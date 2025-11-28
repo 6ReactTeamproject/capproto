@@ -1,0 +1,67 @@
+# Docker Compose 설정 - Sync-Up 프로토타입
+services:
+  # PostgreSQL 데이터베이스
+  db:
+    image: postgres:15-alpine
+    container_name: syncup-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-syncup}
+      POSTGRES_USER: ${POSTGRES_USER:-syncup_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-syncup_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "psql -U ${POSTGRES_USER:-syncup_user} -d ${POSTGRES_DB:-syncup} -c 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NestJS 백엔드
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: syncup-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-syncup_user}:${POSTGRES_PASSWORD:-syncup_password}@db:5432/${POSTGRES_DB:-syncup}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      PORT: ${BACKEND_PORT:-4000}
+      NODE_ENV: ${NODE_ENV:-development}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      RUN_SEED: ${RUN_SEED:-false}
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: sh -c "sleep 5 && npx prisma db push --accept-data-loss || true && ([ \"$RUN_SEED\" = \"true\" ] && npm run seed || true) && npm run start:dev"
+
+  # Next.js 프론트엔드
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: syncup-frontend
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:4000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  postgres_data:

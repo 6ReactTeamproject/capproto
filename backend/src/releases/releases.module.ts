@@ -1,0 +1,12 @@
+// 릴리즈 모듈
+import { Module } from '@nestjs/common';
+import { ReleasesService } from './releases.service';
+import { ReleasesController } from './releases.controller';
+
+@Module({
+  controllers: [ReleasesController],
+  providers: [ReleasesService],
+  exports: [ReleasesService],
+})
+export class ReleasesModule {}
+
