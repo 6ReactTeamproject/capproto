@@ -1,7 +1,7 @@
 // Prisma 스키마 - Sync-Up 프로토타입
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native"]
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {

@@ -27,7 +27,10 @@
 cp .env.example .env
 ```
 
-`.env` 파일을 열어 필요한 값들을 수정하세요.
+**처음 실행 시**: `.env` 파일에서 `RUN_SEED=true`로 설정하세요.  
+**이후 실행 시**: `RUN_SEED=false`로 설정하거나 제거하세요.
+
+`.env` 파일을 열어 필요한 값들을 수정할 수 있습니다 (기본값으로도 동작합니다).
 
 ### 2. Docker Compose로 실행
 
@@ -41,15 +44,26 @@ docker compose up -d --build
 
 ### 3. 데이터베이스 마이그레이션 및 Seed 데이터 생성
 
-새 터미널에서:
+**중요**: 처음 실행 시 seed 데이터를 생성해야 합니다.
+
+방법 1: 환경 변수로 자동 실행 (권장)
 
 ```bash
-# Prisma 마이그레이션 실행 (자동으로 실행되지만 수동 실행도 가능)
-docker compose exec backend npx prisma migrate dev
-
-# Seed 데이터 생성
-docker compose run backend npm run seed
+# .env 파일에 RUN_SEED=true 설정 후
+docker compose up --build
 ```
+
+방법 2: 수동 실행
+
+```bash
+# Docker Compose가 실행된 후 새 터미널에서
+docker compose exec backend npm run seed
+```
+
+**참고**:
+
+- `docker-compose.yml`의 `command`에서 자동으로 Prisma 마이그레이션이 실행됩니다.
+- Seed 데이터는 처음 한 번만 생성하면 됩니다. 이후에는 `.env`에서 `RUN_SEED=false`로 설정하세요.
 
 ### 4. 접속
 
@@ -93,20 +107,24 @@ procap/
 ## 주요 API 엔드포인트
 
 ### 인증
+
 - `POST /auth/register` - 회원가입
 - `POST /auth/login` - 로그인
 - `GET /auth/me` - 현재 사용자 정보 (JWT 필요)
 
 ### 프로젝트
+
 - `GET /projects` - 프로젝트 목록
 - `POST /projects` - 프로젝트 생성 (JWT 필요)
 - `GET /projects/:id` - 프로젝트 상세
 - `GET /projects/:id/recommendations` - 추천 팀원 목록
 
 ### 참여 신청
+
 - `POST /projects/:id/applications` - 참여 신청 (JWT 필요)
 
 ### 채팅
+
 - `GET /chat/rooms/project/:projectId` - 채팅방 조회/생성
 - `GET /chat/messages/:roomId` - 메시지 목록
 - WebSocket: `join-room`, `send-message`, `new-message`
@@ -169,4 +187,3 @@ docker compose exec backend npx prisma generate
 ## 라이선스
 
 MIT
-
