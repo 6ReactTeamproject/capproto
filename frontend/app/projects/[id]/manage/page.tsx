@@ -77,6 +77,20 @@ export default function ProjectManagePage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm('정말로 이 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    try {
+      await projectsApi.delete(projectId);
+      alert('프로젝트가 삭제되었습니다.');
+      router.push('/projects');
+    } catch (err: any) {
+      alert(err.message || '프로젝트 삭제에 실패했습니다.');
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '20px' }}>로딩 중...</div>;
   }
@@ -95,7 +109,23 @@ export default function ProjectManagePage() {
         <Link href={`/projects/${projectId}`} style={{ color: '#0070f3' }}>← 프로젝트로 돌아가기</Link>
       </div>
 
-      <h1 style={{ marginBottom: '10px' }}>프로젝트 관리: {project.title}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1 style={{ margin: 0 }}>프로젝트 관리: {project.title}</h1>
+        <button
+          onClick={handleDelete}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          프로젝트 삭제
+        </button>
+      </div>
 
       <div style={{ marginTop: '30px', marginBottom: '30px' }}>
         <h2 style={{ marginBottom: '15px' }}>참여 신청 목록</h2>

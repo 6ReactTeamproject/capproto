@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Param,
   Query,
@@ -49,5 +50,14 @@ export class ProjectsController {
     @CurrentUser() user: any,
   ) {
     return this.projectsService.getRecommendations(id, user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.projectsService.delete(id, user.id);
   }
 }

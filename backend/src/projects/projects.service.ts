@@ -1,5 +1,5 @@
 // 프로젝트 서비스 - 프로젝트 CRUD 및 추천 기능
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 
@@ -172,5 +172,28 @@ export class ProjectsService {
       .slice(0, 5); // 상위 5명
 
     return usersWithScores;
+  }
+
+  // 프로젝트 삭제 (생성자만 가능)
+  async delete(projectId: string, userId: string) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+    }
+
+    // 프로젝트 생성자만 삭제 가능
+    if (project.creatorId !== userId) {
+      throw new ForbiddenException('프로젝트를 삭제할 권한이 없습니다.');
+    }
+
+    // 프로젝트 삭제 (관련 데이터는 CASCADE로 자동 삭제됨)
+    await this.prisma.project.delete({
+      where: { id: projectId },
+    });
+
+    return { message: '프로젝트가 삭제되었습니다.' };
   }
 }

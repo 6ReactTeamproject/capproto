@@ -91,6 +91,11 @@ export const projectsApi = {
   getRecommendations: async (id: string) => {
     return fetchApi<any[]>(`/projects/${id}/recommendations`);
   },
+  delete: async (id: string) => {
+    return fetchApi<any>(`/projects/${id}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 // 참여 신청 API
