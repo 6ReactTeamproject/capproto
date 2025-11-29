@@ -5,6 +5,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi, setToken } from '@/lib/api';
 
+// 사용 가능한 기술 스택 목록
+const AVAILABLE_TECH_STACKS = [
+  // Frontend
+  'React', 'Vue.js', 'Next.js', 'Angular', 'TypeScript', 'JavaScript', 'HTML/CSS',
+  // Backend
+  'Node.js', 'NestJS', 'Express', 'Spring', 'Django', 'FastAPI', 'Python', 'Java',
+  // Database
+  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis',
+  // Mobile
+  'React Native', 'Flutter', 'Swift', 'Kotlin',
+  // Design
+  'Figma', 'Photoshop', 'Illustrator', 'Sketch', 'Adobe XD',
+  // Tools
+  'Docker', 'Git', 'Kubernetes', 'AWS', 'Firebase', 'Prisma', 'TypeORM',
+];
+
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -12,6 +28,7 @@ export default function RegisterPage() {
     password: '',
     nickname: '',
     role: 'DEVELOPER',
+    techStacks: [] as string[],
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -79,6 +96,55 @@ export default function RegisterPage() {
             <option value="DESIGNER">디자이너</option>
             <option value="PLANNER">기획자</option>
           </select>
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>기술 스택 (복수 선택 가능)</label>
+          <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
+            {AVAILABLE_TECH_STACKS.map((stack) => (
+              <label
+                key={stack}
+                style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer' }}
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.techStacks.includes(stack)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFormData({
+                        ...formData,
+                        techStacks: [...formData.techStacks, stack],
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        techStacks: formData.techStacks.filter((s) => s !== stack),
+                      });
+                    }
+                  }}
+                  style={{ marginRight: '8px' }}
+                />
+                <span>{stack}</span>
+              </label>
+            ))}
+          </div>
+          {formData.techStacks.length > 0 && (
+            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+              {formData.techStacks.map((stack) => (
+                <span
+                  key={stack}
+                  style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#e3f2fd',
+                    color: '#1976d2',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                  }}
+                >
+                  {stack}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
         <button

@@ -112,9 +112,13 @@ export class ProjectsService {
     }
 
     const requiredStacks = JSON.parse(project.requiredStacks || '[]') as string[];
+    const neededRoles = JSON.parse(project.neededRoles || '[]') as string[];
 
-    // 모든 사용자 조회 (전체 유저 대상)
+    // 모든 사용자 조회 (전체 유저 대상, 자기 자신 제외)
     const allUsers = await this.prisma.user.findMany({
+      where: {
+        id: { not: userId }, // 자기 자신 제외
+      },
       select: {
         id: true,
         nickname: true,
@@ -123,22 +127,44 @@ export class ProjectsService {
       },
     });
 
-    // 매칭 점수 계산
+    // 매칭 점수 계산 (1~100점)
     const usersWithScores = allUsers
       .map((user) => {
         const userStacks = JSON.parse(user.techStacks || '[]') as string[];
-        // 교집합 개수 계산
-        const intersection = requiredStacks.filter((stack) =>
-          userStacks.includes(stack),
-        );
-        const score = intersection.length;
+        
+        // 1. 기술 스택 매칭 점수 계산 (0~70점)
+        let techScore = 0;
+        if (requiredStacks.length > 0) {
+          const intersection = requiredStacks.filter((stack) =>
+            userStacks.includes(stack),
+          );
+          // 교집합 비율로 점수 계산 (최대 70점)
+          techScore = (intersection.length / requiredStacks.length) * 70;
+        }
+
+        // 2. 역할 매칭 점수 계산 (0~30점)
+        let roleScore = 0;
+        if (neededRoles.length > 0 && neededRoles.includes(user.role)) {
+          roleScore = 30;
+        }
+
+        // 3. 총합 점수 계산 (1~100점으로 정규화)
+        let totalScore = techScore + roleScore;
+        
+        // 최소 1점, 최대 100점으로 제한
+        totalScore = Math.max(1, Math.min(100, Math.round(totalScore)));
+        
+        // 소수점 둘째 자리까지 반올림
+        totalScore = Math.round(totalScore * 100) / 100;
 
         return {
           userId: user.id,
           nickname: user.nickname,
           role: user.role,
           techStacks: userStacks,
-          score,
+          score: totalScore,
+          techScore: Math.round(techScore * 100) / 100,
+          roleScore: Math.round(roleScore * 100) / 100,
         };
       })
       .filter((user) => user.score > 0) // 점수가 0보다 큰 사용자만

@@ -141,3 +141,16 @@ export const releasesApi = {
   },
 };
 
+// 마이페이지 API
+export const mypageApi = {
+  getMyPageInfo: async () => {
+    return fetchApi<any>('/users/me/mypage');
+  },
+  getMyProjects: async () => {
+    return fetchApi<any[]>('/users/me/projects');
+  },
+  getMyApplications: async () => {
+    return fetchApi<any[]>('/users/me/applications');
+  },
+};
+

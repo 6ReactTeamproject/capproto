@@ -1,5 +1,5 @@
 // 회원가입 요청 DTO
-import { IsEmail, IsString, MinLength, IsEnum } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsEnum, IsArray, IsOptional } from 'class-validator';
 import { UserRole } from '@prisma/client';
 
 export class RegisterDto {
@@ -16,4 +16,9 @@ export class RegisterDto {
 
   @IsEnum(UserRole)
   role: UserRole;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  techStacks?: string[];
 }

@@ -40,7 +40,7 @@ export class AuthService {
         passwordHash,
         nickname: registerDto.nickname,
         role: registerDto.role,
-        techStacks: '[]',
+        techStacks: JSON.stringify(registerDto.techStacks || []),
       },
       select: {
         id: true,

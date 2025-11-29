@@ -170,12 +170,34 @@ export default function ProjectDetailPage() {
                     padding: '15px',
                   }}
                 >
-                  <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{recommendedUser.nickname}</div>
-                  <div style={{ color: '#666', marginBottom: '5px' }}>역할: {recommendedUser.role}</div>
-                  <div style={{ marginBottom: '5px' }}>
-                    <strong>스택:</strong> {Array.isArray(recommendedUser.techStacks) ? recommendedUser.techStacks.join(', ') : 'N/A'}
+                  <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: '16px' }}>{recommendedUser.nickname}</div>
+                  <div style={{ color: '#666', marginBottom: '5px' }}>
+                    역할: {
+                      recommendedUser.role === 'DEVELOPER' ? '개발자' :
+                      recommendedUser.role === 'DESIGNER' ? '디자이너' :
+                      recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
+                    }
                   </div>
-                  <div style={{ color: '#0070f3', fontWeight: 'bold' }}>매칭 점수: {recommendedUser.score}</div>
+                  <div style={{ marginBottom: '10px', fontSize: '14px' }}>
+                    <strong>기술 스택:</strong>{' '}
+                    {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
+                      ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
+                      : '없음'}
+                  </div>
+                  <div style={{ 
+                    marginTop: '10px', 
+                    padding: '8px', 
+                    backgroundColor: recommendedUser.score >= 70 ? '#d4edda' : recommendedUser.score >= 50 ? '#fff3cd' : '#f8d7da',
+                    borderRadius: '4px',
+                    textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0070f3' }}>
+                      {recommendedUser.score}점
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                      매칭률
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

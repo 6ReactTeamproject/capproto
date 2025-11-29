@@ -6,6 +6,29 @@ import { useRouter } from 'next/navigation';
 import { projectsApi } from '@/lib/api';
 import { getToken } from '@/lib/api';
 
+// 사용 가능한 역할 목록
+const AVAILABLE_ROLES = [
+  { value: 'DEVELOPER', label: '개발자' },
+  { value: 'DESIGNER', label: '디자이너' },
+  { value: 'PLANNER', label: '기획자' },
+];
+
+// 사용 가능한 기술 스택 목록
+const AVAILABLE_TECH_STACKS = [
+  // Frontend
+  'React', 'Vue.js', 'Next.js', 'Angular', 'TypeScript', 'JavaScript', 'HTML/CSS',
+  // Backend
+  'Node.js', 'NestJS', 'Express', 'Spring', 'Django', 'FastAPI', 'Python', 'Java',
+  // Database
+  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis',
+  // Mobile
+  'React Native', 'Flutter', 'Swift', 'Kotlin',
+  // Design
+  'Figma', 'Photoshop', 'Illustrator', 'Sketch', 'Adobe XD',
+  // Tools
+  'Docker', 'Git', 'Kubernetes', 'AWS', 'Firebase', 'Prisma', 'TypeORM',
+];
+
 export default function NewProjectPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -14,8 +37,6 @@ export default function NewProjectPage() {
     neededRoles: [] as string[],
     requiredStacks: [] as string[],
   });
-  const [roleInput, setRoleInput] = useState('');
-  const [stackInput, setStackInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -42,38 +63,32 @@ export default function NewProjectPage() {
     }
   };
 
-  const addRole = () => {
-    if (roleInput.trim()) {
+  const toggleRole = (role: string) => {
+    if (formData.neededRoles.includes(role)) {
       setFormData({
         ...formData,
-        neededRoles: [...formData.neededRoles, roleInput.trim()],
+        neededRoles: formData.neededRoles.filter((r) => r !== role),
       });
-      setRoleInput('');
+    } else {
+      setFormData({
+        ...formData,
+        neededRoles: [...formData.neededRoles, role],
+      });
     }
   };
 
-  const removeRole = (index: number) => {
-    setFormData({
-      ...formData,
-      neededRoles: formData.neededRoles.filter((_, i) => i !== index),
-    });
-  };
-
-  const addStack = () => {
-    if (stackInput.trim()) {
+  const toggleStack = (stack: string) => {
+    if (formData.requiredStacks.includes(stack)) {
       setFormData({
         ...formData,
-        requiredStacks: [...formData.requiredStacks, stackInput.trim()],
+        requiredStacks: formData.requiredStacks.filter((s) => s !== stack),
       });
-      setStackInput('');
+    } else {
+      setFormData({
+        ...formData,
+        requiredStacks: [...formData.requiredStacks, stack],
+      });
     }
-  };
-
-  const removeStack = (index: number) => {
-    setFormData({
-      ...formData,
-      requiredStacks: formData.requiredStacks.filter((_, i) => i !== index),
-    });
   };
 
   return (
@@ -101,86 +116,78 @@ export default function NewProjectPage() {
           />
         </div>
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>필요 역할</label>
+          <label style={{ display: 'block', marginBottom: '5px' }}>필요 역할 (복수 선택 가능)</label>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-            <input
-              type="text"
-              value={roleInput}
-              onChange={(e) => setRoleInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addRole();
-                }
-              }}
-              placeholder="예: DEVELOPER"
-              style={{ flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            />
-            <button type="button" onClick={addRole} style={{ padding: '8px 16px', backgroundColor: '#0070f3', color: 'white', borderRadius: '4px' }}>
-              추가
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-            {formData.neededRoles.map((role, index) => (
-              <span
-                key={index}
-                style={{
-                  padding: '4px 8px',
-                  backgroundColor: '#f0f0f0',
-                  borderRadius: '4px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                }}
+            {AVAILABLE_ROLES.map((role) => (
+              <label
+                key={role.value}
+                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
               >
-                {role}
-                <button type="button" onClick={() => removeRole(index)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                  ×
-                </button>
-              </span>
+                <input
+                  type="checkbox"
+                  checked={formData.neededRoles.includes(role.value)}
+                  onChange={() => toggleRole(role.value)}
+                  style={{ marginRight: '5px' }}
+                />
+                <span>{role.label}</span>
+              </label>
             ))}
           </div>
+          {formData.neededRoles.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '10px' }}>
+              {formData.neededRoles.map((role) => (
+                <span
+                  key={role}
+                  style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#e3f2fd',
+                    color: '#1976d2',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                  }}
+                >
+                  {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>필요 스택</label>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-            <input
-              type="text"
-              value={stackInput}
-              onChange={(e) => setStackInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addStack();
-                }
-              }}
-              placeholder="예: React"
-              style={{ flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            />
-            <button type="button" onClick={addStack} style={{ padding: '8px 16px', backgroundColor: '#0070f3', color: 'white', borderRadius: '4px' }}>
-              추가
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-            {formData.requiredStacks.map((stack, index) => (
-              <span
-                key={index}
-                style={{
-                  padding: '4px 8px',
-                  backgroundColor: '#f0f0f0',
-                  borderRadius: '4px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                }}
+          <label style={{ display: 'block', marginBottom: '5px' }}>필요 스택 (복수 선택 가능)</label>
+          <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
+            {AVAILABLE_TECH_STACKS.map((stack) => (
+              <label
+                key={stack}
+                style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer' }}
               >
-                {stack}
-                <button type="button" onClick={() => removeStack(index)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                  ×
-                </button>
-              </span>
+                <input
+                  type="checkbox"
+                  checked={formData.requiredStacks.includes(stack)}
+                  onChange={() => toggleStack(stack)}
+                  style={{ marginRight: '8px' }}
+                />
+                <span>{stack}</span>
+              </label>
             ))}
           </div>
+          {formData.requiredStacks.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '10px' }}>
+              {formData.requiredStacks.map((stack) => (
+                <span
+                  key={stack}
+                  style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#e3f2fd',
+                    color: '#1976d2',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                  }}
+                >
+                  {stack}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
         <button

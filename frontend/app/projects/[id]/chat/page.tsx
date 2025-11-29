@@ -27,16 +27,14 @@ export default function ChatPage() {
 
     return () => {
       if (socket) {
+        socket.off('messages');
+        socket.off('new-message');
+        socket.off('connect');
         socket.disconnect();
+        setSocket(null);
       }
     };
   }, [projectId]);
-
-  useEffect(() => {
-    if (socket && projectId) {
-      socket.emit('join-room', { projectId });
-    }
-  }, [socket, projectId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -44,6 +42,14 @@ export default function ChatPage() {
 
   const loadChatRoom = async () => {
     try {
+      // 기존 소켓이 있으면 정리
+      if (socket) {
+        socket.off('messages');
+        socket.off('new-message');
+        socket.off('connect');
+        socket.disconnect();
+      }
+
       const room = await chatApi.getRoom(projectId);
       setRoomId(room.id);
       setMessages(room.messages || []);
@@ -63,7 +69,14 @@ export default function ChatPage() {
       });
 
       newSocket.on('new-message', (message: any) => {
-        setMessages((prev) => [...prev, message]);
+        setMessages((prev) => {
+          // 중복 메시지 체크 (같은 ID가 이미 있으면 추가하지 않음)
+          const exists = prev.some((msg) => msg.id === message.id);
+          if (exists) {
+            return prev;
+          }
+          return [...prev, message];
+        });
       });
 
       setSocket(newSocket);
@@ -92,15 +105,16 @@ export default function ChatPage() {
   const sendMessage = () => {
     if (!socket || !projectId || !userId || !newMessage.trim()) return;
 
+    const messageContent = newMessage.trim();
+    setNewMessage(''); // 먼저 입력창 비우기
+
     socket.emit('send-message', {
       projectId,
       senderId: userId,
-      content: newMessage,
+      content: messageContent,
       sourceLang,
       targetLang,
     });
-
-    setNewMessage('');
   };
 
   const scrollToBottom = () => {

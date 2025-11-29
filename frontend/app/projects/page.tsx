@@ -49,6 +49,9 @@ export default function ProjectsPage() {
           </Link>
           {user ? (
             <>
+              <Link href="/mypage" style={{ color: '#0070f3', textDecoration: 'none', marginRight: '10px' }}>
+                마이페이지
+              </Link>
               <span style={{ color: '#666' }}>안녕하세요, {user.nickname}님</span>
               <button
                 onClick={logout}
