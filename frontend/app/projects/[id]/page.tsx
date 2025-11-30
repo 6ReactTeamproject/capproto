@@ -99,7 +99,23 @@ export default function ProjectDetailPage() {
           )}
         </div>
         <div style={{ marginTop: '10px' }}>
-          <div><strong>생성자:</strong> {project.creator?.nickname}</div>
+          <div>
+            <strong>생성자:</strong>{' '}
+            {project.creator?.id ? (
+              <Link
+                href={`/users/${project.creator.id}`}
+                style={{
+                  color: '#0070f3',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {project.creator.nickname}
+              </Link>
+            ) : (
+              project.creator?.nickname || 'N/A'
+            )}
+          </div>
           <div><strong>필요 역할:</strong> {Array.isArray(project.neededRoles) ? project.neededRoles.join(', ') : 'N/A'}</div>
           <div><strong>필요 스택:</strong> {Array.isArray(project.requiredStacks) ? project.requiredStacks.join(', ') : 'N/A'}</div>
         </div>

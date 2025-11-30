@@ -159,3 +159,13 @@ export const mypageApi = {
   },
 };
 
+// 유저 API
+export const usersApi = {
+  getOne: async (id: string) => {
+    return fetchApi<any>(`/users/${id}`);
+  },
+  getProjects: async (id: string) => {
+    return fetchApi<any[]>(`/users/${id}/projects`);
+  },
+};
+

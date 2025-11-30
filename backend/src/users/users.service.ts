@@ -1,10 +1,14 @@
 // 사용자 서비스 - 사용자 정보 조회
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { GitHubService } from './github.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private githubService: GitHubService,
+  ) {}
 
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
@@ -16,6 +20,8 @@ export class UsersService {
         role: true,
         techStacks: true,
         createdAt: true,
+        githubId: true,
+        githubUsername: true,
       },
     });
 
@@ -60,6 +66,8 @@ export class UsersService {
 
     return projects.map((project) => ({
       ...project,
+      neededRoles: JSON.parse(project.neededRoles || '[]'),
+      requiredStacks: JSON.parse(project.requiredStacks || '[]'),
       applicationCount: project.applications.length,
       messageCount: project.chatRoom?.messages.length || 0,
     }));
@@ -94,6 +102,12 @@ export class UsersService {
     const myProjects = await this.getMyProjects(userId);
     const myApplications = await this.getMyApplications(userId);
 
+    // GitHub 통계 가져오기 (GitHub username이 있는 경우)
+    let githubStats = null;
+    if (user.githubUsername) {
+      githubStats = await this.githubService.getUserStats(user.githubUsername);
+    }
+
     return {
       user,
       myProjects,
@@ -104,6 +118,7 @@ export class UsersService {
         pendingApplicationsCount: myApplications.filter((app) => app.status === 'PENDING').length,
         acceptedApplicationsCount: myApplications.filter((app) => app.status === 'ACCEPTED').length,
       },
+      githubStats,
     };
   }
 }

@@ -13,10 +13,12 @@ datasource db {
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
-  passwordHash  String   @map("password_hash")
+  passwordHash  String?  @map("password_hash")
   nickname      String   @unique
   role          UserRole
   techStacks    String   @default("[]") @map("tech_stacks")
+  githubId      String?  @unique @map("github_id")
+  githubUsername String? @map("github_username")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

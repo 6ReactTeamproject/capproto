@@ -8,11 +8,6 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
-  }
-
   @Get('me/projects')
   @UseGuards(JwtAuthGuard)
   async getMyProjects(@CurrentUser() user: any) {
@@ -29,5 +24,15 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async getMyPageInfo(@CurrentUser() user: any) {
     return this.usersService.getMyPageInfo(user.id);
+  }
+
+  @Get(':id/projects')
+  async getUserProjects(@Param('id') id: string) {
+    return this.usersService.getMyProjects(id);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
   }
 }
