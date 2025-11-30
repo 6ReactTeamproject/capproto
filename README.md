@@ -23,14 +23,14 @@
 
 ### 1. 환경 변수 설정
 
-```bash
-cp .env.example .env
-```
+**백엔드 환경 변수** (`backend/.env` 또는 루트 `.env`):
+- `GITHUB_TOKEN` (선택사항): GitHub Personal Access Token을 설정하면 API 요청 한도가 시간당 60회에서 5,000회로 증가합니다.
+  - GitHub에서 토큰 생성: https://github.com/settings/tokens
+  - 필요한 권한: `public_repo` (저장소 정보 읽기)
+  - 설정하지 않으면 인증 없는 요청으로 제한됩니다 (시간당 60회)
 
 **처음 실행 시**: `.env` 파일에서 `RUN_SEED=true`로 설정하세요.  
 **이후 실행 시**: `RUN_SEED=false`로 설정하거나 제거하세요.
-
-`.env` 파일을 열어 필요한 값들을 수정할 수 있습니다 (기본값으로도 동작합니다).
 
 ### 2. Docker Compose로 실행
 

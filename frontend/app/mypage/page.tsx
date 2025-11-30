@@ -218,6 +218,20 @@ export default function MyPage() {
             GitHub 활동 통계
           </h2>
           
+          {githubStats.rateLimited && (
+            <div style={{ 
+              padding: '12px', 
+              backgroundColor: '#fff3cd', 
+              border: '1px solid #ffc107', 
+              borderRadius: '4px', 
+              marginBottom: '20px',
+              fontSize: '14px',
+              color: '#856404'
+            }}>
+              ⚠️ GitHub API 요청 한도에 도달했습니다. 통계 정보가 제한적으로 표시될 수 있습니다. 잠시 후 다시 시도해주세요.
+            </div>
+          )}
+          
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
             <div style={{ padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#24292e', marginBottom: '5px' }}>

@@ -32,6 +32,21 @@ export class UsersService {
     return user;
   }
 
+  // 사용자의 GitHub 토큰 가져오기
+  private async getGitHubToken(userId: string): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { githubToken: true },
+    });
+    const hasToken = !!user?.githubToken;
+    if (!hasToken) {
+      console.log(`[UsersService] No GitHub token found for user ${userId}`);
+    } else {
+      console.log(`[UsersService] GitHub token found for user ${userId}`);
+    }
+    return user?.githubToken || null;
+  }
+
   // 내가 생성한 프로젝트 목록
   async getMyProjects(userId: string) {
     const projects = await this.prisma.project.findMany({
@@ -105,7 +120,9 @@ export class UsersService {
     // GitHub 통계 가져오기 (GitHub username이 있는 경우)
     let githubStats = null;
     if (user.githubUsername) {
-      githubStats = await this.githubService.getUserStats(user.githubUsername);
+      // 사용자의 GitHub 토큰 사용 (없으면 서버 토큰 사용)
+      const githubToken = await this.getGitHubToken(userId);
+      githubStats = await this.githubService.getUserStats(user.githubUsername, githubToken);
     }
 
     return {

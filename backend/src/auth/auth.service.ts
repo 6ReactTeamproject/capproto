@@ -132,7 +132,14 @@ export class AuthService {
     });
 
     if (user) {
-      // 기존 GitHub 사용자 - 로그인
+      // 기존 GitHub 사용자 - 로그인 시 토큰 갱신
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          githubToken: githubData.accessToken, // 토큰 갱신
+        },
+      });
+
       const accessToken = this.jwtService.sign({
         sub: user.id,
         email: user.email,
@@ -162,6 +169,7 @@ export class AuthService {
           data: {
             githubId: githubData.githubId,
             githubUsername: githubData.githubUsername,
+            githubToken: githubData.accessToken, // GitHub 토큰 저장
           },
           select: {
             id: true,
@@ -206,6 +214,7 @@ export class AuthService {
         techStacks: JSON.stringify([]),
         githubId: githubData.githubId,
         githubUsername: githubData.githubUsername,
+        githubToken: githubData.accessToken, // GitHub 토큰 저장
       },
       select: {
         id: true,

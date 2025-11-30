@@ -19,6 +19,7 @@ model User {
   techStacks    String   @default("[]") @map("tech_stacks")
   githubId      String?  @unique @map("github_id")
   githubUsername String? @map("github_username")
+  githubToken   String?  @map("github_token") // GitHub OAuth 토큰 (암호화 저장 권장)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
