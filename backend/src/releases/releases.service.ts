@@ -15,7 +15,7 @@ export class ReleasesService {
     Python: { owner: 'python', repo: 'cpython', useTags: true }, // Releases 대신 Tags 사용
     Java: { owner: 'openjdk', repo: 'jdk', useTags: true }, // Releases 대신 Tags 사용
     'Next.js': { owner: 'vercel', repo: 'next.js' },
-    NestJS: { owner: 'nestjs', repo: 'nestjs' },
+    NestJS: { owner: 'nestjs', repo: 'nest' },
   };
 
   constructor(private prisma: PrismaService) {}
