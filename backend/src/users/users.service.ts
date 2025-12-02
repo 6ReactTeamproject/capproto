@@ -122,7 +122,8 @@ export class UsersService {
     if (user.githubUsername) {
       // 사용자의 GitHub 토큰 사용 (없으면 서버 토큰 사용)
       const githubToken = await this.getGitHubToken(userId);
-      githubStats = await this.githubService.getUserStats(user.githubUsername, githubToken);
+      // 캐시 무시하여 최신 데이터 가져오기 (문제 해결을 위해)
+      githubStats = await this.githubService.getUserStats(user.githubUsername, githubToken, true);
     }
 
     return {

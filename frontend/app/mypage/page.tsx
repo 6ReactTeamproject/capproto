@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { mypageApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+
 export default function MyPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const [mypageInfo, setMypageInfo] = useState<any>(null);
@@ -34,7 +36,17 @@ export default function MyPage() {
   };
 
   if (authLoading || loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>로딩 중...</div>;
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '18px', marginBottom: '10px' }}>로딩 중...</div>
+        <div style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
+          GitHub 활동 정보를 불러오고 있습니다. 잠시만 기다려주세요.
+        </div>
+        <div style={{ marginTop: '20px', fontSize: '12px', color: '#999' }}>
+          (처음 로딩 시 최대 20개 저장소의 정보를 수집하므로 약간 시간이 걸릴 수 있습니다)
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -229,6 +241,32 @@ export default function MyPage() {
               color: '#856404'
             }}>
               ⚠️ GitHub API 요청 한도에 도달했습니다. 통계 정보가 제한적으로 표시될 수 있습니다. 잠시 후 다시 시도해주세요.
+            </div>
+          )}
+          
+          {githubStats.permissionIssue && (
+            <div style={{ 
+              padding: '12px', 
+              backgroundColor: '#f8d7da', 
+              border: '1px solid #dc3545', 
+              borderRadius: '4px', 
+              marginBottom: '20px',
+              fontSize: '14px',
+              color: '#721c24'
+            }}>
+              ⚠️ GitHub 권한 문제가 발생했습니다. 조직 저장소 정보를 가져오려면 추가 권한이 필요합니다.
+              <div style={{ marginTop: '8px' }}>
+                <a 
+                  href={`${API_BASE_URL}/auth/github`}
+                  style={{ 
+                    color: '#721c24', 
+                    textDecoration: 'underline',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  GitHub로 다시 로그인하기 (재인증 필요)
+                </a>
+              </div>
             </div>
           )}
           
