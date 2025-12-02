@@ -102,6 +102,77 @@ export class ApplicationsService {
     }));
   }
 
+  // 프로젝트 생성자가 특정 사용자 초대 (참여 신청 생성)
+  async invite(projectId: string, invitedUserId: string, creatorId: string, message?: string) {
+    // 프로젝트 존재 및 권한 확인
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+    }
+
+    // 프로젝트 생성자만 초대 가능
+    if (project.creatorId !== creatorId) {
+      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+    }
+
+    // 초대받는 사용자 존재 확인
+    const invitedUser = await this.prisma.user.findUnique({
+      where: { id: invitedUserId },
+    });
+
+    if (!invitedUser) {
+      throw new NotFoundException('초대할 사용자를 찾을 수 없습니다.');
+    }
+
+    // 자기 자신은 초대할 수 없음
+    if (invitedUserId === creatorId) {
+      throw new ConflictException('자기 자신은 초대할 수 없습니다.');
+    }
+
+    // 중복 신청 체크
+    const existingApplication = await this.prisma.projectApplication.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId: invitedUserId,
+        },
+      },
+    });
+
+    if (existingApplication) {
+      throw new ConflictException('이미 참여 신청이 있거나 초대된 사용자입니다.');
+    }
+
+    // 초대 생성 (참여 신청으로 생성, 상태는 PENDING)
+    const application = await this.prisma.projectApplication.create({
+      data: {
+        projectId,
+        userId: invitedUserId,
+        message: message || '프로젝트 생성자가 초대했습니다.',
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            nickname: true,
+            role: true,
+          },
+        },
+        project: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    return application;
+  }
+
   // 참여 신청 수락/거절
   async updateStatus(
     applicationId: string,

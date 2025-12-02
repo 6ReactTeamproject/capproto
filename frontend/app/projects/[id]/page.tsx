@@ -18,6 +18,7 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
+  const [invitingUsers, setInvitingUsers] = useState<Set<string>>(new Set());
   const isCreator = user && project && project.creator?.id === user.id;
 
   useEffect(() => {
@@ -61,6 +62,24 @@ export default function ProjectDetailPage() {
       alert(err.message || '참여 신청에 실패했습니다.');
     } finally {
       setApplying(false);
+    }
+  };
+
+  const handleInvite = async (userId: string) => {
+    setInvitingUsers(prev => new Set(prev).add(userId));
+    try {
+      await applicationsApi.invite(projectId, userId);
+      alert('초대가 완료되었습니다.');
+      // 추천 목록 새로고침 (초대된 사용자 제외하거나 상태 업데이트)
+      loadRecommendations();
+    } catch (err: any) {
+      alert(err.message || '초대에 실패했습니다.');
+    } finally {
+      setInvitingUsers(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
     }
   };
 
@@ -214,6 +233,23 @@ export default function ProjectDetailPage() {
                       매칭률
                     </div>
                   </div>
+                  <button
+                    onClick={() => handleInvite(recommendedUser.userId)}
+                    disabled={invitingUsers.has(recommendedUser.userId)}
+                    style={{
+                      marginTop: '10px',
+                      width: '100%',
+                      padding: '8px 16px',
+                      backgroundColor: invitingUsers.has(recommendedUser.userId) ? '#ccc' : '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: invitingUsers.has(recommendedUser.userId) ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                    }}
+                  >
+                    {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
+                  </button>
                 </div>
               ))}
             </div>

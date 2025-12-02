@@ -19,6 +19,17 @@ export class ApplicationsController {
     return this.applicationsService.create(projectId, user.id, createApplicationDto);
   }
 
+  @Post('invite/:userId')
+  @UseGuards(JwtAuthGuard)
+  async invite(
+    @Param('projectId') projectId: string,
+    @Param('userId') userId: string,
+    @Body() body: { message?: string },
+    @CurrentUser() user: any,
+  ) {
+    return this.applicationsService.invite(projectId, userId, user.id, body.message);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   async findByProject(

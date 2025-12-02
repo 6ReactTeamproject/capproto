@@ -106,6 +106,12 @@ export const applicationsApi = {
       body: JSON.stringify({ message }),
     });
   },
+  invite: async (projectId: string, userId: string, message?: string) => {
+    return fetchApi<any>(`/projects/${projectId}/applications/invite/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  },
   getByProject: async (projectId: string) => {
     return fetchApi<any[]>(`/projects/${projectId}/applications`);
   },

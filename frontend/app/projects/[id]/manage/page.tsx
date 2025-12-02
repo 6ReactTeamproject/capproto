@@ -16,6 +16,7 @@ export default function ProjectManagePage() {
   const [applications, setApplications] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [invitingUsers, setInvitingUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
@@ -88,6 +89,25 @@ export default function ProjectManagePage() {
       router.push('/projects');
     } catch (err: any) {
       alert(err.message || '프로젝트 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleInvite = async (userId: string) => {
+    setInvitingUsers(prev => new Set(prev).add(userId));
+    try {
+      await applicationsApi.invite(projectId, userId);
+      alert('초대가 완료되었습니다.');
+      // 참여 신청 목록과 추천 목록 새로고침
+      loadApplications();
+      loadRecommendations();
+    } catch (err: any) {
+      alert(err.message || '초대에 실패했습니다.');
+    } finally {
+      setInvitingUsers(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
     }
   };
 
@@ -217,7 +237,37 @@ export default function ProjectManagePage() {
                 <div style={{ marginBottom: '5px' }}>
                   <strong>스택:</strong> {Array.isArray(recommendedUser.techStacks) ? recommendedUser.techStacks.join(', ') : 'N/A'}
                 </div>
-                <div style={{ color: '#0070f3', fontWeight: 'bold' }}>매칭 점수: {recommendedUser.score}</div>
+                <div style={{ 
+                  marginTop: '10px', 
+                  padding: '8px', 
+                  backgroundColor: recommendedUser.score >= 70 ? '#d4edda' : recommendedUser.score >= 50 ? '#fff3cd' : '#f8d7da',
+                  borderRadius: '4px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0070f3' }}>
+                    {recommendedUser.score}점
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    매칭률
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleInvite(recommendedUser.userId)}
+                  disabled={invitingUsers.has(recommendedUser.userId)}
+                  style={{
+                    marginTop: '10px',
+                    width: '100%',
+                    padding: '8px 16px',
+                    backgroundColor: invitingUsers.has(recommendedUser.userId) ? '#ccc' : '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: invitingUsers.has(recommendedUser.userId) ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                  }}
+                >
+                  {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
+                </button>
               </div>
             ))}
           </div>
