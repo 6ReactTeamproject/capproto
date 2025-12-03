@@ -1,5 +1,5 @@
 // 프로젝트 생성 요청 DTO
-import { IsString, IsNotEmpty, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -17,4 +17,12 @@ export class CreateProjectDto {
   @IsArray()
   @IsString({ each: true })
   requiredStacks: string[];
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
 }

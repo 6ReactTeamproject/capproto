@@ -392,7 +392,8 @@ async function main() {
 
   console.log(`✅ ${users.length}명의 사용자 생성 완료`);
 
-  // 프로젝트 생성 (5개)
+  // 프로젝트 생성 (20개)
+  const now = new Date();
   const projects = await Promise.all([
     prisma.project.create({
       data: {
@@ -400,6 +401,9 @@ async function main() {
         shortDescription: "Next.js와 TypeScript를 활용한 모던 웹 앱 개발",
         neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER"]),
         requiredStacks: JSON.stringify(["React", "Next.js", "TypeScript"]),
+        startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 1주일 후 시작
+        endDate: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000), // 3개월 후 종료
+        isRecruiting: false, // 모집 종료
         creatorId: users[0].id,
       },
     }),
@@ -409,6 +413,9 @@ async function main() {
         shortDescription: "PostgreSQL과 Prisma를 사용한 RESTful API 개발",
         neededRoles: JSON.stringify(["DEVELOPER"]),
         requiredStacks: JSON.stringify(["NestJS", "PostgreSQL", "TypeScript"]),
+        startDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000), // 2주일 후 시작
+        endDate: new Date(now.getTime() + 75 * 24 * 60 * 60 * 1000), // 약 2.5개월 후 종료
+        isRecruiting: false, // 모집 종료
         creatorId: users[1].id,
       },
     }),
@@ -418,6 +425,9 @@ async function main() {
         shortDescription: "Figma를 활용한 모바일 앱 디자인 프로젝트",
         neededRoles: JSON.stringify(["DESIGNER", "PLANNER"]),
         requiredStacks: JSON.stringify(["Figma", "Photoshop"]),
+        startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3일 후 시작
+        endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000), // 2개월 후 종료
+        isRecruiting: false, // 모집 종료
         creatorId: users[30].id, // 디자이너1
       },
     }),
@@ -427,6 +437,8 @@ async function main() {
         shortDescription: "React + Node.js + MongoDB 스택의 풀스택 프로젝트",
         neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER", "PLANNER"]),
         requiredStacks: JSON.stringify(["React", "Node.js", "MongoDB"]),
+        startDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000), // 10일 후 시작
+        endDate: new Date(now.getTime() + 120 * 24 * 60 * 60 * 1000), // 4개월 후 종료
         creatorId: users[2].id,
       },
     }),
@@ -436,7 +448,174 @@ async function main() {
         shortDescription: "Notion과 Jira를 활용한 협업 도구 개발",
         neededRoles: JSON.stringify(["PLANNER", "DEVELOPER"]),
         requiredStacks: JSON.stringify(["Notion", "Jira", "React"]),
+        startDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), // 5일 후 시작
+        endDate: new Date(now.getTime() + 100 * 24 * 60 * 60 * 1000), // 약 3.3개월 후 종료
         creatorId: users[45].id, // 기획자1
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "Vue.js 기반 대시보드",
+        shortDescription: "Vue 3와 Composition API를 활용한 관리자 대시보드 개발",
+        neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER"]),
+        requiredStacks: JSON.stringify(["Vue.js", "TypeScript", "Pinia"]),
+        startDate: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 80 * 24 * 60 * 60 * 1000),
+        creatorId: users[3].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "실시간 채팅 애플리케이션",
+        shortDescription: "WebSocket을 활용한 실시간 메신저 개발",
+        neededRoles: JSON.stringify(["DEVELOPER"]),
+        requiredStacks: JSON.stringify(["Node.js", "Socket.io", "React"]),
+        startDate: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 70 * 24 * 60 * 60 * 1000),
+        creatorId: users[4].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "이커머스 플랫폼 디자인",
+        shortDescription: "온라인 쇼핑몰 UI/UX 디자인 및 프로토타입 제작",
+        neededRoles: JSON.stringify(["DESIGNER", "PLANNER"]),
+        requiredStacks: JSON.stringify(["Figma", "Adobe XD", "Principle"]),
+        startDate: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 65 * 24 * 60 * 60 * 1000),
+        creatorId: users[31].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "Django 기반 블로그 플랫폼",
+        shortDescription: "Python Django로 개발하는 개인 블로그 시스템",
+        neededRoles: JSON.stringify(["DEVELOPER"]),
+        requiredStacks: JSON.stringify(["Django", "Python", "PostgreSQL"]),
+        startDate: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 85 * 24 * 60 * 60 * 1000),
+        creatorId: users[5].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "모바일 게임 UI 디자인",
+        shortDescription: "모바일 게임을 위한 인터페이스 및 캐릭터 디자인",
+        neededRoles: JSON.stringify(["DESIGNER"]),
+        requiredStacks: JSON.stringify(["Figma", "Illustrator", "After Effects"]),
+        startDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 55 * 24 * 60 * 60 * 1000),
+        creatorId: users[32].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "마이크로서비스 아키텍처 구축",
+        shortDescription: "Docker와 Kubernetes를 활용한 마이크로서비스 시스템 개발",
+        neededRoles: JSON.stringify(["DEVELOPER"]),
+        requiredStacks: JSON.stringify(["Docker", "Kubernetes", "Go", "gRPC"]),
+        startDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 150 * 24 * 60 * 60 * 1000),
+        creatorId: users[6].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "스타트업 제품 기획",
+        shortDescription: "새로운 SaaS 서비스의 전체 기획 및 프로토타입 설계",
+        neededRoles: JSON.stringify(["PLANNER", "DESIGNER"]),
+        requiredStacks: JSON.stringify(["Notion", "Figma", "Miro"]),
+        startDate: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 50 * 24 * 60 * 60 * 1000),
+        creatorId: users[46].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "React Native 모바일 앱",
+        shortDescription: "크로스 플랫폼 모바일 애플리케이션 개발",
+        neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER"]),
+        requiredStacks: JSON.stringify(["React Native", "TypeScript", "Firebase"]),
+        startDate: new Date(now.getTime() + 9 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 110 * 24 * 60 * 60 * 1000),
+        creatorId: users[7].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "AI 기반 추천 시스템",
+        shortDescription: "머신러닝을 활용한 개인화 추천 엔진 개발",
+        neededRoles: JSON.stringify(["DEVELOPER"]),
+        requiredStacks: JSON.stringify(["Python", "TensorFlow", "FastAPI"]),
+        startDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 130 * 24 * 60 * 60 * 1000),
+        creatorId: users[8].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "브랜드 아이덴티티 디자인",
+        shortDescription: "스타트업을 위한 브랜드 로고 및 시각 아이덴티티 제작",
+        neededRoles: JSON.stringify(["DESIGNER"]),
+        requiredStacks: JSON.stringify(["Illustrator", "Photoshop", "Figma"]),
+        startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000),
+        creatorId: users[33].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "GraphQL API 서버",
+        shortDescription: "Apollo Server를 활용한 GraphQL 백엔드 개발",
+        neededRoles: JSON.stringify(["DEVELOPER"]),
+        requiredStacks: JSON.stringify(["GraphQL", "Apollo", "Node.js", "MongoDB"]),
+        startDate: new Date(now.getTime() + 11 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 95 * 24 * 60 * 60 * 1000),
+        creatorId: users[9].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "웹 애니메이션 프로젝트",
+        shortDescription: "Framer Motion과 Lottie를 활용한 인터랙티브 웹 애니메이션",
+        neededRoles: JSON.stringify(["DESIGNER", "DEVELOPER"]),
+        requiredStacks: JSON.stringify(["Framer", "Lottie", "React"]),
+        startDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),
+        creatorId: users[34].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "블록체인 기반 NFT 마켓플레이스",
+        shortDescription: "Web3 기술을 활용한 NFT 거래 플랫폼 개발",
+        neededRoles: JSON.stringify(["DEVELOPER"]),
+        requiredStacks: JSON.stringify(["Solidity", "Web3", "React", "Ethereum"]),
+        startDate: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 140 * 24 * 60 * 60 * 1000),
+        creatorId: users[10].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "사용자 리서치 및 UX 개선",
+        shortDescription: "기존 서비스의 사용자 경험 분석 및 개선안 제시",
+        neededRoles: JSON.stringify(["PLANNER", "DESIGNER"]),
+        requiredStacks: JSON.stringify(["Notion", "Figma", "Miro", "UserTesting"]),
+        startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 70 * 24 * 60 * 60 * 1000),
+        creatorId: users[47].id,
+      },
+    }),
+    prisma.project.create({
+      data: {
+        title: "Flutter 크로스플랫폼 앱",
+        shortDescription: "Flutter를 활용한 iOS/Android 네이티브 앱 개발",
+        neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER"]),
+        requiredStacks: JSON.stringify(["Flutter", "Dart", "Firebase"]),
+        startDate: new Date(now.getTime() + 13 * 24 * 60 * 60 * 1000),
+        endDate: new Date(now.getTime() + 105 * 24 * 60 * 60 * 1000),
+        creatorId: users[11].id,
       },
     }),
   ]);

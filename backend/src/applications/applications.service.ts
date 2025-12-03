@@ -21,6 +21,11 @@ export class ApplicationsService {
       throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
     }
 
+    // 모집 중인지 확인
+    if (!project.isRecruiting) {
+      throw new ConflictException('모집이 종료된 프로젝트입니다.');
+    }
+
     // 중복 신청 체크
     const existingApplication = await this.prisma.projectApplication.findUnique({
       where: {

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -39,15 +40,7 @@ export class ProjectsController {
     return this.projectsService.create(createProjectDto, user.id);
   }
 
-  @Get(':id')
-  @UseGuards(OptionalJwtAuthGuard)
-  async findOne(
-    @Param('id') id: string,
-    @CurrentUser() user?: any,
-  ) {
-    return this.projectsService.findOne(id, user?.id);
-  }
-
+  // 더 구체적인 라우트를 먼저 정의
   @Get(':id/recommendations')
   @UseGuards(JwtAuthGuard)
   async getRecommendations(
@@ -55,6 +48,24 @@ export class ProjectsController {
     @CurrentUser() user: any,
   ) {
     return this.projectsService.getRecommendations(id, user.id);
+  }
+
+  @Put(':id/close-recruitment')
+  @UseGuards(JwtAuthGuard)
+  async closeRecruitment(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.projectsService.closeRecruitment(id, user.id);
+  }
+
+  @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
+  async findOne(
+    @Param('id') id: string,
+    @CurrentUser() user?: any,
+  ) {
+    return this.projectsService.findOne(id, user?.id);
   }
 
   @Delete(':id')

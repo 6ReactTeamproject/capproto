@@ -17,7 +17,8 @@ export default function ProjectsPage() {
 
   const loadProjects = async () => {
     try {
-      const response = await projectsApi.getAll();
+      // 모든 프로젝트를 가져오기 위해 큰 limit 설정
+      const response = await projectsApi.getAll(1, 100);
       setProjects(response.data || []);
     } catch (err) {
       console.error('프로젝트 로드 실패:', err);
@@ -99,7 +100,23 @@ export default function ProjectsPage() {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              <h2 style={{ marginBottom: '10px' }}>{project.title}</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <h2 style={{ margin: 0, flex: 1 }}>{project.title}</h2>
+                {project.isRecruiting === false && (
+                  <span style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#ff9800',
+                    color: 'white',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap',
+                    marginLeft: '10px'
+                  }}>
+                    모집 완료
+                  </span>
+                )}
+              </div>
               <p style={{ color: '#666', marginBottom: '15px' }}>{project.shortDescription}</p>
               <div style={{ marginBottom: '10px' }}>
                 <strong>필요 역할:</strong>{' '}

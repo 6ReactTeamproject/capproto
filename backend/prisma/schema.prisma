@@ -1,6 +1,6 @@
 // Prisma 스키마 - Sync-Up 프로토타입
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
@@ -11,24 +11,24 @@ datasource db {
 
 // 사용자
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String?  @map("password_hash")
-  nickname      String   @unique
-  role          UserRole
-  techStacks    String   @default("[]") @map("tech_stacks")
-  githubId      String?  @unique @map("github_id")
-  githubUsername String? @map("github_username")
-  githubToken   String?  @map("github_token") // GitHub OAuth 토큰 (암호화 저장 권장)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String?  @map("password_hash")
+  nickname       String   @unique
+  role           UserRole
+  techStacks     String   @default("[]") @map("tech_stacks")
+  githubId       String?  @unique @map("github_id")
+  githubUsername String?  @map("github_username")
+  githubToken    String?  @map("github_token") // GitHub OAuth 토큰 (암호화 저장 권장)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   // 관계
-  createdProjects Project[] @relation("ProjectCreator")
-  applications    ProjectApplication[]
-  chatMessages    ChatMessage[]
-  evaluationsGiven Evaluation[] @relation("Evaluator")
-  evaluationsReceived Evaluation[] @relation("Evaluatee")
+  createdProjects     Project[]            @relation("ProjectCreator")
+  applications        ProjectApplication[]
+  chatMessages        ChatMessage[]
+  evaluationsGiven    Evaluation[]         @relation("Evaluator")
+  evaluationsReceived Evaluation[]         @relation("Evaluatee")
 
   @@map("users")
 }
@@ -41,36 +41,39 @@ enum UserRole {
 
 // 프로젝트
 model Project {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   title            String
-  shortDescription String   @map("short_description")
-  neededRoles      String   @default("[]") @map("needed_roles")
-  requiredStacks   String   @default("[]") @map("required_stacks")
-  creatorId        String   @map("creator_id")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  shortDescription String    @map("short_description")
+  neededRoles      String    @default("[]") @map("needed_roles")
+  requiredStacks   String    @default("[]") @map("required_stacks")
+  startDate        DateTime? @map("start_date")
+  endDate          DateTime? @map("end_date")
+  isRecruiting     Boolean  @default(true) @map("is_recruiting")
+  creatorId        String    @map("creator_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   // 관계
-  creator          User     @relation("ProjectCreator", fields: [creatorId], references: [id])
-  applications     ProjectApplication[]
-  chatRoom         ChatRoom?
-  evaluations      Evaluation[]
+  creator      User                 @relation("ProjectCreator", fields: [creatorId], references: [id])
+  applications ProjectApplication[]
+  chatRoom     ChatRoom?
+  evaluations  Evaluation[]
 
   @@map("projects")
 }
 
 // 참여 신청
 model ProjectApplication {
-  id        String              @id @default(uuid())
-  projectId String              @map("project_id")
-  userId    String              @map("user_id")
+  id        String            @id @default(uuid())
+  projectId String            @map("project_id")
+  userId    String            @map("user_id")
   message   String?
-  status    ApplicationStatus   @default(PENDING)
-  createdAt DateTime            @default(now()) @map("created_at")
-  updatedAt DateTime            @updatedAt @map("updated_at")
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
 
   @@unique([projectId, userId])
   @@map("project_applications")
@@ -84,30 +87,30 @@ enum ApplicationStatus {
 
 // 채팅방
 model ChatRoom {
-  id        String        @id @default(uuid())
-  projectId String        @unique @map("project_id")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  projectId String   @unique @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  messages  ChatMessage[]
+  project  Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
 
   @@map("chat_rooms")
 }
 
 // 채팅 메시지
 model ChatMessage {
-  id               String   @id @default(uuid())
-  roomId           String   @map("room_id")
-  senderId         String   @map("sender_id")
-  content          String
-  sourceLang       String   @default("ko") @map("source_lang")
-  targetLang       String   @default("en") @map("target_lang")
-  translatedContent String? @map("translated_content")
-  createdAt        DateTime @default(now()) @map("created_at")
+  id                String   @id @default(uuid())
+  roomId            String   @map("room_id")
+  senderId          String   @map("sender_id")
+  content           String
+  sourceLang        String   @default("ko") @map("source_lang")
+  targetLang        String   @default("en") @map("target_lang")
+  translatedContent String?  @map("translated_content")
+  createdAt         DateTime @default(now()) @map("created_at")
 
-  room             ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  sender           User     @relation(fields: [senderId], references: [id])
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User     @relation(fields: [senderId], references: [id])
 
   @@map("chat_messages")
 }
@@ -123,9 +126,9 @@ model Evaluation {
   contribution  Int
   createdAt     DateTime @default(now()) @map("created_at")
 
-  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  evaluator     User     @relation("Evaluator", fields: [evaluatorId], references: [id])
-  evaluatee     User     @relation("Evaluatee", fields: [evaluateeId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evaluator User    @relation("Evaluator", fields: [evaluatorId], references: [id])
+  evaluatee User    @relation("Evaluatee", fields: [evaluateeId], references: [id])
 
   @@unique([projectId, evaluatorId, evaluateeId])
   @@map("evaluations")
@@ -133,15 +136,15 @@ model Evaluation {
 
 // 언어별 릴리즈 정보
 model Release {
-  id            String   @id @default(uuid())
-  language      String   // 예: "TypeScript", "Python", "Node.js", "React" 등
-  version       String   // 버전 번호 (예: "5.3.0")
-  releaseDate   DateTime @map("release_date")
-  officialDocs  String   @map("official_docs") // 공식 문서 URL
-  officialContent String @map("official_content") // 공식 문서 핵심 내용 (원문)
-  summary       String   // 간략 정리 내용
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(uuid())
+  language        String // 예: "TypeScript", "Python", "Node.js", "React" 등
+  version         String // 버전 번호 (예: "5.3.0")
+  releaseDate     DateTime @map("release_date")
+  officialDocs    String   @map("official_docs") // 공식 문서 URL
+  officialContent String   @map("official_content") // 공식 문서 핵심 내용 (원문)
+  summary         String // 간략 정리 내용
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@unique([language, version])
   @@map("releases")

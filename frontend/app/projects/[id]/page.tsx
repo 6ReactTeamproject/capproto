@@ -17,9 +17,11 @@ export default function ProjectDetailPage() {
   const [applicationMessage, setApplicationMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
+  const [closingRecruitment, setClosingRecruitment] = useState(false);
   const [invitingUsers, setInvitingUsers] = useState<Set<string>>(new Set());
   const isCreator = user && project && project.creator?.id === user.id;
   const hasApplied = project?.hasApplied || false;
+  const isRecruiting = project?.isRecruiting ?? true; // 기본값은 true, undefined일 때만 true
 
   useEffect(() => {
     loadProject();
@@ -34,6 +36,8 @@ export default function ProjectDetailPage() {
   const loadProject = async () => {
     try {
       const data = await projectsApi.getOne(projectId);
+      console.log('프로젝트 데이터:', data); // 디버깅용
+      console.log('isRecruiting:', data?.isRecruiting); // 디버깅용
       setProject(data);
     } catch (err) {
       console.error('프로젝트 로드 실패:', err);
@@ -84,6 +88,22 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleCloseRecruitment = async () => {
+    if (!confirm('모집을 종료하시겠습니까? 종료 후에는 참여 신청을 받을 수 없습니다.')) {
+      return;
+    }
+    setClosingRecruitment(true);
+    try {
+      await projectsApi.closeRecruitment(projectId);
+      await loadProject(); // 프로젝트 정보 다시 로드
+      alert('모집이 종료되었습니다.');
+    } catch (err: any) {
+      alert(err.message || '모집 종료에 실패했습니다.');
+    } finally {
+      setClosingRecruitment(false);
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '20px' }}>로딩 중...</div>;
   }
@@ -98,8 +118,43 @@ export default function ProjectDetailPage() {
         <Link href="/projects" style={{ color: '#0070f3' }}>← 목록으로</Link>
       </div>
 
-      <h1 style={{ marginBottom: '10px' }}>{project.title}</h1>
-      <p style={{ color: '#666', marginBottom: '20px' }}>{project.shortDescription}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+            <h1 style={{ margin: 0 }}>{project.title}</h1>
+            {project.isRecruiting === false && (
+              <div style={{
+                padding: '6px 12px',
+                backgroundColor: '#ff9800',
+                color: 'white',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+              }}>
+                모집 완료
+              </div>
+            )}
+          </div>
+          <p style={{ color: '#666', marginBottom: '10px' }}>{project.shortDescription}</p>
+        </div>
+        {isCreator && project.isRecruiting !== false && (
+          <button
+            onClick={handleCloseRecruitment}
+            disabled={closingRecruitment}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: closingRecruitment ? '#ccc' : '#ff9800',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: closingRecruitment ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            {closingRecruitment ? '처리 중...' : '모집 종료'}
+          </button>
+        )}
+      </div>
 
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -138,13 +193,42 @@ export default function ProjectDetailPage() {
           </div>
           <div><strong>필요 역할:</strong> {Array.isArray(project.neededRoles) ? project.neededRoles.join(', ') : 'N/A'}</div>
           <div><strong>필요 스택:</strong> {Array.isArray(project.requiredStacks) ? project.requiredStacks.join(', ') : 'N/A'}</div>
+          <div>
+            <strong>프로젝트 기간:</strong>{' '}
+            {(() => {
+              const formatDate = (date: string | Date | null | undefined) => {
+                if (!date) return null;
+                try {
+                  const d = typeof date === 'string' ? new Date(date) : date;
+                  if (isNaN(d.getTime())) return null;
+                  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                } catch {
+                  return null;
+                }
+              };
+              const start = formatDate(project.startDate);
+              const end = formatDate(project.endDate);
+              if (start && end) {
+                return `${start} ~ ${end}`;
+              } else if (start) {
+                return `${start} ~`;
+              } else if (end) {
+                return `~ ${end}`;
+              }
+              return '미정';
+            })()}
+          </div>
         </div>
       </div>
 
       {!isCreator && (
         <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
           <h2 style={{ marginBottom: '10px' }}>참여 신청</h2>
-          {hasApplied ? (
+          {project.isRecruiting === false ? (
+            <div style={{ color: '#ff9800', marginBottom: '10px', fontWeight: 'bold' }}>
+              모집이 종료된 프로젝트입니다.
+            </div>
+          ) : hasApplied ? (
             <div style={{ color: 'green', marginBottom: '10px' }}>참여 신청이 완료되었습니다!</div>
           ) : (
             <>

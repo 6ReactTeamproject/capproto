@@ -36,6 +36,8 @@ export default function NewProjectPage() {
     shortDescription: '',
     neededRoles: [] as string[],
     requiredStacks: [] as string[],
+    startDate: '',
+    endDate: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -188,6 +190,30 @@ export default function NewProjectPage() {
               ))}
             </div>
           )}
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>프로젝트 기간 (선택사항)</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>시작일</label>
+              <input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>종료일</label>
+              <input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                min={formData.startDate || undefined}
+                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+              />
+            </div>
+          </div>
         </div>
         {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
         <button

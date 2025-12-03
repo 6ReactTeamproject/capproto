@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from "@nestjs/common";
 import { PrismaService } from "../common/prisma/prisma.service";
 import { CreateProjectDto } from "./dto/create-project.dto";
@@ -18,6 +19,12 @@ export class ProjectsService {
         shortDescription: createProjectDto.shortDescription,
         neededRoles: JSON.stringify(createProjectDto.neededRoles),
         requiredStacks: JSON.stringify(createProjectDto.requiredStacks),
+        startDate: createProjectDto.startDate
+          ? new Date(createProjectDto.startDate)
+          : null,
+        endDate: createProjectDto.endDate
+          ? new Date(createProjectDto.endDate)
+          : null,
         creatorId,
       },
       include: {
@@ -63,6 +70,7 @@ export class ProjectsService {
         ...project,
         neededRoles: JSON.parse(project.neededRoles),
         requiredStacks: JSON.parse(project.requiredStacks),
+        isRecruiting: project.isRecruiting ?? true, // 기본값 true
       })),
       total,
       page,
@@ -107,6 +115,7 @@ export class ProjectsService {
       ...project,
       neededRoles: JSON.parse(project.neededRoles),
       requiredStacks: JSON.parse(project.requiredStacks),
+      isRecruiting: project.isRecruiting ?? true, // 기본값 true
       creator: {
         ...project.creator,
         techStacks: JSON.parse(project.creator.techStacks || "[]"),
@@ -193,6 +202,35 @@ export class ProjectsService {
       .slice(0, 5); // 상위 5명
 
     return usersWithScores;
+  }
+
+  // 모집 종료 (생성자만 가능)
+  async closeRecruitment(projectId: string, userId: string) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException("프로젝트를 찾을 수 없습니다.");
+    }
+
+    // 프로젝트 생성자만 모집 종료 가능
+    if (project.creatorId !== userId) {
+      throw new ForbiddenException("모집을 종료할 권한이 없습니다.");
+    }
+
+    // 이미 모집 종료된 경우
+    if (!project.isRecruiting) {
+      throw new ConflictException("이미 모집이 종료된 프로젝트입니다.");
+    }
+
+    // 모집 종료
+    await this.prisma.project.update({
+      where: { id: projectId },
+      data: { isRecruiting: false },
+    });
+
+    return { message: "모집이 종료되었습니다." };
   }
 
   // 프로젝트 삭제 (생성자만 가능)

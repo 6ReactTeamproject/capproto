@@ -82,6 +82,8 @@ export const projectsApi = {
     shortDescription: string;
     neededRoles: string[];
     requiredStacks: string[];
+    startDate?: string;
+    endDate?: string;
   }) => {
     return fetchApi<any>('/projects', {
       method: 'POST',
@@ -90,6 +92,11 @@ export const projectsApi = {
   },
   getRecommendations: async (id: string) => {
     return fetchApi<any[]>(`/projects/${id}/recommendations`);
+  },
+  closeRecruitment: async (id: string) => {
+    return fetchApi<any>(`/projects/${id}/close-recruitment`, {
+      method: 'PUT',
+    });
   },
   delete: async (id: string) => {
     return fetchApi<any>(`/projects/${id}`, {
