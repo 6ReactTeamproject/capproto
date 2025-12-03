@@ -1,7 +1,11 @@
 // 프로젝트 서비스 - 프로젝트 CRUD 및 추천 기능
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../common/prisma/prisma.service';
-import { CreateProjectDto } from './dto/create-project.dto';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
+import { PrismaService } from "../common/prisma/prisma.service";
+import { CreateProjectDto } from "./dto/create-project.dto";
 
 @Injectable()
 export class ProjectsService {
@@ -40,7 +44,7 @@ export class ProjectsService {
       this.prisma.project.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           creator: {
             select: {
@@ -66,7 +70,7 @@ export class ProjectsService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId?: string) {
     const project = await this.prisma.project.findUnique({
       where: { id },
       include: {
@@ -82,7 +86,21 @@ export class ProjectsService {
     });
 
     if (!project) {
-      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+      throw new NotFoundException("프로젝트를 찾을 수 없습니다.");
+    }
+
+    // 현재 사용자의 참여 신청 상태 확인
+    let hasApplied = false;
+    if (userId) {
+      const application = await this.prisma.projectApplication.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: id,
+            userId,
+          },
+        },
+      });
+      hasApplied = !!application;
     }
 
     return {
@@ -91,8 +109,9 @@ export class ProjectsService {
       requiredStacks: JSON.parse(project.requiredStacks),
       creator: {
         ...project.creator,
-        techStacks: JSON.parse(project.creator.techStacks || '[]'),
+        techStacks: JSON.parse(project.creator.techStacks || "[]"),
       },
+      hasApplied,
     };
   }
 
@@ -103,16 +122,18 @@ export class ProjectsService {
     });
 
     if (!project) {
-      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+      throw new NotFoundException("프로젝트를 찾을 수 없습니다.");
     }
 
     // 프로젝트 생성자만 접근 가능
     if (project.creatorId !== userId) {
-      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+      throw new NotFoundException("프로젝트를 찾을 수 없습니다.");
     }
 
-    const requiredStacks = JSON.parse(project.requiredStacks || '[]') as string[];
-    const neededRoles = JSON.parse(project.neededRoles || '[]') as string[];
+    const requiredStacks = JSON.parse(
+      project.requiredStacks || "[]"
+    ) as string[];
+    const neededRoles = JSON.parse(project.neededRoles || "[]") as string[];
 
     // 모든 사용자 조회 (전체 유저 대상, 자기 자신 제외)
     const allUsers = await this.prisma.user.findMany({
@@ -130,13 +151,13 @@ export class ProjectsService {
     // 매칭 점수 계산 (1~100점)
     const usersWithScores = allUsers
       .map((user) => {
-        const userStacks = JSON.parse(user.techStacks || '[]') as string[];
-        
+        const userStacks = JSON.parse(user.techStacks || "[]") as string[];
+
         // 1. 기술 스택 매칭 점수 계산 (0~70점)
         let techScore = 0;
         if (requiredStacks.length > 0) {
           const intersection = requiredStacks.filter((stack) =>
-            userStacks.includes(stack),
+            userStacks.includes(stack)
           );
           // 교집합 비율로 점수 계산 (최대 70점)
           techScore = (intersection.length / requiredStacks.length) * 70;
@@ -150,10 +171,10 @@ export class ProjectsService {
 
         // 3. 총합 점수 계산 (1~100점으로 정규화)
         let totalScore = techScore + roleScore;
-        
+
         // 최소 1점, 최대 100점으로 제한
         totalScore = Math.max(1, Math.min(100, Math.round(totalScore)));
-        
+
         // 소수점 둘째 자리까지 반올림
         totalScore = Math.round(totalScore * 100) / 100;
 
@@ -181,12 +202,12 @@ export class ProjectsService {
     });
 
     if (!project) {
-      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+      throw new NotFoundException("프로젝트를 찾을 수 없습니다.");
     }
 
     // 프로젝트 생성자만 삭제 가능
     if (project.creatorId !== userId) {
-      throw new ForbiddenException('프로젝트를 삭제할 권한이 없습니다.');
+      throw new ForbiddenException("프로젝트를 삭제할 권한이 없습니다.");
     }
 
     // 프로젝트 삭제 (관련 데이터는 CASCADE로 자동 삭제됨)
@@ -194,6 +215,6 @@ export class ProjectsService {
       where: { id: projectId },
     });
 
-    return { message: '프로젝트가 삭제되었습니다.' };
+    return { message: "프로젝트가 삭제되었습니다." };
   }
 }

@@ -17,9 +17,9 @@ export default function ProjectDetailPage() {
   const [applicationMessage, setApplicationMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const [applySuccess, setApplySuccess] = useState(false);
   const [invitingUsers, setInvitingUsers] = useState<Set<string>>(new Set());
   const isCreator = user && project && project.creator?.id === user.id;
+  const hasApplied = project?.hasApplied || false;
 
   useEffect(() => {
     loadProject();
@@ -56,8 +56,9 @@ export default function ProjectDetailPage() {
     setApplying(true);
     try {
       await applicationsApi.create(projectId, applicationMessage);
-      setApplySuccess(true);
       setApplicationMessage('');
+      // 프로젝트 정보 다시 로드하여 hasApplied 상태 업데이트
+      await loadProject();
     } catch (err: any) {
       alert(err.message || '참여 신청에 실패했습니다.');
     } finally {
@@ -143,7 +144,7 @@ export default function ProjectDetailPage() {
       {!isCreator && (
         <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
           <h2 style={{ marginBottom: '10px' }}>참여 신청</h2>
-          {applySuccess ? (
+          {hasApplied ? (
             <div style={{ color: 'green', marginBottom: '10px' }}>참여 신청이 완료되었습니다!</div>
           ) : (
             <>
