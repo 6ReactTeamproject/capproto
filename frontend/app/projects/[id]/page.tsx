@@ -21,7 +21,7 @@ export default function ProjectDetailPage() {
   const [invitingUsers, setInvitingUsers] = useState<Set<string>>(new Set());
   const isCreator = user && project && project.creator?.id === user.id;
   const hasApplied = project?.hasApplied || false;
-  const isRecruiting = project?.isRecruiting ?? true; // 기본값은 true, undefined일 때만 true
+  const isRecruiting = project?.isRecruiting ?? true;
 
   useEffect(() => {
     loadProject();
@@ -36,8 +36,8 @@ export default function ProjectDetailPage() {
   const loadProject = async () => {
     try {
       const data = await projectsApi.getOne(projectId);
-      console.log('프로젝트 데이터:', data); // 디버깅용
-      console.log('isRecruiting:', data?.isRecruiting); // 디버깅용
+      console.log('프로젝트 데이터:', data);
+      console.log('isRecruiting:', data?.isRecruiting);
       setProject(data);
     } catch (err) {
       console.error('프로젝트 로드 실패:', err);
@@ -61,7 +61,6 @@ export default function ProjectDetailPage() {
     try {
       await applicationsApi.create(projectId, applicationMessage);
       setApplicationMessage('');
-      // 프로젝트 정보 다시 로드하여 hasApplied 상태 업데이트
       await loadProject();
     } catch (err: any) {
       alert(err.message || '참여 신청에 실패했습니다.');
@@ -75,7 +74,6 @@ export default function ProjectDetailPage() {
     try {
       await applicationsApi.invite(projectId, userId);
       alert('초대가 완료되었습니다.');
-      // 추천 목록 새로고침 (초대된 사용자 제외하거나 상태 업데이트)
       loadRecommendations();
     } catch (err: any) {
       alert(err.message || '초대에 실패했습니다.');
@@ -95,7 +93,7 @@ export default function ProjectDetailPage() {
     setClosingRecruitment(true);
     try {
       await projectsApi.closeRecruitment(projectId);
-      await loadProject(); // 프로젝트 정보 다시 로드
+      await loadProject();
       alert('모집이 종료되었습니다.');
     } catch (err: any) {
       alert(err.message || '모집 종료에 실패했습니다.');
@@ -105,243 +103,214 @@ export default function ProjectDetailPage() {
   };
 
   if (loading) {
-    return <div style={{ padding: '20px' }}>로딩 중...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">로딩 중...</div>
+      </div>
+    );
   }
 
   if (!project) {
-    return <div style={{ padding: '20px' }}>프로젝트를 찾을 수 없습니다.</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">프로젝트를 찾을 수 없습니다.</div>
+      </div>
+    );
   }
 
-  return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Link href="/projects" style={{ color: '#0070f3' }}>← 목록으로</Link>
-      </div>
+  const formatDate = (date: string | Date | null | undefined) => {
+    if (!date) return null;
+    try {
+      const d = typeof date === 'string' ? new Date(date) : date;
+      if (isNaN(d.getTime())) return null;
+      return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch {
+      return null;
+    }
+  };
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-            <h1 style={{ margin: 0 }}>{project.title}</h1>
-            {project.isRecruiting === false && (
-              <div style={{
-                padding: '6px 12px',
-                backgroundColor: '#ff9800',
-                color: 'white',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: 'bold',
-              }}>
-                모집 완료
+  const start = formatDate(project.startDate);
+  const end = formatDate(project.endDate);
+  const dateRange = start && end ? `${start} ~ ${end}` : start ? `${start} ~` : end ? `~ ${end}` : '미정';
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 뒤로가기 */}
+        <Link 
+          href="/projects" 
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-6 transition-colors"
+        >
+          ← 목록으로
+        </Link>
+
+        {/* 프로젝트 헤더 */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
+                {project.isRecruiting === false && (
+                  <span className="px-3 py-1 bg-orange-500 text-white rounded-full text-sm font-semibold whitespace-nowrap">
+                    모집 완료
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-600 text-lg">{project.shortDescription}</p>
+            </div>
+            {isCreator && project.isRecruiting !== false && (
+              <button
+                onClick={handleCloseRecruitment}
+                disabled={closingRecruitment}
+                className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+              >
+                {closingRecruitment ? '처리 중...' : '모집 종료'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 프로젝트 정보 */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">프로젝트 정보</h2>
+            {isCreator && (
+              <Link
+                href={`/projects/${projectId}/manage`}
+                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+              >
+                프로젝트 관리
+              </Link>
+            )}
+          </div>
+          <div className="space-y-4">
+            <div>
+              <span className="font-semibold text-gray-700">생성자:</span>{' '}
+              {project.creator?.id ? (
+                <Link
+                  href={`/users/${project.creator.id}`}
+                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
+                  {project.creator.nickname}
+                </Link>
+              ) : (
+                <span className="text-gray-600">{project.creator?.nickname || 'N/A'}</span>
+              )}
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">필요 역할:</span>{' '}
+              <span className="text-gray-600">
+                {Array.isArray(project.neededRoles) ? project.neededRoles.join(', ') : 'N/A'}
+              </span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">필요 스택:</span>{' '}
+              <span className="text-gray-600">
+                {Array.isArray(project.requiredStacks) ? project.requiredStacks.join(', ') : 'N/A'}
+              </span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-700">프로젝트 기간:</span>{' '}
+              <span className="text-gray-600">{dateRange}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 참여 신청 */}
+        {!isCreator && (
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">참여 신청</h2>
+            {project.isRecruiting === false ? (
+              <div className="px-4 py-3 bg-orange-50 border border-orange-200 rounded-xl text-orange-700 font-semibold">
+                모집이 종료된 프로젝트입니다.
+              </div>
+            ) : hasApplied ? (
+              <div className="px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-semibold">
+                참여 신청이 완료되었습니다!
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <textarea
+                  value={applicationMessage}
+                  onChange={(e) => setApplicationMessage(e.target.value)}
+                  placeholder="자기 PR을 입력하세요 (선택사항)"
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                />
+                <button
+                  onClick={handleApply}
+                  disabled={applying || !user}
+                  className="w-full px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                >
+                  {!user ? '로그인 필요' : applying ? '신청 중...' : '참여 신청하기'}
+                </button>
               </div>
             )}
           </div>
-          <p style={{ color: '#666', marginBottom: '10px' }}>{project.shortDescription}</p>
-        </div>
-        {isCreator && project.isRecruiting !== false && (
-          <button
-            onClick={handleCloseRecruitment}
-            disabled={closingRecruitment}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: closingRecruitment ? '#ccc' : '#ff9800',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: closingRecruitment ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-            }}
-          >
-            {closingRecruitment ? '처리 중...' : '모집 종료'}
-          </button>
         )}
-      </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <h2>프로젝트 정보</h2>
-          {isCreator && (
-            <Link
-              href={`/projects/${projectId}/manage`}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                borderRadius: '4px',
-              }}
-            >
-              프로젝트 관리
-            </Link>
-          )}
+        {/* 채팅방 */}
+        <div className="mb-6">
+          <Link
+            href={`/projects/${projectId}/chat`}
+            className="inline-block px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+          >
+            채팅방 들어가기
+          </Link>
         </div>
-        <div style={{ marginTop: '10px' }}>
-          <div>
-            <strong>생성자:</strong>{' '}
-            {project.creator?.id ? (
-              <Link
-                href={`/users/${project.creator.id}`}
-                style={{
-                  color: '#0070f3',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {project.creator.nickname}
-              </Link>
+
+        {/* 추천 팀원 */}
+        {isCreator && (
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">추천 팀원</h2>
+            {recommendations.length === 0 ? (
+              <div className="text-gray-500 text-center py-8">추천할 팀원이 없습니다.</div>
             ) : (
-              project.creator?.nickname || 'N/A'
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {recommendations.map((recommendedUser) => (
+                  <div
+                    key={recommendedUser.userId}
+                    className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+                  >
+                    <div className="font-bold text-lg text-gray-900 mb-2">{recommendedUser.nickname}</div>
+                    <div className="text-gray-600 text-sm mb-2">
+                      역할: {
+                        recommendedUser.role === 'DEVELOPER' ? '개발자' :
+                        recommendedUser.role === 'DESIGNER' ? '디자이너' :
+                        recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
+                      }
+                    </div>
+                    <div className="text-sm text-gray-600 mb-4">
+                      <span className="font-semibold">기술 스택:</span>{' '}
+                      {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
+                        ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
+                        : '없음'}
+                    </div>
+                    <div className={`mb-4 p-4 rounded-xl text-center ${
+                      recommendedUser.score >= 70 ? 'bg-emerald-50' : 
+                      recommendedUser.score >= 50 ? 'bg-yellow-50' : 'bg-red-50'
+                    }`}>
+                      <div className="text-3xl font-bold text-blue-600">
+                        {recommendedUser.score}점
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        매칭률
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleInvite(recommendedUser.userId)}
+                      disabled={invitingUsers.has(recommendedUser.userId)}
+                      className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                    >
+                      {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-          <div><strong>필요 역할:</strong> {Array.isArray(project.neededRoles) ? project.neededRoles.join(', ') : 'N/A'}</div>
-          <div><strong>필요 스택:</strong> {Array.isArray(project.requiredStacks) ? project.requiredStacks.join(', ') : 'N/A'}</div>
-          <div>
-            <strong>프로젝트 기간:</strong>{' '}
-            {(() => {
-              const formatDate = (date: string | Date | null | undefined) => {
-                if (!date) return null;
-                try {
-                  const d = typeof date === 'string' ? new Date(date) : date;
-                  if (isNaN(d.getTime())) return null;
-                  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-                } catch {
-                  return null;
-                }
-              };
-              const start = formatDate(project.startDate);
-              const end = formatDate(project.endDate);
-              if (start && end) {
-                return `${start} ~ ${end}`;
-              } else if (start) {
-                return `${start} ~`;
-              } else if (end) {
-                return `~ ${end}`;
-              }
-              return '미정';
-            })()}
-          </div>
-        </div>
+        )}
       </div>
-
-      {!isCreator && (
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-          <h2 style={{ marginBottom: '10px' }}>참여 신청</h2>
-          {project.isRecruiting === false ? (
-            <div style={{ color: '#ff9800', marginBottom: '10px', fontWeight: 'bold' }}>
-              모집이 종료된 프로젝트입니다.
-            </div>
-          ) : hasApplied ? (
-            <div style={{ color: 'green', marginBottom: '10px' }}>참여 신청이 완료되었습니다!</div>
-          ) : (
-            <>
-              <textarea
-                value={applicationMessage}
-                onChange={(e) => setApplicationMessage(e.target.value)}
-                placeholder="자기 PR을 입력하세요 (선택사항)"
-                rows={3}
-                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px', marginBottom: '10px' }}
-              />
-              <button
-                onClick={handleApply}
-                disabled={applying || !user}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: user ? '#0070f3' : '#ccc',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: applying || !user ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {!user ? '로그인 필요' : applying ? '신청 중...' : '참여 신청하기'}
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      <div style={{ marginBottom: '20px' }}>
-        <Link
-          href={`/projects/${projectId}/chat`}
-          style={{
-            display: 'inline-block',
-            padding: '10px 20px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            borderRadius: '4px',
-            marginBottom: '20px',
-          }}
-        >
-          채팅방 들어가기
-        </Link>
-      </div>
-
-      {isCreator && (
-        <div style={{ marginTop: '30px' }}>
-          <h2 style={{ marginBottom: '15px' }}>추천 팀원</h2>
-          {recommendations.length === 0 ? (
-            <div>추천할 팀원이 없습니다.</div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
-              {recommendations.map((recommendedUser) => (
-                <div
-                  key={recommendedUser.userId}
-                  style={{
-                    border: '1px solid #ccc',
-                    borderRadius: '8px',
-                    padding: '15px',
-                  }}
-                >
-                  <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: '16px' }}>{recommendedUser.nickname}</div>
-                  <div style={{ color: '#666', marginBottom: '5px' }}>
-                    역할: {
-                      recommendedUser.role === 'DEVELOPER' ? '개발자' :
-                      recommendedUser.role === 'DESIGNER' ? '디자이너' :
-                      recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
-                    }
-                  </div>
-                  <div style={{ marginBottom: '10px', fontSize: '14px' }}>
-                    <strong>기술 스택:</strong>{' '}
-                    {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
-                      ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
-                      : '없음'}
-                  </div>
-                  <div style={{ 
-                    marginTop: '10px', 
-                    padding: '8px', 
-                    backgroundColor: recommendedUser.score >= 70 ? '#d4edda' : recommendedUser.score >= 50 ? '#fff3cd' : '#f8d7da',
-                    borderRadius: '4px',
-                    textAlign: 'center',
-                  }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0070f3' }}>
-                      {recommendedUser.score}점
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                      매칭률
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleInvite(recommendedUser.userId)}
-                    disabled={invitingUsers.has(recommendedUser.userId)}
-                    style={{
-                      marginTop: '10px',
-                      width: '100%',
-                      padding: '8px 16px',
-                      backgroundColor: invitingUsers.has(recommendedUser.userId) ? '#ccc' : '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: invitingUsers.has(recommendedUser.userId) ? 'not-allowed' : 'pointer',
-                      fontSize: '14px',
-                    }}
-                  >
-                    {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
-

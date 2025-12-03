@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { authApi, setToken } from '@/lib/api';
 
 // 사용 가능한 기술 스택 목록
@@ -50,123 +51,121 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h1 style={{ marginBottom: '20px' }}>회원가입</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>이메일</label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>비밀번호</label>
-          <input
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required
-            minLength={6}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>닉네임</label>
-          <input
-            type="text"
-            value={formData.nickname}
-            onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-            required
-            minLength={2}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>역할</label>
-          <select
-            value={formData.role}
-            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-          >
-            <option value="DEVELOPER">개발자</option>
-            <option value="DESIGNER">디자이너</option>
-            <option value="PLANNER">기획자</option>
-          </select>
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>기술 스택 (복수 선택 가능)</label>
-          <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
-            {AVAILABLE_TECH_STACKS.map((stack) => (
-              <label
-                key={stack}
-                style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={formData.techStacks.includes(stack)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setFormData({
-                        ...formData,
-                        techStacks: [...formData.techStacks, stack],
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        techStacks: formData.techStacks.filter((s) => s !== stack),
-                      });
-                    }
-                  }}
-                  style={{ marginRight: '8px' }}
-                />
-                <span>{stack}</span>
-              </label>
-            ))}
-          </div>
-          {formData.techStacks.length > 0 && (
-            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-              {formData.techStacks.map((stack) => (
-                <span
-                  key={stack}
-                  style={{
-                    padding: '4px 8px',
-                    backgroundColor: '#e3f2fd',
-                    color: '#1976d2',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                  }}
-                >
-                  {stack}
-                </span>
-              ))}
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-sm p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">회원가입</h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">이메일</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="이메일을 입력하세요"
+              />
             </div>
-          )}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">비밀번호</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="비밀번호를 입력하세요 (최소 6자)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">닉네임</label>
+              <input
+                type="text"
+                value={formData.nickname}
+                onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                required
+                minLength={2}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="닉네임을 입력하세요"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">역할</label>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="DEVELOPER">개발자</option>
+                <option value="DESIGNER">디자이너</option>
+                <option value="PLANNER">기획자</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">기술 스택 (복수 선택 가능)</label>
+              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
+                {AVAILABLE_TECH_STACKS.map((stack) => (
+                  <label
+                    key={stack}
+                    className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.techStacks.includes(stack)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData({
+                            ...formData,
+                            techStacks: [...formData.techStacks, stack],
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            techStacks: formData.techStacks.filter((s) => s !== stack),
+                          });
+                        }
+                      }}
+                      className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">{stack}</span>
+                  </label>
+                ))}
+              </div>
+              {formData.techStacks.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.techStacks.map((stack) => (
+                    <span
+                      key={stack}
+                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                    >
+                      {stack}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            {error && (
+              <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
+                {error}
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+            >
+              {loading ? '가입 중...' : '회원가입'}
+            </button>
+          </form>
+          <div className="mt-6 text-center">
+            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              로그인
+            </Link>
+          </div>
         </div>
-        {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {loading ? '가입 중...' : '회원가입'}
-        </button>
-      </form>
-      <div style={{ marginTop: '15px', textAlign: 'center' }}>
-        <a href="/login" style={{ color: '#0070f3' }}>로그인</a>
       </div>
     </div>
   );
 }
-

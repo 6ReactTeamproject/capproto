@@ -94,145 +94,147 @@ export default function NewProjectPage() {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '20px' }}>
-      <h1 style={{ marginBottom: '20px' }}>프로젝트 생성</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>제목</label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>한 줄 소개</label>
-          <textarea
-            value={formData.shortDescription}
-            onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-            required
-            rows={3}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>필요 역할 (복수 선택 가능)</label>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-            {AVAILABLE_ROLES.map((role) => (
-              <label
-                key={role.value}
-                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={formData.neededRoles.includes(role.value)}
-                  onChange={() => toggleRole(role.value)}
-                  style={{ marginRight: '5px' }}
-                />
-                <span>{role.label}</span>
-              </label>
-            ))}
-          </div>
-          {formData.neededRoles.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '10px' }}>
-              {formData.neededRoles.map((role) => (
-                <span
-                  key={role}
-                  style={{
-                    padding: '4px 8px',
-                    backgroundColor: '#e3f2fd',
-                    color: '#1976d2',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                  }}
-                >
-                  {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>필요 스택 (복수 선택 가능)</label>
-          <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
-            {AVAILABLE_TECH_STACKS.map((stack) => (
-              <label
-                key={stack}
-                style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={formData.requiredStacks.includes(stack)}
-                  onChange={() => toggleStack(stack)}
-                  style={{ marginRight: '8px' }}
-                />
-                <span>{stack}</span>
-              </label>
-            ))}
-          </div>
-          {formData.requiredStacks.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '10px' }}>
-              {formData.requiredStacks.map((stack) => (
-                <span
-                  key={stack}
-                  style={{
-                    padding: '4px 8px',
-                    backgroundColor: '#e3f2fd',
-                    color: '#1976d2',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                  }}
-                >
-                  {stack}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>프로젝트 기간 (선택사항)</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-2xl shadow-sm p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">프로젝트 생성</h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 제목 */}
             <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>시작일</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">제목</label>
               <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="프로젝트 제목을 입력하세요"
               />
             </div>
+
+            {/* 한 줄 소개 */}
             <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>종료일</label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                min={formData.startDate || undefined}
-                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+              <label className="block text-sm font-semibold text-gray-700 mb-2">한 줄 소개</label>
+              <textarea
+                value={formData.shortDescription}
+                onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                required
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                placeholder="프로젝트를 한 줄로 소개해주세요"
               />
             </div>
-          </div>
+
+            {/* 필요 역할 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">필요 역할 (복수 선택 가능)</label>
+              <div className="flex flex-wrap gap-3 mb-3">
+                {AVAILABLE_ROLES.map((role) => (
+                  <label
+                    key={role.value}
+                    className="flex items-center cursor-pointer px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.neededRoles.includes(role.value)}
+                      onChange={() => toggleRole(role.value)}
+                      className="mr-2 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">{role.label}</span>
+                  </label>
+                ))}
+              </div>
+              {formData.neededRoles.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.neededRoles.map((role) => (
+                    <span
+                      key={role}
+                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                    >
+                      {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 필요 스택 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">필요 스택 (복수 선택 가능)</label>
+              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
+                {AVAILABLE_TECH_STACKS.map((stack) => (
+                  <label
+                    key={stack}
+                    className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.requiredStacks.includes(stack)}
+                      onChange={() => toggleStack(stack)}
+                      className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">{stack}</span>
+                  </label>
+                ))}
+              </div>
+              {formData.requiredStacks.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.requiredStacks.map((stack) => (
+                    <span
+                      key={stack}
+                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                    >
+                      {stack}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 프로젝트 기간 */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">프로젝트 기간 (선택사항)</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-2">시작일</label>
+                  <input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-2">종료일</label>
+                  <input
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    min={formData.startDate || undefined}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 에러 메시지 */}
+            {error && (
+              <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
+                {error}
+              </div>
+            )}
+
+            {/* 제출 버튼 */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+            >
+              {loading ? '생성 중...' : '프로젝트 생성'}
+            </button>
+          </form>
         </div>
-        {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {loading ? '생성 중...' : '프로젝트 생성'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
-
