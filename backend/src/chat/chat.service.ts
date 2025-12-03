@@ -1,13 +1,47 @@
 // 채팅 서비스 - 채팅방 및 메시지 관리, 더미 번역 기능
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 
 @Injectable()
 export class ChatService {
   constructor(private prisma: PrismaService) {}
 
+  // 사용자가 프로젝트 참여자인지 확인
+  async checkProjectMember(projectId: string, userId: string): Promise<boolean> {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+    }
+
+    // 프로젝트 생성자는 항상 참여자
+    if (project.creatorId === userId) {
+      return true;
+    }
+
+    // 수락된 참여 신청이 있는지 확인
+    const acceptedApplication = await this.prisma.projectApplication.findFirst({
+      where: {
+        projectId,
+        userId,
+        status: 'ACCEPTED',
+      },
+    });
+
+    return !!acceptedApplication;
+  }
+
   // 프로젝트 채팅방 조회 또는 생성
-  async getOrCreateChatRoom(projectId: string) {
+  async getOrCreateChatRoom(projectId: string, userId?: string) {
+    // userId가 제공된 경우 참여자 확인
+    if (userId) {
+      const isMember = await this.checkProjectMember(projectId, userId);
+      if (!isMember) {
+        throw new ForbiddenException('프로젝트 참여자만 채팅방에 접근할 수 있습니다.');
+      }
+    }
     let chatRoom = await this.prisma.chatRoom.findUnique({
       where: { projectId },
       include: {

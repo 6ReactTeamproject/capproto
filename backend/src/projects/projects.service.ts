@@ -99,6 +99,7 @@ export class ProjectsService {
 
     // 현재 사용자의 참여 신청 상태 확인
     let hasApplied = false;
+    let isAccepted = false;
     if (userId) {
       const application = await this.prisma.projectApplication.findUnique({
         where: {
@@ -109,6 +110,7 @@ export class ProjectsService {
         },
       });
       hasApplied = !!application;
+      isAccepted = application?.status === 'ACCEPTED';
     }
 
     return {
@@ -121,6 +123,7 @@ export class ProjectsService {
         techStacks: JSON.parse(project.creator.techStacks || "[]"),
       },
       hasApplied,
+      isAccepted, // 수락된 신청 여부
     };
   }
 

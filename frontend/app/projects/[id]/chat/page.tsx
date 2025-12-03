@@ -4,7 +4,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-import { chatApi, getToken } from '@/lib/api';
+import { chatApi, getToken, projectsApi } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import Link from 'next/link';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -12,33 +14,72 @@ export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
+  const { user, loading: authLoading } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [roomId, setRoomId] = useState<string | null>(null);
   const [sourceLang, setSourceLang] = useState('ko');
   const [targetLang, setTargetLang] = useState('en');
-  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 사용자 정보 가져오기 (간단하게 토큰에서 추출하거나 별도 API 호출)
-    loadChatRoom();
+    if (!authLoading) {
+      checkAccess();
+    }
 
     return () => {
       if (socket) {
         socket.off('messages');
         socket.off('new-message');
+        socket.off('error');
         socket.off('connect');
         socket.disconnect();
         setSocket(null);
       }
     };
-  }, [projectId]);
+  }, [projectId, authLoading, user]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const checkAccess = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // 로그인 체크
+      if (!user) {
+        setError('로그인이 필요합니다.');
+        setLoading(false);
+        return;
+      }
+
+      // 프로젝트 정보 가져오기
+      const project = await projectsApi.getOne(projectId);
+      
+      // 프로젝트 생성자이거나 수락된 신청이 있는지 확인
+      const isCreator = project.creator?.id === user.id;
+      const hasAcceptedApplication = project.isAccepted || false;
+
+      if (!isCreator && !hasAcceptedApplication) {
+        setError('프로젝트 참여자만 채팅방에 접근할 수 있습니다.');
+        setLoading(false);
+        return;
+      }
+
+      setHasAccess(true);
+      await loadChatRoom();
+    } catch (err: any) {
+      console.error('접근 권한 확인 실패:', err);
+      setError(err.message || '채팅방에 접근할 수 없습니다.');
+      setLoading(false);
+    }
+  };
 
   const loadChatRoom = async () => {
     try {
@@ -46,6 +87,7 @@ export default function ChatPage() {
       if (socket) {
         socket.off('messages');
         socket.off('new-message');
+        socket.off('error');
         socket.off('connect');
         socket.disconnect();
       }
@@ -57,20 +99,26 @@ export default function ChatPage() {
       // WebSocket 연결
       const newSocket = io(API_BASE_URL, {
         transports: ['websocket'],
+        auth: {
+          token: getToken(),
+        },
       });
 
       newSocket.on('connect', () => {
         console.log('WebSocket 연결됨');
-        newSocket.emit('join-room', { projectId });
+        newSocket.emit('join-room', { 
+          projectId,
+          userId: user?.id,
+        });
       });
 
       newSocket.on('messages', (msgs: any[]) => {
         setMessages(msgs);
+        setLoading(false);
       });
 
       newSocket.on('new-message', (message: any) => {
         setMessages((prev) => {
-          // 중복 메시지 체크 (같은 ID가 이미 있으면 추가하지 않음)
           const exists = prev.some((msg) => msg.id === message.id);
           if (exists) {
             return prev;
@@ -79,38 +127,29 @@ export default function ChatPage() {
         });
       });
 
-      setSocket(newSocket);
+      newSocket.on('error', (error: any) => {
+        console.error('WebSocket 에러:', error);
+        setError(error.message || '채팅방 접근 권한이 없습니다.');
+        setLoading(false);
+      });
 
-      // 간단하게 사용자 ID 가져오기 (실제로는 auth API에서 가져와야 함)
-      // 여기서는 임시로 localStorage에서 가져오거나 API 호출
-      fetch(`${API_BASE_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((user) => {
-          if (user.id) {
-            setUserId(user.id);
-          }
-        })
-        .catch(() => {
-          // 로그인하지 않은 경우 처리
-        });
-    } catch (err) {
+      setSocket(newSocket);
+    } catch (err: any) {
       console.error('채팅방 로드 실패:', err);
+      setError(err.message || '채팅방을 불러올 수 없습니다.');
+      setLoading(false);
     }
   };
 
   const sendMessage = () => {
-    if (!socket || !projectId || !userId || !newMessage.trim()) return;
+    if (!socket || !projectId || !user?.id || !newMessage.trim()) return;
 
     const messageContent = newMessage.trim();
-    setNewMessage(''); // 먼저 입력창 비우기
+    setNewMessage('');
 
     socket.emit('send-message', {
       projectId,
-      senderId: userId,
+      senderId: user.id,
       content: messageContent,
       sourceLang,
       targetLang,
@@ -121,86 +160,125 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <button onClick={() => router.push(`/projects/${projectId}`)} style={{ color: '#0070f3' }}>
-          ← 프로젝트로 돌아가기
-        </button>
-        <h1 style={{ marginTop: '10px' }}>채팅방</h1>
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">로딩 중...</div>
       </div>
+    );
+  }
 
-      <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #ccc', borderRadius: '8px', padding: '15px', marginBottom: '15px', backgroundColor: '#f9f9f9' }}>
-        {messages.map((message) => (
-          <div key={message.id} style={{ marginBottom: '15px' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{message.sender?.nickname || '알 수 없음'}</div>
-            <div style={{ marginBottom: '5px', padding: '8px', backgroundColor: 'white', borderRadius: '4px' }}>
-              {message.content}
-            </div>
-            {message.translatedContent && (
-              <div style={{ padding: '8px', backgroundColor: '#e3f2fd', borderRadius: '4px', color: '#666', fontSize: '0.9em' }}>
-                {message.translatedContent}
-              </div>
+  if (error || !hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm p-8 text-center">
+          <div className="text-red-600 font-semibold mb-4">{error || '접근 권한이 없습니다.'}</div>
+          <div className="space-y-3">
+            {!user && (
+              <Link
+                href={`/login?redirect=/projects/${projectId}/chat`}
+                className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+              >
+                로그인하기
+              </Link>
             )}
-            <div style={{ fontSize: '0.8em', color: '#999', marginTop: '5px' }}>
-              {new Date(message.createdAt).toLocaleString()}
-            </div>
+            <Link
+              href={`/projects/${projectId}`}
+              className="inline-block px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-medium transition-colors"
+            >
+              프로젝트로 돌아가기
+            </Link>
           </div>
-        ))}
-        <div ref={messagesEndRef} />
+        </div>
       </div>
+    );
+  }
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-        <select
-          value={sourceLang}
-          onChange={(e) => setSourceLang(e.target.value)}
-          style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-        >
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-          <option value="ja">日本語</option>
-        </select>
-        <span>→</span>
-        <select
-          value={targetLang}
-          onChange={(e) => setTargetLang(e.target.value)}
-          style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-        >
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-          <option value="ja">日本語</option>
-        </select>
-      </div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <Link 
+            href={`/projects/${projectId}`} 
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-4 transition-colors"
+          >
+            ← 프로젝트로 돌아가기
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">채팅방</h1>
+        </div>
 
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              sendMessage();
-            }
-          }}
-          placeholder="메시지를 입력하세요..."
-          style={{ flex: 1, padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!socket || !newMessage.trim()}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: !socket || !newMessage.trim() ? 'not-allowed' : 'pointer',
-          }}
-        >
-          전송
-        </button>
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex-1 overflow-y-auto max-h-96 mb-6 space-y-4">
+            {messages.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">메시지가 없습니다.</div>
+            ) : (
+              messages.map((message) => (
+                <div key={message.id} className="border-b border-gray-100 pb-4 last:border-0">
+                  <div className="font-semibold text-gray-900 mb-2">
+                    {message.sender?.nickname || '알 수 없음'}
+                  </div>
+                  <div className="mb-2 p-3 bg-gray-50 rounded-xl text-gray-900">
+                    {message.content}
+                  </div>
+                  {message.translatedContent && (
+                    <div className="mb-2 p-3 bg-blue-50 rounded-xl text-gray-700 text-sm">
+                      {message.translatedContent}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500">
+                    {new Date(message.createdAt).toLocaleString('ko-KR')}
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="flex gap-3 mb-4">
+            <select
+              value={sourceLang}
+              onChange={(e) => setSourceLang(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="ko">한국어</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+            <span className="flex items-center text-gray-500">→</span>
+            <select
+              value={targetLang}
+              onChange={(e) => setTargetLang(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="ko">한국어</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  sendMessage();
+                }
+              }}
+              placeholder="메시지를 입력하세요..."
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!socket || !newMessage.trim()}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+            >
+              전송
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-

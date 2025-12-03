@@ -1,19 +1,30 @@
 // 채팅 컨트롤러 - REST API 엔드포인트
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get('rooms/project/:projectId')
-  async getOrCreateChatRoom(@Param('projectId') projectId: string) {
-    return this.chatService.getOrCreateChatRoom(projectId);
+  @UseGuards(JwtAuthGuard)
+  async getOrCreateChatRoom(
+    @Param('projectId') projectId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.chatService.getOrCreateChatRoom(projectId, user.id);
   }
 
   @Get('messages/:roomId')
-  async getMessages(@Param('roomId') roomId: string) {
-    const chatRoom = await this.chatService.getOrCreateChatRoom(roomId);
+  @UseGuards(JwtAuthGuard)
+  async getMessages(
+    @Param('roomId') roomId: string,
+    @CurrentUser() user: any,
+  ) {
+    // roomId가 실제로는 projectId일 수 있으므로 프로젝트 참여자 확인
+    const chatRoom = await this.chatService.getOrCreateChatRoom(roomId, user.id);
     return chatRoom.messages;
   }
 

@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { projectsApi, applicationsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import ChatWidget from '@/components/ChatWidget';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -19,9 +20,11 @@ export default function ProjectDetailPage() {
   const [applying, setApplying] = useState(false);
   const [closingRecruitment, setClosingRecruitment] = useState(false);
   const [invitingUsers, setInvitingUsers] = useState<Set<string>>(new Set());
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const isCreator = user && project && project.creator?.id === user.id;
   const hasApplied = project?.hasApplied || false;
   const isRecruiting = project?.isRecruiting ?? true;
+  const canAccessChat = user && (isCreator || project?.isAccepted);
 
   useEffect(() => {
     loadProject();
@@ -249,15 +252,21 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
-        {/* 채팅방 */}
-        <div className="mb-6">
-          <Link
-            href={`/projects/${projectId}/chat`}
-            className="inline-block px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
-          >
-            채팅방 들어가기
-          </Link>
-        </div>
+        {/* 채팅 버튼 (참여자만 표시) */}
+        {canAccessChat && (
+          <div className="mb-6">
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              채팅방 열기
+            </button>
+          </div>
+        )}
+
 
         {/* 추천 팀원 */}
         {isCreator && (
@@ -311,6 +320,15 @@ export default function ProjectDetailPage() {
           </div>
         )}
       </div>
+
+      {/* 프로젝트 상세 페이지 전용 채팅 버튼 (전역 버튼과 겹치지 않도록 조건부 렌더링) */}
+      {canAccessChat && (
+        <ChatWidget 
+          projectId={projectId}
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
     </div>
   );
 }
