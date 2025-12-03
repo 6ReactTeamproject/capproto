@@ -6,6 +6,16 @@ import Link from 'next/link';
 import { projectsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
+// 역할을 한글로 변환하는 함수
+const getRoleLabel = (role: string): string => {
+  const roleMap: Record<string, string> = {
+    'DEVELOPER': '개발자',
+    'DESIGNER': '디자이너',
+    'PLANNER': '기획자',
+  };
+  return roleMap[role] || role;
+};
+
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,7 +117,9 @@ export default function ProjectsPage() {
                   <div className="text-sm">
                     <span className="font-semibold text-gray-700">필요 역할:</span>{' '}
                     <span className="text-gray-600">
-                      {Array.isArray(project.neededRoles) ? project.neededRoles.join(', ') : 'N/A'}
+                      {Array.isArray(project.neededRoles) 
+                        ? project.neededRoles.map(getRoleLabel).join(', ') 
+                        : 'N/A'}
                     </span>
                   </div>
                   <div className="text-sm">

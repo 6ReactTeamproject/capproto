@@ -8,6 +8,16 @@ import { projectsApi, applicationsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import ChatWidget from '@/components/ChatWidget';
 
+// 역할을 한글로 변환하는 함수
+const getRoleLabel = (role: string): string => {
+  const roleMap: Record<string, string> = {
+    'DEVELOPER': '개발자',
+    'DESIGNER': '디자이너',
+    'PLANNER': '기획자',
+  };
+  return roleMap[role] || role;
+};
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -203,7 +213,9 @@ export default function ProjectDetailPage() {
             <div>
               <span className="font-semibold text-gray-700">필요 역할:</span>{' '}
               <span className="text-gray-600">
-                {Array.isArray(project.neededRoles) ? project.neededRoles.join(', ') : 'N/A'}
+                {Array.isArray(project.neededRoles) 
+                  ? project.neededRoles.map(getRoleLabel).join(', ') 
+                  : 'N/A'}
               </span>
             </div>
             <div>
