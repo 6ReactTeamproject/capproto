@@ -202,102 +202,193 @@ async function main() {
   // 비밀번호 해시
   const passwordHash = await bcrypt.hash("password123", 10);
 
-  // 사용자 생성 (10명)
-  const users = await Promise.all([
-    // 개발자 5명
-    prisma.user.create({
-      data: {
-        email: "dev1@example.com",
-        passwordHash,
-        nickname: "개발자1",
-        role: UserRole.DEVELOPER,
-        techStacks: JSON.stringify(["React", "TypeScript", "Next.js"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "dev2@example.com",
-        passwordHash,
-        nickname: "개발자2",
-        role: UserRole.DEVELOPER,
-        techStacks: JSON.stringify(["NestJS", "PostgreSQL", "TypeScript"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "dev3@example.com",
-        passwordHash,
-        nickname: "개발자3",
-        role: UserRole.DEVELOPER,
-        techStacks: JSON.stringify(["React", "Node.js", "MongoDB"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "dev4@example.com",
-        passwordHash,
-        nickname: "개발자4",
-        role: UserRole.DEVELOPER,
-        techStacks: JSON.stringify(["Vue.js", "Spring", "MySQL"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "dev5@example.com",
-        passwordHash,
-        nickname: "개발자5",
-        role: UserRole.DEVELOPER,
-        techStacks: JSON.stringify(["React", "Next.js", "Prisma"]),
-      },
-    }),
-    // 디자이너 3명
-    prisma.user.create({
-      data: {
-        email: "designer1@example.com",
-        passwordHash,
-        nickname: "디자이너1",
-        role: UserRole.DESIGNER,
-        techStacks: JSON.stringify(["Figma", "Photoshop", "Illustrator"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "designer2@example.com",
-        passwordHash,
-        nickname: "디자이너2",
-        role: UserRole.DESIGNER,
-        techStacks: JSON.stringify(["Figma", "Sketch", "Adobe XD"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "designer3@example.com",
-        passwordHash,
-        nickname: "디자이너3",
-        role: UserRole.DESIGNER,
-        techStacks: JSON.stringify(["Figma", "After Effects"]),
-      },
-    }),
-    // 기획자 2명
-    prisma.user.create({
-      data: {
-        email: "planner1@example.com",
-        passwordHash,
-        nickname: "기획자1",
-        role: UserRole.PLANNER,
-        techStacks: JSON.stringify(["Notion", "Figma", "Jira"]),
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: "planner2@example.com",
-        passwordHash,
-        nickname: "기획자2",
-        role: UserRole.PLANNER,
-        techStacks: JSON.stringify(["Notion", "Confluence"]),
-      },
-    }),
-  ]);
+  // 사용자 생성 (55명)
+  const users: any[] = [];
+
+  // 개발자 닉네임 목록
+  const developerNicknames = [
+    "james123",
+    "민수",
+    "sarah99",
+    "alex_kim",
+    "coffee",
+    "react_lover",
+    "kim_coder",
+    "night_coder",
+    "lee_dev",
+    "jin_fullstack",
+    "cloud_park",
+    "choi_backend",
+    "api_master",
+    "micro_kim",
+    "block_yoon",
+    "ai_dev",
+    "mobile_jung",
+    "game_hong",
+    "security_kang",
+    "moon",
+    "david2024",
+    "emily_dev",
+    "mike_coder",
+    "lisa_tech",
+    "tom_dev",
+    "jessica123",
+    "ryan_code",
+    "amy_dev",
+    "chris_tech",
+    "kate_coder",
+  ];
+
+  // 디자이너 닉네임 목록
+  const designerNicknames = [
+    "지영",
+    "서연",
+    "수진",
+    "영희",
+    "미나",
+    "하늘",
+    "별",
+    "river",
+    "ocean",
+    "star",
+    "luna",
+    "snow",
+    "rain",
+    "wind",
+    "sky",
+  ];
+
+  // 기획자 닉네임 목록
+  const plannerNicknames = [
+    "현우",
+    "준호",
+    "sarah_planner",
+    "alex_manager",
+    "민준",
+    "james_pm",
+    "태현",
+    "emily_strategy",
+    "준영",
+    "mike_planner",
+  ];
+
+  // 개발자 스택 목록
+  const developerStacks = [
+    ["React", "TypeScript", "Next.js"],
+    ["NestJS", "PostgreSQL", "TypeScript"],
+    ["React", "Node.js", "MongoDB"],
+    ["Vue.js", "Spring", "MySQL"],
+    ["React", "Next.js", "Prisma"],
+    ["Angular", "TypeScript", "RxJS"],
+    ["Express", "MongoDB", "Node.js"],
+    ["Django", "Python", "PostgreSQL"],
+    ["Flask", "Python", "SQLite"],
+    ["Laravel", "PHP", "MySQL"],
+    ["Ruby on Rails", "Ruby", "PostgreSQL"],
+    ["ASP.NET", "C#", "SQL Server"],
+    ["Go", "Gin", "PostgreSQL"],
+    ["Rust", "Actix", "Docker"],
+    ["Kotlin", "Spring Boot", "PostgreSQL"],
+    ["Swift", "iOS", "Core Data"],
+    ["React Native", "TypeScript", "Firebase"],
+    ["Flutter", "Dart", "Firebase"],
+    ["GraphQL", "Apollo", "MongoDB"],
+    ["Microservices", "Docker", "Kubernetes"],
+    ["AWS", "Lambda", "DynamoDB"],
+    ["GCP", "Cloud Functions", "Firestore"],
+    ["Azure", "Functions", "Cosmos DB"],
+    ["Redis", "Node.js", "Socket.io"],
+    ["Elasticsearch", "Kibana", "Logstash"],
+    ["TensorFlow", "Python", "Jupyter"],
+    ["PyTorch", "Python", "NumPy"],
+    ["Blockchain", "Solidity", "Web3"],
+    ["WebAssembly", "Rust", "C++"],
+    ["Deno", "TypeScript", "Oak"],
+  ];
+
+  // 디자이너 스택 목록
+  const designerStacks = [
+    ["Figma", "Photoshop", "Illustrator"],
+    ["Figma", "Sketch", "Adobe XD"],
+    ["Figma", "After Effects"],
+    ["Figma", "Principle", "Framer"],
+    ["Sketch", "InVision", "Zeplin"],
+    ["Adobe XD", "Illustrator", "Photoshop"],
+    ["Figma", "Protopie", "Lottie"],
+    ["Blender", "Cinema 4D", "After Effects"],
+    ["Figma", "Webflow", "Framer"],
+    ["Sketch", "Abstract", "InVision"],
+    ["Figma", "Miro", "Whimsical"],
+    ["Adobe Creative Suite", "Figma", "Principle"],
+    ["Figma", "Origami", "Flinto"],
+    ["Sketch", "Figma", "Zeplin"],
+    ["Figma", "Notion", "Miro"],
+  ];
+
+  // 기획자 스택 목록
+  const plannerStacks = [
+    ["Notion", "Figma", "Jira"],
+    ["Notion", "Confluence"],
+    ["Notion", "Miro", "Figma"],
+    ["Jira", "Confluence", "Trello"],
+    ["Notion", "Airtable", "Figma"],
+    ["Miro", "Figma", "Notion"],
+    ["Confluence", "Jira", "Slack"],
+    ["Notion", "Google Workspace", "Figma"],
+    ["Airtable", "Notion", "Figma"],
+    ["Notion", "Miro", "Whimsical"],
+  ];
+
+  // 개발자 30명 생성
+  for (let i = 1; i <= 30; i++) {
+    const stacks = developerStacks[(i - 1) % developerStacks.length];
+    const nickname = developerNicknames[(i - 1) % developerNicknames.length];
+    users.push(
+      await prisma.user.create({
+        data: {
+          email: `dev${i}@example.com`,
+          passwordHash,
+          nickname: nickname,
+          role: UserRole.DEVELOPER,
+          techStacks: JSON.stringify(stacks),
+        },
+      })
+    );
+  }
+
+  // 디자이너 15명 생성
+  for (let i = 1; i <= 15; i++) {
+    const stacks = designerStacks[(i - 1) % designerStacks.length];
+    const nickname = designerNicknames[(i - 1) % designerNicknames.length];
+    users.push(
+      await prisma.user.create({
+        data: {
+          email: `designer${i}@example.com`,
+          passwordHash,
+          nickname: nickname,
+          role: UserRole.DESIGNER,
+          techStacks: JSON.stringify(stacks),
+        },
+      })
+    );
+  }
+
+  // 기획자 10명 생성
+  for (let i = 1; i <= 10; i++) {
+    const stacks = plannerStacks[(i - 1) % plannerStacks.length];
+    const nickname = plannerNicknames[(i - 1) % plannerNicknames.length];
+    users.push(
+      await prisma.user.create({
+        data: {
+          email: `planner${i}@example.com`,
+          passwordHash,
+          nickname: nickname,
+          role: UserRole.PLANNER,
+          techStacks: JSON.stringify(stacks),
+        },
+      })
+    );
+  }
 
   console.log(`✅ ${users.length}명의 사용자 생성 완료`);
 
@@ -327,7 +418,7 @@ async function main() {
         shortDescription: "Figma를 활용한 모바일 앱 디자인 프로젝트",
         neededRoles: JSON.stringify(["DESIGNER", "PLANNER"]),
         requiredStacks: JSON.stringify(["Figma", "Photoshop"]),
-        creatorId: users[5].id,
+        creatorId: users[30].id, // 디자이너1
       },
     }),
     prisma.project.create({
@@ -345,7 +436,7 @@ async function main() {
         shortDescription: "Notion과 Jira를 활용한 협업 도구 개발",
         neededRoles: JSON.stringify(["PLANNER", "DEVELOPER"]),
         requiredStacks: JSON.stringify(["Notion", "Jira", "React"]),
-        creatorId: users[8].id,
+        creatorId: users[45].id, // 기획자1
       },
     }),
   ]);
@@ -408,7 +499,7 @@ async function main() {
           minutesAgo: 75,
         },
         {
-          senderIndex: 5, // designer1
+          senderIndex: 30, // designer1
           content:
             "디자이너로 참여 가능할까요? Figma로 UI 디자인 먼저 진행하면 좋을 것 같아요.",
           sourceLang: "ko",
@@ -480,7 +571,7 @@ async function main() {
       projectIndex: 2,
       messages: [
         {
-          senderIndex: 5, // creator (디자이너1)
+          senderIndex: 30, // creator (디자이너1)
           content:
             "모바일 앱 디자인 프로젝트 시작합니다! Figma로 디자인 시스템부터 구축하려고 해요.",
           sourceLang: "ko",
@@ -490,7 +581,7 @@ async function main() {
           minutesAgo: 240,
         },
         {
-          senderIndex: 6, // designer2
+          senderIndex: 31, // designer2
           content:
             "기획자분도 있으시면 좋을 것 같아요. 사용자 플로우 설계도 필요할 것 같아서요.",
           sourceLang: "ko",
@@ -500,7 +591,7 @@ async function main() {
           minutesAgo: 210,
         },
         {
-          senderIndex: 8, // planner1
+          senderIndex: 45, // planner1
           content:
             "기획자로 참여할 수 있을까요? 사용자 스토리와 와이어프레임 먼저 정리하면 좋을 것 같아요.",
           sourceLang: "ko",
@@ -510,7 +601,7 @@ async function main() {
           minutesAgo: 180,
         },
         {
-          senderIndex: 5,
+          senderIndex: 30,
           content:
             "네, 좋아요! 와이어프레임이 나오면 디자인 작업도 수월할 것 같아요. 디자인 컨셉도 같이 논의해봐요.",
           sourceLang: "ko",
@@ -520,7 +611,7 @@ async function main() {
           minutesAgo: 150,
         },
         {
-          senderIndex: 7, // designer3
+          senderIndex: 32, // designer3
           content:
             "애니메이션과 인터랙션도 제가 담당할 수 있어요. After Effects로 프로토타입도 만들 수 있습니다.",
           sourceLang: "ko",
@@ -566,7 +657,7 @@ async function main() {
           minutesAgo: 60,
         },
         {
-          senderIndex: 5, // designer1
+          senderIndex: 30, // designer1
           content:
             "디자인 작업도 필요하면 언제든 말씀해주세요. UI 컴포넌트 디자인부터 시작하면 될 것 같아요.",
           sourceLang: "ko",
@@ -582,7 +673,7 @@ async function main() {
       projectIndex: 4,
       messages: [
         {
-          senderIndex: 8, // creator (기획자1)
+          senderIndex: 45, // creator (기획자1)
           content:
             "Notion과 Jira를 참고한 협업 도구를 만들려고 합니다. 기획과 개발 모두 필요해요!",
           sourceLang: "ko",
@@ -602,7 +693,7 @@ async function main() {
           minutesAgo: 270,
         },
         {
-          senderIndex: 8,
+          senderIndex: 45,
           content:
             "좋아요! 백엔드는 어떤 스택으로 할지 논의가 필요할 것 같아요. REST API와 실시간 알림 기능도 중요할 것 같아서요.",
           sourceLang: "ko",
@@ -612,7 +703,7 @@ async function main() {
           minutesAgo: 240,
         },
         {
-          senderIndex: 9, // planner2
+          senderIndex: 46, // planner2
           content:
             "기획서 초안 작성했어요. 칸반 보드, 태스크 관리, 댓글 기능을 중심으로 구성했는데 한번 봐주세요.",
           sourceLang: "ko",
@@ -622,7 +713,7 @@ async function main() {
           minutesAgo: 210,
         },
         {
-          senderIndex: 8,
+          senderIndex: 45,
           content:
             "네, 확인해볼게요! 사용자 인증과 권한 관리 부분도 추가로 논의해야 할 것 같아요.",
           sourceLang: "ko",
@@ -686,8 +777,11 @@ async function main() {
 
   console.log("🎉 Seed 스크립트 완료!");
   console.log("\n📝 테스트 계정:");
-  console.log("  - 이메일: dev1@example.com ~ planner2@example.com");
+  console.log("  - 이메일: dev1@example.com ~ planner10@example.com");
   console.log("  - 비밀번호: password123");
+  console.log(
+    `  - 총 ${users.length}명의 사용자 생성됨 (개발자 30명, 디자이너 15명, 기획자 10명)`
+  );
 }
 
 main()
