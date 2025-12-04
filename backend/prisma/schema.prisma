@@ -113,8 +113,8 @@ model ChatMessage {
   senderId          String   @map("sender_id")
   content           String
   sourceLang        String   @default("ko") @map("source_lang")
-  targetLang        String   @default("en") @map("target_lang")
-  translatedContent String?  @map("translated_content")
+  targetLang        String?  @map("target_lang") // 실시간 번역이므로 nullable (각 사용자별로 다름)
+  translatedContent String?  @map("translated_content") // 실시간 번역이므로 nullable (각 사용자별로 다름)
   createdAt         DateTime @default(now()) @map("created_at")
 
   room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)

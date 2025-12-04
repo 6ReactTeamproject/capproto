@@ -266,7 +266,7 @@ export default function GlobalChatWidget() {
                 return {
                   ...chat,
                   lastMessage: {
-                    content: message.content,
+                    content: message.translatedContent || message.content, // 번역된 내용 사용
                     createdAt: message.createdAt,
                   },
                   updatedAt: message.createdAt,

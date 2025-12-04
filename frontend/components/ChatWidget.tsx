@@ -22,8 +22,6 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [sourceLang, setSourceLang] = useState('ko');
-  const [targetLang, setTargetLang] = useState('en');
   const [loading, setLoading] = useState(true);
   const [chatTitle, setChatTitle] = useState<string>('채팅');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -102,12 +100,15 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
       });
 
       newSocket.on('new-message', (message: any) => {
+        console.log('새 메시지 수신:', message);
         setMessages((prev) => {
-          const exists = prev.some((msg) => msg.id === message.id);
+          // 임시 메시지가 있으면 제거하고 실제 메시지로 교체
+          const filtered = prev.filter((msg) => !msg.id?.startsWith('temp-'));
+          const exists = filtered.some((msg) => msg.id === message.id);
           if (exists) {
-            return prev;
+            return filtered;
           }
-          return [...prev, message];
+          return [...filtered, message];
         });
       });
 
@@ -168,13 +169,32 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
     const messageContent = newMessage.trim();
     setNewMessage('');
 
+    // Optimistic update: 메시지 전송 전에 로컬 상태에 임시 메시지 추가
+    const tempMessage = {
+      id: `temp-${Date.now()}`,
+      content: messageContent,
+      sender: {
+        id: user.id,
+        nickname: user.nickname,
+      },
+      createdAt: new Date().toISOString(),
+      translatedContent: messageContent, // 자신의 언어이므로 번역 불필요
+      sourceLang: 'ko', // 임시값, 서버에서 실제 값으로 교체됨
+      targetLang: 'ko',
+    };
+    setMessages((prev) => [...prev, tempMessage]);
+
     currentSocket.emit('send-message', {
       projectId: projectId || undefined,
       userId: userId || undefined,
       senderId: user.id,
       content: messageContent,
-      sourceLang,
-      targetLang,
+    }, (error: any) => {
+      if (error) {
+        console.error('메시지 전송 실패:', error);
+        // 에러 발생 시 임시 메시지 제거
+        setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
+      }
     });
   };
 
@@ -257,17 +277,9 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                       : 'bg-white text-gray-900'
                   }`}>
                     <div className={`text-sm ${isMyMessage ? 'text-white' : 'text-gray-900'}`}>
-                      {message.content}
+                      {/* 번역된 내용이 있으면 번역본 표시, 없으면 원문 표시 */}
+                      {message.translatedContent || message.content}
                     </div>
-                    {message.translatedContent && (
-                      <div className={`mt-2 pt-2 border-t ${
-                        isMyMessage 
-                          ? 'border-blue-400 text-blue-50' 
-                          : 'border-gray-100 text-gray-600'
-                      } text-xs`}>
-                        {message.translatedContent}
-                      </div>
-                    )}
                   </div>
                   <div className={`text-xs text-gray-400 mt-1 ${isMyMessage ? 'text-right' : 'text-left'}`}>
                     {new Date(message.createdAt).toLocaleTimeString('ko-KR', { 
@@ -280,31 +292,6 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
             })
           )}
           <div ref={messagesEndRef} />
-        </div>
-
-        {/* 언어 선택 */}
-        <div className="px-4 py-2 border-t border-gray-200 bg-white">
-          <div className="flex gap-2 items-center mb-2">
-            <select
-              value={sourceLang}
-              onChange={(e) => setSourceLang(e.target.value)}
-              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="ko">한국어</option>
-              <option value="en">English</option>
-              <option value="ja">日本語</option>
-            </select>
-            <span className="text-gray-400 text-sm">→</span>
-            <select
-              value={targetLang}
-              onChange={(e) => setTargetLang(e.target.value)}
-              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="ko">한국어</option>
-              <option value="en">English</option>
-              <option value="ja">日本語</option>
-            </select>
-          </div>
         </div>
 
         {/* 입력 영역 */}

@@ -4,188 +4,6 @@ import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-// 더미 번역 함수 - 한글을 영어로 번역 (더미)
-function translateDummyKoToEn(content: string): string {
-  // 실제 번역 API 대신 더미 번역 텍스트 생성
-  const translations: Record<string, string> = {
-    "안녕하세요!": "Hello!",
-    안녕하세요: "Hello",
-    네: "Yes",
-    좋아요: "Good",
-    좋습니다: "Great",
-    감사합니다: "Thank you",
-    프로젝트: "project",
-    프로젝트에: "to the project",
-    관심: "interest",
-    참여: "participate",
-    참여하고: "participate",
-    "참여하고 싶어요": "would like to participate",
-    "참여 가능할까요": "can I participate",
-    환영합니다: "Welcome",
-    경험이: "experience",
-    있어서: "have",
-    어떤: "what",
-    기능: "feature",
-    시작할: "start",
-    예정: "planning",
-    인가요: "is it",
-    인증: "authentication",
-    시스템: "system",
-    메인: "main",
-    대시보드: "dashboard",
-    구현: "implement",
-    하려고: "try to",
-    해요: "do",
-    TypeScript: "TypeScript",
-    타입: "type",
-    안정성: "stability",
-    챙기고요: "maintain",
-    디자이너로: "as a designer",
-    Figma: "Figma",
-    UI: "UI",
-    디자인: "design",
-    먼저: "first",
-    진행하면: "proceed",
-    개발도: "development also",
-    수월할: "easier",
-    "디자인 시스템": "design system",
-    정리하면: "organize",
-    좋겠습니다: "would be good",
-    질문: "question",
-    있으시면: "if you have",
-    물어보세요: "please ask",
-    NestJS: "NestJS",
-    Prisma: "Prisma",
-    백엔드: "backend",
-    API: "API",
-    서버: "server",
-    RESTful: "RESTful",
-    WebSocket: "WebSocket",
-    지원할: "support",
-    도메인: "domain",
-    시작하나요: "start with",
-    유저: "user",
-    관리: "management",
-    PostgreSQL: "PostgreSQL",
-    스키마: "schema",
-    설계: "design",
-    논의하면: "discuss",
-    좋을: "good",
-    "것 같아요": "I think",
-    알겠습니다: "I understand",
-    JWT: "JWT",
-    미들웨어: "middleware",
-    구성도: "composition",
-    고민해볼게요: "think about",
-    모바일: "mobile",
-    앱: "app",
-    시작합니다: "starting",
-    시스템부터: "from the system",
-    구축하려고: "build",
-    기획자분도: "planner too",
-    사용자: "user",
-    플로우: "flow",
-    설계도: "design",
-    필요할: "need",
-    "참여할 수": "can participate",
-    있을까요: "is it possible",
-    스토리: "story",
-    와이어프레임: "wireframe",
-    나오면: "comes out",
-    작업도: "work also",
-    컨셉: "concept",
-    애니메이션: "animation",
-    인터랙션: "interaction",
-    "담당할 수": "can handle",
-    "After Effects": "After Effects",
-    프로토타입: "prototype",
-    "만들 수": "can make",
-    있습니다: "have",
-    풀스택: "fullstack",
-    실시간: "real-time",
-    포함할: "include",
-    작업: "work",
-    "도와드릴 수": "can help",
-    "상태 관리": "state management",
-    라이브러리: "library",
-    일단: "first",
-    "Context API": "Context API",
-    필요하면: "if needed",
-    Redux: "Redux",
-    Zustand: "Zustand",
-    "전환할 수": "switch",
-    "스키마 설계도": "schema design",
-    "함께 해야 할": "need to do together",
-    언제든: "anytime",
-    말씀해주세요: "please tell me",
-    컴포넌트: "component",
-    참고한: "referenced",
-    협업: "collaboration",
-    도구: "tool",
-    만들려고: "trying to make",
-    기획과: "planning and",
-    "개발 모두": "development both",
-    필요해요: "need",
-    프론트엔드: "frontend",
-    개발자로: "as a developer",
-    사용한: "used",
-    스택으로: "stack",
-    할지: "what to do",
-    알림: "notification",
-    중요할: "important",
-    기획서: "plan document",
-    초안: "draft",
-    작성했어요: "wrote",
-    칸반: "kanban",
-    보드: "board",
-    태스크: "task",
-    댓글: "comment",
-    중심으로: "centered",
-    구성했는데: "composed",
-    봐주세요: "please look",
-    확인해볼게요: "will check",
-    권한: "permission",
-    추가로: "additionally",
-    "해야 할": "need to",
-  };
-
-  // 간단한 번역 (실제로는 더 복잡한 로직 필요)
-  let translated = content;
-
-  // 일반적인 문장 패턴 번역
-  if (translated.includes("안녕하세요")) {
-    translated = translated.replace(/안녕하세요/g, "Hello");
-  }
-  if (translated.includes("네")) {
-    translated = translated.replace(/네/g, "Yes");
-  }
-  if (translated.includes("좋습니다") || translated.includes("좋아요")) {
-    translated = translated
-      .replace(/좋습니다/g, "Good")
-      .replace(/좋아요/g, "Good");
-  }
-  if (translated.includes("감사합니다")) {
-    translated = translated.replace(/감사합니다/g, "Thank you");
-  }
-
-  // 더미 번역 - 실제 내용을 영어로 번역한 것처럼 보이도록
-  // 실제로는 의미 있는 번역이 아니지만, 영어로 된 텍스트 생성
-  return `Hello! Thank you for your interest in this project. ${content.substring(
-    0,
-    50
-  )}...`;
-}
-
-// 더미 번역 함수 - 일본어를 영어로 번역 (더미)
-function translateDummyJaToEn(content: string): string {
-  return `[Translation] ${content}`;
-}
-
-// 더미 번역 함수 - 영어를 한글로 번역 (더미)
-function translateDummyEnToKo(content: string): string {
-  return `[번역] ${content}`;
-}
-
 async function main() {
   console.log("🌱 Seed 스크립트 시작...");
 
@@ -205,72 +23,65 @@ async function main() {
   // 사용자 생성 (55명)
   const users: any[] = [];
 
-  // 개발자 닉네임 목록
-  const developerNicknames = [
-    "james123",
+  // 개발자 닉네임 목록 (국가별로 분리)
+  const developerNicknamesKR = [
     "민수",
+    "김코더",
+    "이개발",
+    "박클라우드",
+    "최백엔드",
+    "정모바일",
+    "홍게임",
+    "강보안",
+    "문개발",
+    "윤블록체인",
+  ];
+  const developerNicknamesUS = [
+    "james123",
     "sarah99",
-    "alex_kim",
+    "alex_dev",
     "coffee",
     "react_lover",
-    "kim_coder",
-    "night_coder",
-    "lee_dev",
-    "jin_fullstack",
-    "cloud_park",
-    "choi_backend",
-    "api_master",
-    "micro_kim",
-    "block_yoon",
-    "ai_dev",
-    "mobile_jung",
-    "game_hong",
-    "security_kang",
-    "moon",
     "david2024",
     "emily_dev",
     "mike_coder",
     "lisa_tech",
     "tom_dev",
-    "jessica123",
-    "ryan_code",
-    "amy_dev",
-    "chris_tech",
-    "kate_coder",
+  ];
+  const developerNicknamesJP = [
+    "たろう",
+    "さくら",
+    "けんじ",
+    "ゆき",
+    "ひろし",
+    "みき",
+    "だいすけ",
+    "あや",
+    "まさき",
+    "なつき",
   ];
 
-  // 디자이너 닉네임 목록
-  const designerNicknames = [
-    "지영",
-    "서연",
-    "수진",
-    "영희",
-    "미나",
-    "하늘",
-    "별",
-    "river",
-    "ocean",
-    "star",
-    "luna",
-    "snow",
-    "rain",
-    "wind",
-    "sky",
+  // 디자이너 닉네임 목록 (국가별로 분리)
+  const designerNicknamesKR = ["지영", "서연", "수진", "영희", "미나"];
+  const designerNicknamesUS = [
+    "emily_design",
+    "sophia_ui",
+    "olivia_ux",
+    "ava_creative",
+    "isabella_art",
   ];
+  const designerNicknamesJP = ["みゆき", "あかり", "みお", "ゆい", "りん"];
 
-  // 기획자 닉네임 목록
-  const plannerNicknames = [
-    "현우",
-    "준호",
+  // 기획자 닉네임 목록 (국가별로 분리)
+  const plannerNicknamesKR = ["현우", "준호", "민준", "태현", "준영"];
+  const plannerNicknamesUS = [
     "sarah_planner",
     "alex_manager",
-    "민준",
     "james_pm",
-    "태현",
     "emily_strategy",
-    "준영",
     "mike_planner",
   ];
+  const plannerNicknamesJP = ["たかし", "ゆうき", "あきら", "まさと", "ひろき"];
 
   // 개발자 스택 목록
   const developerStacks = [
@@ -339,68 +150,107 @@ async function main() {
     ["Notion", "Miro", "Whimsical"],
   ];
 
-  // 개발자 30명 생성
+  // 개발자 30명 생성 (국가별로 닉네임 배정)
   for (let i = 1; i <= 30; i++) {
     const stacks = developerStacks[(i - 1) % developerStacks.length];
-    const nickname = developerNicknames[(i - 1) % developerNicknames.length];
     // 국가 할당 (30명 개발자를 3개 국가에 분배: KR 10, US 10, JP 10)
     const countries = ["KR", "US", "JP"];
-    const country = countries[i % 3];
-    
+    const country = countries[(i - 1) % 3];
+
+    // 국가에 맞는 닉네임 선택
+    let nickname: string;
+    if (country === "KR") {
+      // KR: i=1,4,7,10,13,16,19,22,25,28 -> index 0,1,2,3,4,5,6,7,8,9
+      const index = Math.floor((i - 1) / 3) % developerNicknamesKR.length;
+      nickname = developerNicknamesKR[index];
+    } else if (country === "US") {
+      // US: i=2,5,8,11,14,17,20,23,26,29 -> index 0,1,2,3,4,5,6,7,8,9
+      const index = Math.floor((i - 1) / 3) % developerNicknamesUS.length;
+      nickname = developerNicknamesUS[index];
+    } else {
+      // JP: i=3,6,9,12,15,18,21,24,27,30 -> index 0,1,2,3,4,5,6,7,8,9
+      const index = Math.floor((i - 1) / 3) % developerNicknamesJP.length;
+      nickname = developerNicknamesJP[index];
+    }
+
     users.push(
       await prisma.user.create({
-      data: {
+        data: {
           email: `dev${i}@example.com`,
-        passwordHash,
+          passwordHash,
           nickname: nickname,
-        role: UserRole.DEVELOPER,
+          role: UserRole.DEVELOPER,
           techStacks: JSON.stringify(stacks),
           country: country,
-      },
+        } as any,
       })
     );
   }
 
-  // 디자이너 15명 생성
+  // 디자이너 15명 생성 (국가별로 닉네임 배정)
   for (let i = 1; i <= 15; i++) {
     const stacks = designerStacks[(i - 1) % designerStacks.length];
-    const nickname = designerNicknames[(i - 1) % designerNicknames.length];
     // 국가 할당 (15명 디자이너를 3개 국가에 분배: KR 5, US 5, JP 5)
     const countries = ["KR", "US", "JP"];
-    const country = countries[i % 3];
-    
+    const country = countries[(i - 1) % 3];
+
+    // 국가에 맞는 닉네임 선택
+    let nickname: string;
+    if (country === "KR") {
+      const index = (i - 1) % designerNicknamesKR.length;
+      nickname = designerNicknamesKR[index];
+    } else if (country === "US") {
+      const index = (i - 1) % designerNicknamesUS.length;
+      nickname = designerNicknamesUS[index];
+    } else {
+      const index = (i - 1) % designerNicknamesJP.length;
+      nickname = designerNicknamesJP[index];
+    }
+
     users.push(
       await prisma.user.create({
-      data: {
+        data: {
           email: `designer${i}@example.com`,
-        passwordHash,
+          passwordHash,
           nickname: nickname,
-        role: UserRole.DESIGNER,
+          role: UserRole.DESIGNER,
           techStacks: JSON.stringify(stacks),
           country: country,
-      },
+        } as any,
       })
     );
   }
 
-  // 기획자 10명 생성
+  // 기획자 10명 생성 (국가별로 닉네임 배정)
   for (let i = 1; i <= 10; i++) {
     const stacks = plannerStacks[(i - 1) % plannerStacks.length];
-    const nickname = plannerNicknames[(i - 1) % plannerNicknames.length];
     // 국가 할당 (10명 기획자를 3개 국가에 분배: KR 4, US 3, JP 3)
     const countries = ["KR", "US", "JP"];
-    const country = countries[i % 3];
-    
+    const country = countries[(i - 1) % 3];
+
+    // 국가에 맞는 닉네임 선택
+    let nickname: string;
+    if (country === "KR") {
+      const index = (i - 1) % plannerNicknamesKR.length;
+      nickname = plannerNicknamesKR[index];
+    } else if (country === "US") {
+      const index = (i - 1) % plannerNicknamesUS.length;
+      nickname = plannerNicknamesUS[index];
+    } else {
+      const index = (i - 1) % plannerNicknamesJP.length;
+      nickname = plannerNicknamesJP[index];
+    }
+
     users.push(
       await prisma.user.create({
-      data: {
+        data: {
           email: `planner${i}@example.com`,
-        passwordHash,
+          passwordHash,
           nickname: nickname,
-        role: UserRole.PLANNER,
+          role: UserRole.PLANNER,
           techStacks: JSON.stringify(stacks),
           country: country,
-      },
+        } as any,
       })
     );
   }
@@ -420,7 +270,7 @@ async function main() {
         endDate: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000), // 3개월 후 종료
         isRecruiting: false, // 모집 종료
         creatorId: users[0].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -432,7 +282,7 @@ async function main() {
         endDate: new Date(now.getTime() + 75 * 24 * 60 * 60 * 1000), // 약 2.5개월 후 종료
         isRecruiting: false, // 모집 종료
         creatorId: users[1].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -444,7 +294,7 @@ async function main() {
         endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000), // 2개월 후 종료
         isRecruiting: false, // 모집 종료
         creatorId: users[30].id, // 디자이너1
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -455,7 +305,7 @@ async function main() {
         startDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000), // 10일 후 시작
         endDate: new Date(now.getTime() + 120 * 24 * 60 * 60 * 1000), // 4개월 후 종료
         creatorId: users[2].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -466,18 +316,19 @@ async function main() {
         startDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), // 5일 후 시작
         endDate: new Date(now.getTime() + 100 * 24 * 60 * 60 * 1000), // 약 3.3개월 후 종료
         creatorId: users[45].id, // 기획자1
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "Vue.js 기반 대시보드",
-        shortDescription: "Vue 3와 Composition API를 활용한 관리자 대시보드 개발",
+        shortDescription:
+          "Vue 3와 Composition API를 활용한 관리자 대시보드 개발",
         neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER"]),
         requiredStacks: JSON.stringify(["Vue.js", "TypeScript", "Pinia"]),
         startDate: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 80 * 24 * 60 * 60 * 1000),
         creatorId: users[3].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -488,7 +339,7 @@ async function main() {
         startDate: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 70 * 24 * 60 * 60 * 1000),
         creatorId: users[4].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -499,7 +350,7 @@ async function main() {
         startDate: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 65 * 24 * 60 * 60 * 1000),
         creatorId: users[31].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -510,29 +361,34 @@ async function main() {
         startDate: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 85 * 24 * 60 * 60 * 1000),
         creatorId: users[5].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "모바일 게임 UI 디자인",
         shortDescription: "모바일 게임을 위한 인터페이스 및 캐릭터 디자인",
         neededRoles: JSON.stringify(["DESIGNER"]),
-        requiredStacks: JSON.stringify(["Figma", "Illustrator", "After Effects"]),
+        requiredStacks: JSON.stringify([
+          "Figma",
+          "Illustrator",
+          "After Effects",
+        ]),
         startDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 55 * 24 * 60 * 60 * 1000),
         creatorId: users[32].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "마이크로서비스 아키텍처 구축",
-        shortDescription: "Docker와 Kubernetes를 활용한 마이크로서비스 시스템 개발",
+        shortDescription:
+          "Docker와 Kubernetes를 활용한 마이크로서비스 시스템 개발",
         neededRoles: JSON.stringify(["DEVELOPER"]),
         requiredStacks: JSON.stringify(["Docker", "Kubernetes", "Go", "gRPC"]),
         startDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 150 * 24 * 60 * 60 * 1000),
         creatorId: users[6].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -543,18 +399,22 @@ async function main() {
         startDate: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 50 * 24 * 60 * 60 * 1000),
         creatorId: users[46].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "React Native 모바일 앱",
         shortDescription: "크로스 플랫폼 모바일 애플리케이션 개발",
         neededRoles: JSON.stringify(["DEVELOPER", "DESIGNER"]),
-        requiredStacks: JSON.stringify(["React Native", "TypeScript", "Firebase"]),
+        requiredStacks: JSON.stringify([
+          "React Native",
+          "TypeScript",
+          "Firebase",
+        ]),
         startDate: new Date(now.getTime() + 9 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 110 * 24 * 60 * 60 * 1000),
         creatorId: users[7].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -565,7 +425,7 @@ async function main() {
         startDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 130 * 24 * 60 * 60 * 1000),
         creatorId: users[8].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -576,51 +436,67 @@ async function main() {
         startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000),
         creatorId: users[33].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "GraphQL API 서버",
         shortDescription: "Apollo Server를 활용한 GraphQL 백엔드 개발",
         neededRoles: JSON.stringify(["DEVELOPER"]),
-        requiredStacks: JSON.stringify(["GraphQL", "Apollo", "Node.js", "MongoDB"]),
+        requiredStacks: JSON.stringify([
+          "GraphQL",
+          "Apollo",
+          "Node.js",
+          "MongoDB",
+        ]),
         startDate: new Date(now.getTime() + 11 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 95 * 24 * 60 * 60 * 1000),
         creatorId: users[9].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "웹 애니메이션 프로젝트",
-        shortDescription: "Framer Motion과 Lottie를 활용한 인터랙티브 웹 애니메이션",
+        shortDescription:
+          "Framer Motion과 Lottie를 활용한 인터랙티브 웹 애니메이션",
         neededRoles: JSON.stringify(["DESIGNER", "DEVELOPER"]),
         requiredStacks: JSON.stringify(["Framer", "Lottie", "React"]),
         startDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),
         creatorId: users[34].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "블록체인 기반 NFT 마켓플레이스",
         shortDescription: "Web3 기술을 활용한 NFT 거래 플랫폼 개발",
         neededRoles: JSON.stringify(["DEVELOPER"]),
-        requiredStacks: JSON.stringify(["Solidity", "Web3", "React", "Ethereum"]),
+        requiredStacks: JSON.stringify([
+          "Solidity",
+          "Web3",
+          "React",
+          "Ethereum",
+        ]),
         startDate: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 140 * 24 * 60 * 60 * 1000),
         creatorId: users[10].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
         title: "사용자 리서치 및 UX 개선",
         shortDescription: "기존 서비스의 사용자 경험 분석 및 개선안 제시",
         neededRoles: JSON.stringify(["PLANNER", "DESIGNER"]),
-        requiredStacks: JSON.stringify(["Notion", "Figma", "Miro", "UserTesting"]),
+        requiredStacks: JSON.stringify([
+          "Notion",
+          "Figma",
+          "Miro",
+          "UserTesting",
+        ]),
         startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 70 * 24 * 60 * 60 * 1000),
         creatorId: users[47].id,
-      },
+      } as any,
     }),
     prisma.project.create({
       data: {
@@ -631,7 +507,7 @@ async function main() {
         startDate: new Date(now.getTime() + 13 * 24 * 60 * 60 * 1000),
         endDate: new Date(now.getTime() + 105 * 24 * 60 * 60 * 1000),
         creatorId: users[11].id,
-      },
+      } as any,
     }),
   ]);
 
@@ -657,60 +533,47 @@ async function main() {
   console.log("✅ 참여 신청 생성 완료");
 
   // 채팅방 및 메시지 생성 (더 현실적인 대화로 구성)
+  // 보낸 사람의 국가에 맞게 메시지 언어 설정 (KR→ko, US→en, JP→ja)
   const chatConversations = [
     // 프로젝트 0: React 기반 웹 애플리케이션
     {
       projectIndex: 0,
       messages: [
         {
-          senderIndex: 0, // creator (개발자1)
+          senderIndex: 1, // creator (개발자2, US) - users[1] = dev2 = US
           content:
-            "안녕하세요! 이 프로젝트에 관심 가져주셔서 감사합니다. React와 Next.js로 모던한 웹 앱을 만들어보고 싶습니다.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Hello! Thank you for your interest in this project. I'd like to create a modern web app using React and Next.js.",
+            "Hello! Thank you for your interest in this project. I'd like to create a modern web app using React and Next.js.",
           minutesAgo: 120,
         },
         {
-          senderIndex: 2, // dev3 (참여 신청자)
+          senderIndex: 0, // dev1 (참여 신청자, KR) - users[0] = dev1 = KR
           content:
             "안녕하세요! React와 Node.js를 사용해본 경험이 있어서 참여하고 싶어요. 어떤 기능부터 시작할 예정인가요?",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Hello! I have experience with React and Node.js, so I'd like to participate. What features are you planning to start with?",
           minutesAgo: 90,
         },
         {
-          senderIndex: 0,
+          senderIndex: 1, // US
           content:
-            "좋습니다! 일단 인증 시스템과 메인 대시보드를 먼저 구현하려고 해요. TypeScript로 타입 안정성도 챙기고요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Great! I'm planning to implement the authentication system and main dashboard first. I'll also ensure type safety with TypeScript.",
+            "Great! I'm planning to implement the authentication system and main dashboard first. I'll also ensure type safety with TypeScript.",
           minutesAgo: 75,
         },
         {
-          senderIndex: 30, // designer1
+          senderIndex: 30, // designer1 (KR) - users[30] = designer1 = KR
           content:
             "디자이너로 참여 가능할까요? Figma로 UI 디자인 먼저 진행하면 좋을 것 같아요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Can I participate as a designer? I think it would be good to proceed with UI design in Figma first.",
           minutesAgo: 60,
         },
         {
-          senderIndex: 0,
+          senderIndex: 1, // US
           content:
-            "네, 환영합니다! 디자인이 먼저 나오면 개발도 수월할 것 같아요. 디자인 시스템도 같이 정리하면 좋겠습니다.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Yes, welcome! If the design comes out first, development will be easier. It would be good to organize the design system together as well.",
+            "Yes, welcome! If the design comes out first, development will be easier. It would be good to organize the design system together as well.",
           minutesAgo: 45,
+        },
+        {
+          senderIndex: 2, // dev3 (JP) - users[2] = dev3 = JP
+          content:
+            "こんにちは！ReactとTypeScriptの経験があります。フロントエンド開発に参加できますか？",
+          minutesAgo: 30,
         },
       ],
     },
@@ -719,44 +582,34 @@ async function main() {
       projectIndex: 1,
       messages: [
         {
-          senderIndex: 1, // creator (개발자2)
+          senderIndex: 2, // creator (개발자3, JP) - users[2] = dev3 = JP
           content:
-            "NestJS와 Prisma를 활용한 백엔드 API 서버 프로젝트입니다. RESTful API와 WebSocket을 모두 지원할 예정이에요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] This is a backend API server project using NestJS and Prisma. We plan to support both RESTful API and WebSocket.",
+            "NestJSとPrismaを使ったバックエンドAPIサーバーのプロジェクトです。RESTful APIとWebSocketの両方をサポートする予定です。",
           minutesAgo: 180,
         },
         {
-          senderIndex: 4, // dev5 (참여 신청자)
+          senderIndex: 4, // dev5 (참여 신청자, US) - users[4] = dev5 = US (i=5, (5-1)%3=1)
           content:
-            "Prisma 경험이 있어서 참여하고 싶습니다! 어떤 도메인으로 시작하나요?",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] I have experience with Prisma and would like to participate! What domain should we start with?",
+            "I have experience with Prisma and would like to participate! What domain should we start with?",
           minutesAgo: 150,
         },
         {
-          senderIndex: 1,
+          senderIndex: 2, // JP
           content:
-            "유저 인증과 프로젝트 관리 API부터 시작할 예정입니다. PostgreSQL 스키마 설계도 같이 논의하면 좋을 것 같아요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] We plan to start with user authentication and project management APIs. It would be good to discuss the PostgreSQL schema design together as well.",
+            "ユーザー認証とプロジェクト管理APIから始める予定です。PostgreSQLスキーマの設計も一緒に議論できればと思います。",
           minutesAgo: 120,
         },
         {
-          senderIndex: 4,
+          senderIndex: 4, // US
           content:
-            "알겠습니다. JWT 인증 구조와 미들웨어 구성도 같이 고민해볼게요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Understood. I'll also think about the JWT authentication structure and middleware configuration together.",
+            "Understood. I'll also think about the JWT authentication structure and middleware configuration together.",
           minutesAgo: 90,
+        },
+        {
+          senderIndex: 0, // dev1 (KR) - users[0] = dev1 = KR
+          content:
+            "NestJS에 관심이 많아서 참여하고 싶습니다. 백엔드 개발 경험이 있습니다.",
+          minutesAgo: 60,
         },
       ],
     },
@@ -765,54 +618,40 @@ async function main() {
       projectIndex: 2,
       messages: [
         {
-          senderIndex: 30, // creator (디자이너1)
+          senderIndex: 30, // creator (디자이너1, KR)
           content:
             "모바일 앱 디자인 프로젝트 시작합니다! Figma로 디자인 시스템부터 구축하려고 해요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Starting the mobile app design project! I'm planning to build the design system first using Figma.",
           minutesAgo: 240,
         },
         {
-          senderIndex: 31, // designer2
+          senderIndex: 31, // designer2 (US)
           content:
-            "기획자분도 있으시면 좋을 것 같아요. 사용자 플로우 설계도 필요할 것 같아서요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] It would be good to have a planner as well. I think we'll need to design the user flow too.",
+            "It would be good to have a planner as well. I think we'll need to design the user flow too.",
           minutesAgo: 210,
         },
         {
-          senderIndex: 45, // planner1
+          senderIndex: 45, // planner1 (KR)
           content:
             "기획자로 참여할 수 있을까요? 사용자 스토리와 와이어프레임 먼저 정리하면 좋을 것 같아요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Can I participate as a planner? I think it would be good to organize user stories and wireframes first.",
           minutesAgo: 180,
         },
         {
-          senderIndex: 30,
+          senderIndex: 30, // KR
           content:
             "네, 좋아요! 와이어프레임이 나오면 디자인 작업도 수월할 것 같아요. 디자인 컨셉도 같이 논의해봐요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Yes, good! Once the wireframes are ready, the design work should be easier. Let's also discuss the design concept together.",
           minutesAgo: 150,
         },
         {
-          senderIndex: 32, // designer3
+          senderIndex: 32, // designer3 (JP)
           content:
-            "애니메이션과 인터랙션도 제가 담당할 수 있어요. After Effects로 프로토타입도 만들 수 있습니다.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] I can also handle animations and interactions. I can create prototypes using After Effects as well.",
+            "アニメーションとインタラクションも担当できます。After Effectsでプロトタイプも作成できます。",
           minutesAgo: 120,
+        },
+        {
+          senderIndex: 30, // KR
+          content:
+            "좋습니다! 애니메이션 작업도 함께 진행하면 더 완성도 높은 결과물이 나올 것 같아요.",
+          minutesAgo: 90,
         },
       ],
     },
@@ -821,44 +660,34 @@ async function main() {
       projectIndex: 3,
       messages: [
         {
-          senderIndex: 2, // creator (개발자3)
+          senderIndex: 0, // creator (개발자1, KR) - users[0] = dev1 = KR
           content:
             "React + Node.js + MongoDB 스택으로 풀스택 프로젝트 진행합니다. 실시간 기능도 포함할 예정이에요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] We're proceeding with a full-stack project using React + Node.js + MongoDB stack. We plan to include real-time features as well.",
           minutesAgo: 100,
         },
         {
-          senderIndex: 0, // dev1
+          senderIndex: 1, // dev2 (US) - users[1] = dev2 = US
           content:
-            "React 쪽 프론트엔드 작업 도와드릴 수 있어요. 상태 관리 라이브러리는 어떤 걸 사용할까요?",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] I can help with the React frontend work. What state management library should we use?",
+            "I can help with the React frontend work. What state management library should we use?",
           minutesAgo: 80,
         },
         {
-          senderIndex: 2,
+          senderIndex: 0, // KR
           content:
             "일단 Context API로 시작하고, 필요하면 Redux나 Zustand로 전환할 수 있어요. MongoDB 스키마 설계도 같이 해야 할 것 같아요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Let's start with Context API first, and we can switch to Redux or Zustand if needed. We'll also need to design the MongoDB schema together.",
           minutesAgo: 60,
         },
         {
-          senderIndex: 30, // designer1
+          senderIndex: 30, // designer1 (KR) - users[30] = designer1 = KR
           content:
             "디자인 작업도 필요하면 언제든 말씀해주세요. UI 컴포넌트 디자인부터 시작하면 될 것 같아요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] If design work is needed, please let me know anytime. I think we can start with UI component design.",
           minutesAgo: 40,
+        },
+        {
+          senderIndex: 2, // dev3 (JP) - users[2] = dev3 = JP
+          content:
+            "バックエンド開発も手伝えます。Node.jsとMongoDBの経験があります。",
+          minutesAgo: 20,
         },
       ],
     },
@@ -867,54 +696,40 @@ async function main() {
       projectIndex: 4,
       messages: [
         {
-          senderIndex: 45, // creator (기획자1)
+          senderIndex: 45, // creator (기획자1, KR)
           content:
             "Notion과 Jira를 참고한 협업 도구를 만들려고 합니다. 기획과 개발 모두 필요해요!",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] We're planning to create a collaboration tool inspired by Notion and Jira. We need both planning and development!",
           minutesAgo: 300,
         },
         {
-          senderIndex: 3, // dev4
+          senderIndex: 3, // dev4 (US)
           content:
-            "프론트엔드 개발자로 참여 가능합니다. Vue.js와 Spring을 사용한 경험이 있어요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] I can participate as a frontend developer. I have experience using Vue.js and Spring.",
+            "I can participate as a frontend developer. I have experience using Vue.js and Spring.",
           minutesAgo: 270,
         },
         {
-          senderIndex: 45,
+          senderIndex: 45, // KR
           content:
             "좋아요! 백엔드는 어떤 스택으로 할지 논의가 필요할 것 같아요. REST API와 실시간 알림 기능도 중요할 것 같아서요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Good! I think we need to discuss which stack to use for the backend. REST API and real-time notification features also seem important.",
           minutesAgo: 240,
         },
         {
-          senderIndex: 46, // planner2
+          senderIndex: 46, // planner2 (US)
           content:
-            "기획서 초안 작성했어요. 칸반 보드, 태스크 관리, 댓글 기능을 중심으로 구성했는데 한번 봐주세요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] I've written the initial plan document. I've structured it around kanban board, task management, and comment features. Please take a look.",
+            "I've written the initial plan document. I've structured it around kanban board, task management, and comment features. Please take a look.",
           minutesAgo: 210,
         },
         {
-          senderIndex: 45,
+          senderIndex: 45, // KR
           content:
             "네, 확인해볼게요! 사용자 인증과 권한 관리 부분도 추가로 논의해야 할 것 같아요.",
-          sourceLang: "ko",
-          targetLang: "en",
-          translatedContent:
-            "[번역:en] Yes, I'll check it out! I think we also need to discuss user authentication and permission management separately.",
           minutesAgo: 180,
+        },
+        {
+          senderIndex: 47, // planner3 (JP)
+          content:
+            "ユーザーストーリーと要件定義も作成しました。確認していただけますか？",
+          minutesAgo: 150,
         },
       ],
     },
@@ -936,21 +751,20 @@ async function main() {
     for (const msg of sortedMessages) {
       const now = new Date();
       const createdAt = new Date(now.getTime() - msg.minutesAgo * 60 * 1000);
-      const senderId = users[msg.senderIndex].id;
+      const sender = users[msg.senderIndex];
+      const senderId = sender.id;
 
-      // 번역된 내용이 이미 제공되었는지 확인, 없으면 더미 번역 생성
-      let translatedContent = msg.translatedContent;
-      if (!translatedContent) {
-        // 더미 번역 생성 (한글 → 영어)
-        if (msg.sourceLang === "ko" && msg.targetLang === "en") {
-          translatedContent = translateDummyKoToEn(msg.content);
-        } else if (msg.sourceLang === "ja" && msg.targetLang === "en") {
-          translatedContent = translateDummyJaToEn(msg.content);
-        } else if (msg.sourceLang === "en" && msg.targetLang === "ko") {
-          translatedContent = translateDummyEnToKo(msg.content);
-        } else {
-          translatedContent = `[번역:${msg.targetLang}] ${msg.content}`;
-        }
+      // 보낸 사람의 국가에 따라 sourceLang 자동 결정
+      // 채팅 서비스의 translateMessageForUser가 실시간으로 번역하므로,
+      // seed에서는 원문과 sourceLang만 저장하고 targetLang/translatedContent는 null로 설정
+      let sourceLang = "en"; // 기본값
+      if (sender.country) {
+        const countryLangMap: Record<string, string> = {
+          KR: "ko",
+          US: "en",
+          JP: "ja",
+        };
+        sourceLang = countryLangMap[sender.country] || "en";
       }
 
       await prisma.chatMessage.create({
@@ -958,11 +772,11 @@ async function main() {
           roomId: chatRoom.id,
           senderId,
           content: msg.content,
-          sourceLang: msg.sourceLang,
-          targetLang: msg.targetLang,
-          translatedContent,
+          sourceLang,
+          targetLang: null, // 실시간 번역 시스템이 각 사용자별로 동적으로 생성
+          translatedContent: null, // 실시간 번역 시스템이 각 사용자별로 동적으로 생성
           createdAt,
-        },
+        } as any, // Prisma 타입 오류 방지
       });
     }
   }

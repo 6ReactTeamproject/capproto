@@ -183,25 +183,25 @@ export default function ProjectDetailPage() {
               </button>
             )}
           </div>
-        </div>
+      </div>
 
         {/* 프로젝트 정보 */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">프로젝트 정보</h2>
-            {isCreator && (
-              <Link
-                href={`/projects/${projectId}/manage`}
+          {isCreator && (
+            <Link
+              href={`/projects/${projectId}/manage`}
                 className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
-              >
-                프로젝트 관리
-              </Link>
-            )}
-          </div>
+            >
+              프로젝트 관리
+            </Link>
+          )}
+        </div>
           <div className="space-y-4">
-            <div>
+          <div>
               <span className="font-semibold text-gray-700">생성자:</span>{' '}
-              {project.creator?.id ? (
+            {project.creator?.id ? (
                 <UserDropdown
                   userId={project.creator.id}
                   nickname={project.creator.nickname}
@@ -210,10 +210,10 @@ export default function ProjectDetailPage() {
                     window.dispatchEvent(new CustomEvent('open-direct-chat', { detail: { userId } }));
                   }}
                 />
-              ) : (
+            ) : (
                 <span className="text-gray-600">{project.creator?.nickname || 'N/A'}</span>
-              )}
-            </div>
+            )}
+          </div>
             <div>
               <span className="font-semibold text-gray-700">필요 역할:</span>{' '}
               <span className="text-gray-600">
@@ -232,11 +232,11 @@ export default function ProjectDetailPage() {
               <span className="font-semibold text-gray-700">프로젝트 기간:</span>{' '}
               <span className="text-gray-600">{dateRange}</span>
             </div>
-          </div>
         </div>
+      </div>
 
         {/* 참여 신청 */}
-        {!isCreator && (
+      {!isCreator && (
           <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">참여 신청</h2>
             {project.isRecruiting === false ? (
@@ -247,26 +247,26 @@ export default function ProjectDetailPage() {
               <div className="px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-semibold">
                 참여 신청이 완료되었습니다!
               </div>
-            ) : (
+          ) : (
               <div className="space-y-4">
-                <textarea
-                  value={applicationMessage}
-                  onChange={(e) => setApplicationMessage(e.target.value)}
-                  placeholder="자기 PR을 입력하세요 (선택사항)"
+              <textarea
+                value={applicationMessage}
+                onChange={(e) => setApplicationMessage(e.target.value)}
+                placeholder="자기 PR을 입력하세요 (선택사항)"
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
-                <button
-                  onClick={handleApply}
-                  disabled={applying || !user}
+              />
+              <button
+                onClick={handleApply}
+                disabled={applying || !user}
                   className="w-full px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
-                >
-                  {!user ? '로그인 필요' : applying ? '신청 중...' : '참여 신청하기'}
-                </button>
+              >
+                {!user ? '로그인 필요' : applying ? '신청 중...' : '참여 신청하기'}
+              </button>
               </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
         {/* 채팅 버튼 (참여자만 표시) */}
         {canAccessChat && (
@@ -280,23 +280,23 @@ export default function ProjectDetailPage() {
               </svg>
               채팅방 열기
             </button>
-          </div>
+      </div>
         )}
 
 
         {/* 추천 팀원 */}
-        {isCreator && (
+      {isCreator && (
           <div className="bg-white rounded-2xl shadow-sm p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">추천 팀원</h2>
-            {recommendations.length === 0 ? (
+          {recommendations.length === 0 ? (
               <div className="text-gray-500 text-center py-8">추천할 팀원이 없습니다.</div>
-            ) : (
+          ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recommendations.map((recommendedUser) => (
-                  <div
-                    key={recommendedUser.userId}
+              {recommendations.map((recommendedUser) => (
+                <div
+                  key={recommendedUser.userId}
                     className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
-                  >
+                >
                     <div className="font-bold text-lg text-gray-900 mb-2">
                       <UserDropdown
                         userId={recommendedUser.userId}
@@ -307,41 +307,41 @@ export default function ProjectDetailPage() {
                       />
                     </div>
                     <div className="text-gray-600 text-sm mb-2">
-                      역할: {
-                        recommendedUser.role === 'DEVELOPER' ? '개발자' :
-                        recommendedUser.role === 'DESIGNER' ? '디자이너' :
-                        recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
-                      }
-                    </div>
+                    역할: {
+                      recommendedUser.role === 'DEVELOPER' ? '개발자' :
+                      recommendedUser.role === 'DESIGNER' ? '디자이너' :
+                      recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
+                    }
+                  </div>
                     <div className="text-sm text-gray-600 mb-4">
                       <span className="font-semibold">기술 스택:</span>{' '}
-                      {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
-                        ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
-                        : '없음'}
-                    </div>
+                    {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
+                      ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
+                      : '없음'}
+                  </div>
                     <div className={`mb-4 p-4 rounded-xl text-center ${
                       recommendedUser.score >= 70 ? 'bg-emerald-50' : 
                       recommendedUser.score >= 50 ? 'bg-yellow-50' : 'bg-red-50'
                     }`}>
                       <div className="text-3xl font-bold text-blue-600">
-                        {recommendedUser.score}점
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">
-                        매칭률
-                      </div>
+                      {recommendedUser.score}점
                     </div>
-                    <button
-                      onClick={() => handleInvite(recommendedUser.userId)}
-                      disabled={invitingUsers.has(recommendedUser.userId)}
-                      className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
-                    >
-                      {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
-                    </button>
+                      <div className="text-xs text-gray-600 mt-1">
+                      매칭률
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <button
+                    onClick={() => handleInvite(recommendedUser.userId)}
+                    disabled={invitingUsers.has(recommendedUser.userId)}
+                      className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                  >
+                    {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         )}
       </div>
 

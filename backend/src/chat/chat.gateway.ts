@@ -103,6 +103,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                   select: {
                     id: true,
                     nickname: true,
+                    country: true,
                   },
                 },
               },
@@ -113,6 +114,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (!chatRoom) {
           throw new Error('채팅방을 찾을 수 없습니다.');
         }
+        // 현재 사용자의 언어로 메시지 번역
+        const translatedMessages = await Promise.all(
+          chatRoom.messages.map((msg) => this.chatService.translateMessageForUser(msg, data.currentUserId))
+        );
+        chatRoom = {
+          ...chatRoom,
+          messages: translatedMessages,
+        };
       } else {
         throw new Error('projectId, userId, 또는 roomId가 필요합니다.');
       }
@@ -120,7 +129,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(`room-${chatRoom.id}`);
     console.log(`클라이언트 ${client.id}가 방 ${chatRoom.id}에 입장했습니다.`);
 
-    // 기존 메시지 목록 전송
+    // 기존 메시지 목록 전송 (이미 번역됨)
     client.emit('messages', chatRoom.messages);
     } catch (error: any) {
       client.emit('error', { message: error.message || '채팅방 접근 권한이 없습니다.' });
@@ -138,11 +147,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       roomId?: string;
       senderId: string;
       content: string;
-      sourceLang: string;
-      targetLang: string;
     },
   ) {
     try {
+      console.log('메시지 전송 요청:', { projectId: data.projectId, userId: data.userId, senderId: data.senderId, content: data.content });
       let chatRoom;
       
       if (data.projectId) {
@@ -163,39 +171,104 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new Error('projectId, userId, 또는 roomId가 필요합니다.');
       }
 
-    // 메시지 저장
+      // 메시지 저장 (보낸 사람의 국가 언어로 자동 결정)
     const message = await this.chatService.createMessage(
       chatRoom.id,
       data.senderId,
       data.content,
-      data.sourceLang,
-      data.targetLang,
-    );
+      );
 
-    // 같은 방의 모든 클라이언트에 브로드캐스트
-    const messageData: any = { ...message };
-    if (data.projectId) {
-      messageData.projectId = data.projectId;
-    } else if (data.userId) {
-      messageData.userId = data.userId;
-    }
-    
-    // 채팅방에 입장한 클라이언트들에게 브로드캐스트
-    this.server.to(`room-${chatRoom.id}`).emit('new-message', messageData);
-    
-    // 개인 채팅의 경우, 상대방이 채팅방에 입장하지 않았더라도 직접 메시지 전송
-    if (data.userId && chatRoom.userId1 && chatRoom.userId2) {
-      const recipientId = chatRoom.userId1 === data.senderId ? chatRoom.userId2 : chatRoom.userId1;
-      const recipientSockets = this.userSocketMap.get(recipientId);
-      if (recipientSockets) {
-        // 상대방에게 전송할 때는 senderId를 userId로 설정 (상대방 입장에서 보낸 사람의 ID)
-        const recipientMessageData = { ...messageData };
-        recipientMessageData.userId = data.senderId; // 상대방 입장에서 보낸 사람의 ID
-        recipientSockets.forEach((socketId) => {
-          this.server.to(socketId).emit('new-message', recipientMessageData);
+      // 프로젝트 채팅방의 경우: 프로젝트 참여자들에게 각자의 언어로 번역하여 전송
+      if (data.projectId) {
+        // 프로젝트 참여자 목록 가져오기
+        const project = await this.prisma.project.findUnique({
+          where: { id: data.projectId },
+          select: { creatorId: true },
         });
+        
+        const acceptedApplications = await this.prisma.projectApplication.findMany({
+          where: {
+            projectId: data.projectId,
+            status: 'ACCEPTED',
+          },
+          select: { userId: true },
+        });
+
+        // 채팅방에 입장한 모든 클라이언트에게 브로드캐스트
+        // 각 참여자에게 자신의 언어로 번역된 메시지 전송
+        const participantIds = new Set<string>();
+        if (project) {
+          participantIds.add(project.creatorId);
+        }
+        acceptedApplications.forEach((app) => participantIds.add(app.userId));
+
+        // 모든 참여자에게 메시지 전송 (보낸 사람 포함)
+        for (const participantId of participantIds) {
+          const translatedMessage = await this.chatService.translateMessageForUser(message, participantId);
+          const messageData: any = {
+            ...translatedMessage,
+            projectId: data.projectId,
+          };
+
+          // 해당 참여자의 소켓들에게 직접 전송
+          const participantSockets = this.userSocketMap.get(participantId);
+          if (participantSockets) {
+            participantSockets.forEach((socketId) => {
+              this.server.to(socketId).emit('new-message', messageData);
+            });
+          }
+        }
+
+        // 채팅방에 입장한 모든 클라이언트에게도 브로드캐스트 (fallback)
+        // 보낸 사람의 언어로 번역된 메시지 전송
+        const senderTranslatedMessage = await this.chatService.translateMessageForUser(message, data.senderId);
+        const broadcastMessage = {
+          ...senderTranslatedMessage,
+          projectId: data.projectId,
+        };
+        this.server.to(`room-${chatRoom.id}`).emit('new-message', broadcastMessage);
+      } 
+      // 개인 채팅방의 경우: 상대방에게 번역된 메시지 전송
+      else if (data.userId && chatRoom.userId1 && chatRoom.userId2) {
+        const recipientId = chatRoom.userId1 === data.senderId ? chatRoom.userId2 : chatRoom.userId1;
+        
+        // 상대방에게 번역된 메시지 전송
+        const translatedMessage = await this.chatService.translateMessageForUser(message, recipientId);
+        const recipientMessageData: any = {
+          ...translatedMessage,
+          userId: data.senderId, // 상대방 입장에서 보낸 사람의 ID
+        };
+
+        // 상대방의 소켓들에게 전송
+        const recipientSockets = this.userSocketMap.get(recipientId);
+        if (recipientSockets) {
+          recipientSockets.forEach((socketId) => {
+            this.server.to(socketId).emit('new-message', recipientMessageData);
+          });
+        }
+
+        // 보낸 사람에게도 자신의 언어로 메시지 전송 (자신이 보낸 메시지이므로 원문)
+        const senderTranslatedMessage = await this.chatService.translateMessageForUser(message, data.senderId);
+        const senderMessageData: any = {
+          ...senderTranslatedMessage,
+          userId: recipientId,
+        };
+        const senderSockets = this.userSocketMap.get(data.senderId);
+        if (senderSockets) {
+          senderSockets.forEach((socketId) => {
+            this.server.to(socketId).emit('new-message', senderMessageData);
+          });
+        }
+
+        // 채팅방에 입장한 모든 클라이언트에게도 브로드캐스트 (fallback)
+        // 보낸 사람의 언어로 번역된 메시지 전송
+        const broadcastMessage = {
+          ...senderTranslatedMessage,
+          userId: recipientId,
+        };
+        console.log('개인 채팅방 브로드캐스트:', broadcastMessage);
+        this.server.to(`room-${chatRoom.id}`).emit('new-message', broadcastMessage);
       }
-    }
     } catch (error: any) {
       client.emit('error', { message: error.message || '메시지 전송 권한이 없습니다.' });
     }
