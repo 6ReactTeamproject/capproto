@@ -21,4 +21,8 @@ export class RegisterDto {
   @IsString({ each: true })
   @IsOptional()
   techStacks?: string[];
+
+  @IsString()
+  @IsOptional()
+  country?: string;
 }

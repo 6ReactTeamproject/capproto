@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +42,7 @@ export class AuthService {
         nickname: registerDto.nickname,
         role: registerDto.role,
         techStacks: JSON.stringify(registerDto.techStacks || []),
+        country: registerDto.country,
       },
       select: {
         id: true,
@@ -111,10 +113,62 @@ export class AuthService {
         nickname: true,
         role: true,
         techStacks: true,
+        country: true,
         githubId: true,
         githubUsername: true,
       },
     });
+    return user;
+  }
+
+  async updateProfile(userId: string, updateUserDto: UpdateUserDto) {
+    // 닉네임 변경 시 중복 체크
+    if (updateUserDto.nickname) {
+      const existingNickname = await this.prisma.user.findUnique({
+        where: { nickname: updateUserDto.nickname },
+      });
+      if (existingNickname && existingNickname.id !== userId) {
+        throw new ConflictException('이미 존재하는 닉네임입니다.');
+      }
+    }
+
+    // 비밀번호 변경 시 해시
+    let passwordHash: string | undefined;
+    if (updateUserDto.password) {
+      passwordHash = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    // 업데이트할 데이터 준비
+    const updateData: any = {};
+    if (updateUserDto.nickname) {
+      updateData.nickname = updateUserDto.nickname;
+    }
+    if (updateUserDto.techStacks !== undefined) {
+      updateData.techStacks = JSON.stringify(updateUserDto.techStacks);
+    }
+    if (updateUserDto.country !== undefined) {
+      updateData.country = updateUserDto.country;
+    }
+    if (passwordHash) {
+      updateData.passwordHash = passwordHash;
+    }
+
+    // 사용자 정보 업데이트
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        nickname: true,
+        role: true,
+        techStacks: true,
+        country: true,
+        githubId: true,
+        githubUsername: true,
+      },
+    });
+
     return user;
   }
 

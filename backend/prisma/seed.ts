@@ -343,6 +343,10 @@ async function main() {
   for (let i = 1; i <= 30; i++) {
     const stacks = developerStacks[(i - 1) % developerStacks.length];
     const nickname = developerNicknames[(i - 1) % developerNicknames.length];
+    // 국가 할당 (30명 개발자를 3개 국가에 분배: KR 10, US 10, JP 10)
+    const countries = ["KR", "US", "JP"];
+    const country = countries[i % 3];
+    
     users.push(
       await prisma.user.create({
       data: {
@@ -351,6 +355,7 @@ async function main() {
           nickname: nickname,
         role: UserRole.DEVELOPER,
           techStacks: JSON.stringify(stacks),
+          country: country,
       },
       })
     );
@@ -360,6 +365,10 @@ async function main() {
   for (let i = 1; i <= 15; i++) {
     const stacks = designerStacks[(i - 1) % designerStacks.length];
     const nickname = designerNicknames[(i - 1) % designerNicknames.length];
+    // 국가 할당 (15명 디자이너를 3개 국가에 분배: KR 5, US 5, JP 5)
+    const countries = ["KR", "US", "JP"];
+    const country = countries[i % 3];
+    
     users.push(
       await prisma.user.create({
       data: {
@@ -368,6 +377,7 @@ async function main() {
           nickname: nickname,
         role: UserRole.DESIGNER,
           techStacks: JSON.stringify(stacks),
+          country: country,
       },
       })
     );
@@ -377,6 +387,10 @@ async function main() {
   for (let i = 1; i <= 10; i++) {
     const stacks = plannerStacks[(i - 1) % plannerStacks.length];
     const nickname = plannerNicknames[(i - 1) % plannerNicknames.length];
+    // 국가 할당 (10명 기획자를 3개 국가에 분배: KR 4, US 3, JP 3)
+    const countries = ["KR", "US", "JP"];
+    const country = countries[i % 3];
+    
     users.push(
       await prisma.user.create({
       data: {
@@ -385,6 +399,7 @@ async function main() {
           nickname: nickname,
         role: UserRole.PLANNER,
           techStacks: JSON.stringify(stacks),
+          country: country,
       },
       })
     );

@@ -19,6 +19,7 @@ export class UsersService {
         nickname: true,
         role: true,
         techStacks: true,
+        country: true,
         createdAt: true,
         githubId: true,
         githubUsername: true,

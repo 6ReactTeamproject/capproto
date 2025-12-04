@@ -17,6 +17,7 @@ model User {
   nickname       String   @unique
   role           UserRole
   techStacks     String   @default("[]") @map("tech_stacks")
+  country        String?  // 국가
   githubId       String?  @unique @map("github_id")
   githubUsername String?  @map("github_username")
   githubToken    String?  @map("github_token") // GitHub OAuth 토큰 (암호화 저장 권장)

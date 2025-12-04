@@ -3,16 +3,71 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { mypageApi } from '@/lib/api';
+import { mypageApi, authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
+// 사용 가능한 기술 스택 목록
+const AVAILABLE_TECH_STACKS = [
+  "React",
+  "Vue.js",
+  "Next.js",
+  "Angular",
+  "TypeScript",
+  "JavaScript",
+  "HTML/CSS",
+  "Node.js",
+  "NestJS",
+  "Express",
+  "Spring",
+  "Django",
+  "FastAPI",
+  "Python",
+  "Java",
+  "PostgreSQL",
+  "MySQL",
+  "MongoDB",
+  "Redis",
+  "React Native",
+  "Flutter",
+  "Swift",
+  "Kotlin",
+  "Figma",
+  "Photoshop",
+  "Illustrator",
+  "Sketch",
+  "Adobe XD",
+  "Docker",
+  "Git",
+  "Kubernetes",
+  "AWS",
+  "Firebase",
+  "Prisma",
+  "TypeORM",
+];
+
+// 국가 목록
+const COUNTRIES = [
+  { code: "KR", name: "대한민국" },
+  { code: "US", name: "미국" },
+  { code: "JP", name: "일본" },
+];
+
 export default function MyPage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, checkAuth } = useAuth();
   const [mypageInfo, setMypageInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    nickname: '',
+    techStacks: [] as string[],
+    country: '',
+    password: '',
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -27,11 +82,49 @@ export default function MyPage() {
       setLoading(true);
       const data = await mypageApi.getMyPageInfo();
       setMypageInfo(data);
+      // 프로필 수정 폼 초기화
+      const techStacks = data.user?.techStacks ? JSON.parse(data.user.techStacks || '[]') : [];
+      setEditFormData({
+        nickname: data.user?.nickname || '',
+        techStacks: techStacks,
+        country: data.user?.country || '',
+        password: '',
+      });
     } catch (err: any) {
       console.error('마이페이지 정보 로드 실패:', err);
       setError(err.message || '정보를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setEditError(null);
+    setEditLoading(true);
+
+    try {
+      const updateData: any = {};
+      if (editFormData.nickname !== mypageInfo?.user?.nickname) {
+        updateData.nickname = editFormData.nickname;
+      }
+      if (JSON.stringify(editFormData.techStacks) !== mypageInfo?.user?.techStacks) {
+        updateData.techStacks = editFormData.techStacks;
+      }
+      if (editFormData.country !== mypageInfo?.user?.country) {
+        updateData.country = editFormData.country;
+      }
+      if (editFormData.password) {
+        updateData.password = editFormData.password;
+      }
+
+      await authApi.updateProfile(updateData);
+      setIsEditingProfile(false);
+      await loadMyPageInfo();
+      await checkAuth(); // 인증 정보 새로고침
+    } catch (err: any) {
+      setEditError(err.message || '프로필 수정에 실패했습니다.');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -103,45 +196,184 @@ export default function MyPage() {
 
         {/* 프로필 정보 */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">프로필 정보</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div>
-              <div className="text-sm font-semibold text-gray-600 mb-2">닉네임</div>
-              <div className="text-gray-900 font-medium">{userInfo?.nickname || '-'}</div>
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-gray-600 mb-2">이메일</div>
-              <div className="text-gray-900 font-medium">{userInfo?.email || '-'}</div>
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-gray-600 mb-2">역할</div>
-              <div className="text-gray-900 font-medium">
-                {userInfo?.role === 'DEVELOPER' && '개발자'}
-                {userInfo?.role === 'DESIGNER' && '디자이너'}
-                {userInfo?.role === 'PLANNER' && '기획자'}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-gray-600 mb-2">가입일</div>
-              <div className="text-gray-900 font-medium">
-                {userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString('ko-KR') : '-'}
-              </div>
-            </div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">프로필 정보</h2>
+            {!isEditingProfile && (
+              <button
+                onClick={() => setIsEditingProfile(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+              >
+                프로필 수정
+              </button>
+            )}
           </div>
-          {techStacks.length > 0 && (
-            <div className="mb-6">
-              <div className="text-sm font-semibold text-gray-600 mb-3">기술 스택</div>
-              <div className="flex flex-wrap gap-2">
-                {techStacks.map((stack: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                  >
-                    {stack}
-                  </span>
-                ))}
+
+          {isEditingProfile ? (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">닉네임</label>
+                <input
+                  type="text"
+                  value={editFormData.nickname}
+                  onChange={(e) => setEditFormData({ ...editFormData, nickname: e.target.value })}
+                  required
+                  minLength={2}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">국가</label>
+                <select
+                  value={editFormData.country}
+                  onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">국가를 선택하세요</option>
+                  {COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">기술 스택 (복수 선택 가능)</label>
+                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
+                  {AVAILABLE_TECH_STACKS.map((stack) => (
+                    <label
+                      key={stack}
+                      className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={editFormData.techStacks.includes(stack)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditFormData({
+                              ...editFormData,
+                              techStacks: [...editFormData.techStacks, stack],
+                            });
+                          } else {
+                            setEditFormData({
+                              ...editFormData,
+                              techStacks: editFormData.techStacks.filter((s) => s !== stack),
+                            });
+                          }
+                        }}
+                        className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{stack}</span>
+                    </label>
+                  ))}
+                </div>
+                {editFormData.techStacks.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {editFormData.techStacks.map((stack) => (
+                      <span
+                        key={stack}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                      >
+                        {stack}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">비밀번호 변경 (선택사항)</label>
+                <input
+                  type="password"
+                  value={editFormData.password}
+                  onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
+                  minLength={6}
+                  placeholder="변경할 비밀번호를 입력하세요 (최소 6자)"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="text-xs text-gray-500 mt-1">비밀번호를 변경하지 않으려면 비워두세요</div>
+              </div>
+              {editError && (
+                <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
+                  {editError}
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={editLoading}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                >
+                  {editLoading ? '저장 중...' : '저장하기'}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setEditError(null);
+                    // 폼 데이터 초기화
+                    const techStacks = mypageInfo?.user?.techStacks ? JSON.parse(mypageInfo.user.techStacks || '[]') : [];
+                    setEditFormData({
+                      nickname: mypageInfo?.user?.nickname || '',
+                      techStacks: techStacks,
+                      country: mypageInfo?.user?.country || '',
+                      password: '',
+                    });
+                  }}
+                  disabled={editLoading}
+                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                >
+                  취소
+                </button>
               </div>
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">닉네임</div>
+                  <div className="text-gray-900 font-medium">{userInfo?.nickname || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">이메일</div>
+                  <div className="text-gray-900 font-medium">{userInfo?.email || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">역할</div>
+                  <div className="text-gray-900 font-medium">
+                    {userInfo?.role === 'DEVELOPER' && '개발자'}
+                    {userInfo?.role === 'DESIGNER' && '디자이너'}
+                    {userInfo?.role === 'PLANNER' && '기획자'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">국가</div>
+                  <div className="text-gray-900 font-medium">
+                    {userInfo?.country ? COUNTRIES.find(c => c.code === userInfo.country)?.name || userInfo.country : '-'}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">가입일</div>
+                  <div className="text-gray-900 font-medium">
+                    {userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString('ko-KR') : '-'}
+                  </div>
+                </div>
+              </div>
+              {techStacks.length > 0 && (
+                <div className="mb-6">
+                  <div className="text-sm font-semibold text-gray-600 mb-3">기술 스택</div>
+                  <div className="flex flex-wrap gap-2">
+                    {techStacks.map((stack: string, index: number) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                      >
+                        {stack}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
           <div className="p-4 bg-gray-50 rounded-xl">
             <div className="text-sm font-semibold text-gray-600 mb-3">GitHub 연동</div>

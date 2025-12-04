@@ -1,10 +1,11 @@
 // 인증 컨트롤러 - 회원가입, 로그인 엔드포인트
-import { Controller, Post, Body, Get, UseGuards, Req, Res } from "@nestjs/common";
+import { Controller, Post, Body, Get, Put, UseGuards, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { ConfigService } from "@nestjs/config";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { GitHubAuthGuard } from "./guards/github-auth.guard";
@@ -30,6 +31,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: any) {
     return this.authService.getCurrentUser(user.id);
+  }
+
+  @Put("me")
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(
+    @CurrentUser() user: any,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.authService.updateProfile(user.id, updateUserDto);
   }
 
   // GitHub OAuth 시작

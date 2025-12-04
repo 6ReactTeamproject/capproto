@@ -69,6 +69,17 @@ export const authApi = {
   getMe: async () => {
     return fetchApi<any>('/auth/me');
   },
+  updateProfile: async (data: {
+    nickname?: string;
+    techStacks?: string[];
+    country?: string;
+    password?: string;
+  }) => {
+    return fetchApi<any>('/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 // 프로젝트 API
