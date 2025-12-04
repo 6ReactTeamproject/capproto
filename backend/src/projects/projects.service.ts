@@ -164,7 +164,7 @@ export class ProjectsService {
     const usersWithScores = allUsers
       .map((user) => {
         const userStacks = JSON.parse(user.techStacks || "[]") as string[];
-
+        
         // 1. 기술 스택 매칭 점수 계산 (0~70점)
         let techScore = 0;
         if (requiredStacks.length > 0) {
@@ -183,10 +183,10 @@ export class ProjectsService {
 
         // 3. 총합 점수 계산 (1~100점으로 정규화)
         let totalScore = techScore + roleScore;
-
+        
         // 최소 1점, 최대 100점으로 제한
         totalScore = Math.max(1, Math.min(100, Math.round(totalScore)));
-
+        
         // 소수점 둘째 자리까지 반올림
         totalScore = Math.round(totalScore * 100) / 100;
 

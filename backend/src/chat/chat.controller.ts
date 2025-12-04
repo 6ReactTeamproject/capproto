@@ -28,6 +28,21 @@ export class ChatController {
     return chatRoom.messages;
   }
 
+  @Get('rooms/direct/:userId')
+  @UseGuards(JwtAuthGuard)
+  async getOrCreateDirectChatRoom(
+    @Param('userId') userId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.chatService.getOrCreateDirectChatRoom(user.id, userId);
+  }
+
+  @Get('rooms/direct')
+  @UseGuards(JwtAuthGuard)
+  async getDirectChatRooms(@CurrentUser() user: any) {
+    return this.chatService.getDirectChatRooms(user.id);
+  }
+
   @Post('translate')
   async translate(
     @Body()

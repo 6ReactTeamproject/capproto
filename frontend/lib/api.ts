@@ -15,6 +15,8 @@ export const getToken = (): string | null => {
 export const setToken = (token: string): void => {
   if (typeof window === 'undefined') return;
   localStorage.setItem('token', token);
+  // 토큰 변경 이벤트 발생 (같은 탭에서 감지)
+  window.dispatchEvent(new Event('token-changed'));
 };
 
 export const removeToken = (): void => {
@@ -138,6 +140,12 @@ export const applicationsApi = {
 export const chatApi = {
   getRoom: async (projectId: string) => {
     return fetchApi<any>(`/chat/rooms/project/${projectId}`);
+  },
+  getDirectRoom: async (userId: string) => {
+    return fetchApi<any>(`/chat/rooms/direct/${userId}`);
+  },
+  getDirectRooms: async () => {
+    return fetchApi<any[]>(`/chat/rooms/direct`);
   },
   getMessages: async (roomId: string) => {
     return fetchApi<any[]>(`/chat/messages/${roomId}`);

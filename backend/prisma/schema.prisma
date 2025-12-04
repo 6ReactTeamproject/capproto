@@ -29,6 +29,8 @@ model User {
   chatMessages        ChatMessage[]
   evaluationsGiven    Evaluation[]         @relation("Evaluator")
   evaluationsReceived Evaluation[]         @relation("Evaluatee")
+  chatRoomsAsUser1    ChatRoom[]           @relation("User1ChatRooms")
+  chatRoomsAsUser2    ChatRoom[]           @relation("User2ChatRooms")
 
   @@map("users")
 }
@@ -88,13 +90,18 @@ enum ApplicationStatus {
 // 채팅방
 model ChatRoom {
   id        String   @id @default(uuid())
-  projectId String   @unique @map("project_id")
+  projectId String?  @unique @map("project_id")
+  userId1   String?  @map("user_id1")
+  userId2   String?  @map("user_id2")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  project  Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project  Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user1    User?         @relation("User1ChatRooms", fields: [userId1], references: [id], onDelete: Cascade)
+  user2    User?         @relation("User2ChatRooms", fields: [userId2], references: [id], onDelete: Cascade)
   messages ChatMessage[]
 
+  @@unique([userId1, userId2])
   @@map("chat_rooms")
 }
 

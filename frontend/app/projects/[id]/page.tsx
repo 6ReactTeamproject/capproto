@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { projectsApi, applicationsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import ChatWidget from '@/components/ChatWidget';
+import UserDropdown from '@/components/UserDropdown';
 
 // 역할을 한글로 변환하는 함수
 const getRoleLabel = (role: string): string => {
@@ -44,7 +45,8 @@ export default function ProjectDetailPage() {
     if (project && isCreator) {
       loadRecommendations();
     }
-  }, [project, isCreator]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, isCreator]);
 
   const loadProject = async () => {
     try {
@@ -200,12 +202,14 @@ export default function ProjectDetailPage() {
             <div>
               <span className="font-semibold text-gray-700">생성자:</span>{' '}
               {project.creator?.id ? (
-                <Link
-                  href={`/users/${project.creator.id}`}
-                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-                >
-                  {project.creator.nickname}
-                </Link>
+                <UserDropdown
+                  userId={project.creator.id}
+                  nickname={project.creator.nickname}
+                  onDirectChat={(userId) => {
+                    // 개인 채팅 열기 (GlobalChatWidget에서 처리)
+                    window.dispatchEvent(new CustomEvent('open-direct-chat', { detail: { userId } }));
+                  }}
+                />
               ) : (
                 <span className="text-gray-600">{project.creator?.nickname || 'N/A'}</span>
               )}
@@ -293,7 +297,15 @@ export default function ProjectDetailPage() {
                     key={recommendedUser.userId}
                     className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
                   >
-                    <div className="font-bold text-lg text-gray-900 mb-2">{recommendedUser.nickname}</div>
+                    <div className="font-bold text-lg text-gray-900 mb-2">
+                      <UserDropdown
+                        userId={recommendedUser.userId}
+                        nickname={recommendedUser.nickname}
+                        onDirectChat={(userId) => {
+                          window.dispatchEvent(new CustomEvent('open-direct-chat', { detail: { userId } }));
+                        }}
+                      />
+                    </div>
                     <div className="text-gray-600 text-sm mb-2">
                       역할: {
                         recommendedUser.role === 'DEVELOPER' ? '개발자' :

@@ -81,6 +81,130 @@ export class ChatService {
     return chatRoom;
   }
 
+  // 개인 채팅방 조회 또는 생성
+  async getOrCreateDirectChatRoom(userId1: string, userId2: string) {
+    // 자기 자신과의 채팅은 불가
+    if (userId1 === userId2) {
+      throw new ForbiddenException('자기 자신과는 채팅할 수 없습니다.');
+    }
+
+    // 두 사용자 ID를 정렬하여 중복 방지
+    const [sortedId1, sortedId2] = [userId1, userId2].sort();
+
+    // 기존 채팅방 찾기
+    let chatRoom = await this.prisma.chatRoom.findFirst({
+      where: {
+        userId1: sortedId1,
+        userId2: sortedId2,
+        projectId: null,
+      },
+      include: {
+        messages: {
+          include: {
+            sender: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        user1: {
+          select: {
+            id: true,
+            nickname: true,
+          },
+        },
+        user2: {
+          select: {
+            id: true,
+            nickname: true,
+          },
+        },
+      },
+    });
+
+    // 채팅방이 없으면 생성
+    if (!chatRoom) {
+      chatRoom = await this.prisma.chatRoom.create({
+        data: {
+          userId1: sortedId1,
+          userId2: sortedId2,
+        },
+        include: {
+          messages: {
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  nickname: true,
+                },
+              },
+            },
+            orderBy: { createdAt: 'asc' },
+          },
+          user1: {
+            select: {
+              id: true,
+              nickname: true,
+            },
+          },
+          user2: {
+            select: {
+              id: true,
+              nickname: true,
+            },
+          },
+        },
+      });
+    }
+
+    return chatRoom;
+  }
+
+  // 사용자의 모든 개인 채팅방 목록 조회
+  async getDirectChatRooms(userId: string) {
+    const chatRooms = await this.prisma.chatRoom.findMany({
+      where: {
+        projectId: null,
+        OR: [
+          { userId1: userId },
+          { userId2: userId },
+        ],
+      },
+      include: {
+        user1: {
+          select: {
+            id: true,
+            nickname: true,
+          },
+        },
+        user2: {
+          select: {
+            id: true,
+            nickname: true,
+          },
+        },
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return chatRooms.map((room) => {
+      const otherUser = room.userId1 === userId ? room.user2 : room.user1;
+      return {
+        id: room.id,
+        otherUser,
+        lastMessage: room.messages[0] || null,
+        updatedAt: room.updatedAt,
+      };
+    });
+  }
+
   // 메시지 저장
   async createMessage(
     roomId: string,

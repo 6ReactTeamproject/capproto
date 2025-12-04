@@ -1,7 +1,7 @@
 // 실시간 채팅 위젯 컴포넌트
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { chatApi, getToken, projectsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -9,14 +9,15 @@ import { useAuth } from '@/lib/auth';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 interface ChatWidgetProps {
-  projectId: string;
+  projectId?: string;
+  userId?: string; // 개인 채팅용
   isOpen: boolean;
   onClose: () => void;
   onBack?: () => void; // 채팅 목록으로 돌아가기 (선택사항)
   onOpen?: () => void; // 채팅창이 열렸을 때 호출 (알림 추적용)
 }
 
-export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen }: ChatWidgetProps) {
+export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack, onOpen }: ChatWidgetProps) {
   const { user } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -24,19 +25,24 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
   const [sourceLang, setSourceLang] = useState('ko');
   const [targetLang, setTargetLang] = useState('en');
   const [loading, setLoading] = useState(true);
-  const [projectTitle, setProjectTitle] = useState<string>('프로젝트 채팅');
+  const [chatTitle, setChatTitle] = useState<string>('채팅');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
-  const initializedProjectIdRef = useRef<string | null>(null);
+  const initializedChatRef = useRef<string | null>(null);
 
-  const loadProjectInfo = useCallback(async () => {
+  const loadChatInfo = useCallback(async () => {
     try {
-      const project = await projectsApi.getOne(projectId);
-      setProjectTitle(project.title || '프로젝트 채팅');
+      if (projectId) {
+        const project = await projectsApi.getOne(projectId);
+        setChatTitle(project.title || '프로젝트 채팅');
+      } else if (userId) {
+        // 개인 채팅의 경우 상대방 이름 표시 (나중에 API로 가져올 수 있음)
+        setChatTitle('개인 채팅');
+      }
     } catch (err) {
-      console.error('프로젝트 정보 로드 실패:', err);
+      console.error('채팅 정보 로드 실패:', err);
     }
-  }, [projectId]);
+  }, [projectId, userId]);
 
   const loadChatRoom = useCallback(async () => {
     if (!user) return;
@@ -54,10 +60,24 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
         socketRef.current = null;
       }
 
-      // 먼저 REST API로 메시지 가져오기
-      const room = await chatApi.getRoom(projectId);
+      let room;
+      if (projectId) {
+        // 프로젝트 채팅방
+        room = await chatApi.getRoom(projectId);
+      } else if (userId) {
+        // 개인 채팅방
+        room = await chatApi.getDirectRoom(userId);
+        // 상대방 정보 가져오기
+        const otherUser = room.userId1 === user.id ? room.user2 : room.user1;
+        if (otherUser) {
+          setChatTitle(otherUser.nickname || '개인 채팅');
+        }
+      } else {
+        throw new Error('projectId 또는 userId가 필요합니다.');
+      }
+
       setMessages(room.messages || []);
-      setLoading(false); // REST API로 메시지를 가져왔으므로 로딩 종료
+      setLoading(false);
 
       // WebSocket 연결
       const newSocket = io(API_BASE_URL, {
@@ -71,7 +91,8 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
         console.log('WebSocket 연결됨');
         newSocket.emit('join-room', { 
           projectId,
-          userId: user.id,
+          userId: userId || undefined,
+          currentUserId: user.id,
         });
       });
 
@@ -101,23 +122,28 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
       console.error('채팅방 로드 실패:', err);
       setLoading(false);
     }
-  }, [projectId, user]);
+  }, [projectId, userId, user]);
 
   useEffect(() => {
-    // projectId가 변경되었거나 아직 초기화되지 않았을 때만 초기화
-    const needsInit = isOpen && user && initializedProjectIdRef.current !== projectId;
+    // 채팅방이 변경되었거나 아직 초기화되지 않았을 때만 초기화
+    const chatKey = projectId || userId || '';
+    const needsInit = isOpen && user && initializedChatRef.current !== chatKey;
     
     if (needsInit) {
-      initializedProjectIdRef.current = projectId;
-      loadProjectInfo();
+      initializedChatRef.current = chatKey;
+      loadChatInfo();
       loadChatRoom();
       onOpen?.();
-      window.dispatchEvent(new CustomEvent('chat-opened', { detail: { projectId } }));
+      if (projectId) {
+        window.dispatchEvent(new CustomEvent('chat-opened', { detail: { projectId } }));
+      } else if (userId) {
+        window.dispatchEvent(new CustomEvent('direct-chat-opened', { detail: { userId } }));
+      }
     }
 
     return () => {
-      // 채팅창이 닫히거나 projectId가 변경될 때만 정리
-      if (!isOpen || initializedProjectIdRef.current !== projectId) {
+      // 채팅창이 닫히거나 채팅방이 변경될 때만 정리
+      if (!isOpen || initializedChatRef.current !== chatKey) {
         if (socketRef.current) {
           socketRef.current.off('messages');
           socketRef.current.off('new-message');
@@ -128,27 +154,23 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
           setSocket(null);
         }
         if (!isOpen) {
-          initializedProjectIdRef.current = null;
+          initializedChatRef.current = null;
         }
       }
     };
-  }, [isOpen, user, projectId, loadProjectInfo, loadChatRoom, onOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      scrollToBottom();
-    }
-  }, [messages, isOpen]);
+  }, [isOpen, user, projectId, userId, loadChatInfo, loadChatRoom, onOpen]);
 
   const sendMessage = () => {
     const currentSocket = socketRef.current || socket;
-    if (!currentSocket || !projectId || !user?.id || !newMessage.trim()) return;
+    if (!currentSocket || !user?.id || !newMessage.trim()) return;
+    if (!projectId && !userId) return;
 
     const messageContent = newMessage.trim();
     setNewMessage('');
 
     currentSocket.emit('send-message', {
-      projectId,
+      projectId: projectId || undefined,
+      userId: userId || undefined,
       senderId: user.id,
       content: messageContent,
       sourceLang,
@@ -156,11 +178,20 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
     });
   };
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [messages, isOpen, scrollToBottom]);
+
+  // 모든 hooks가 호출된 후에 조건부 return
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <>
@@ -190,7 +221,7 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
                 </svg>
               </button>
             )}
-            <h2 className="text-lg font-bold text-gray-900 truncate">{projectTitle}</h2>
+            <h2 className="text-lg font-bold text-gray-900 truncate">{chatTitle}</h2>
           </div>
           <button
             onClick={onClose}
@@ -293,7 +324,7 @@ export default function ChatWidget({ projectId, isOpen, onClose, onBack, onOpen 
             />
             <button
               onClick={sendMessage}
-              disabled={!socket || !newMessage.trim()}
+              disabled={!socket || !newMessage.trim() || (!projectId && !userId)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed text-sm"
             >
               전송

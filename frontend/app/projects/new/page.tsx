@@ -102,94 +102,94 @@ export default function NewProjectPage() {
             {/* 제목 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">제목</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="프로젝트 제목을 입력하세요"
-              />
-            </div>
+          />
+        </div>
 
             {/* 한 줄 소개 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">한 줄 소개</label>
-              <textarea
-                value={formData.shortDescription}
-                onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-                required
-                rows={3}
+          <textarea
+            value={formData.shortDescription}
+            onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+            required
+            rows={3}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 placeholder="프로젝트를 한 줄로 소개해주세요"
-              />
-            </div>
+          />
+        </div>
 
             {/* 필요 역할 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">필요 역할 (복수 선택 가능)</label>
               <div className="flex flex-wrap gap-3 mb-3">
-                {AVAILABLE_ROLES.map((role) => (
-                  <label
-                    key={role.value}
+            {AVAILABLE_ROLES.map((role) => (
+              <label
+                key={role.value}
                     className="flex items-center cursor-pointer px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.neededRoles.includes(role.value)}
-                      onChange={() => toggleRole(role.value)}
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.neededRoles.includes(role.value)}
+                  onChange={() => toggleRole(role.value)}
                       className="mr-2 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                    />
+                />
                     <span className="text-sm font-medium text-gray-700">{role.label}</span>
-                  </label>
-                ))}
-              </div>
-              {formData.neededRoles.length > 0 && (
+              </label>
+            ))}
+          </div>
+          {formData.neededRoles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.neededRoles.map((role) => (
-                    <span
-                      key={role}
+              {formData.neededRoles.map((role) => (
+                <span
+                  key={role}
                       className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                    >
-                      {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
-                    </span>
-                  ))}
-                </div>
-              )}
+                >
+                  {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
+                </span>
+              ))}
             </div>
+          )}
+        </div>
 
             {/* 필요 스택 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">필요 스택 (복수 선택 가능)</label>
               <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
-                {AVAILABLE_TECH_STACKS.map((stack) => (
-                  <label
-                    key={stack}
+            {AVAILABLE_TECH_STACKS.map((stack) => (
+              <label
+                key={stack}
                     className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.requiredStacks.includes(stack)}
-                      onChange={() => toggleStack(stack)}
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.requiredStacks.includes(stack)}
+                  onChange={() => toggleStack(stack)}
                       className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                    />
+                />
                     <span className="text-sm text-gray-700">{stack}</span>
-                  </label>
-                ))}
-              </div>
-              {formData.requiredStacks.length > 0 && (
+              </label>
+            ))}
+          </div>
+          {formData.requiredStacks.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.requiredStacks.map((stack) => (
-                    <span
-                      key={stack}
+              {formData.requiredStacks.map((stack) => (
+                <span
+                  key={stack}
                       className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                    >
-                      {stack}
-                    </span>
-                  ))}
-                </div>
-              )}
+                >
+                  {stack}
+                </span>
+              ))}
             </div>
+          )}
+        </div>
 
             {/* 프로젝트 기간 */}
             <div>
@@ -225,14 +225,14 @@ export default function NewProjectPage() {
             )}
 
             {/* 제출 버튼 */}
-            <button
-              type="submit"
-              disabled={loading}
+        <button
+          type="submit"
+          disabled={loading}
               className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
-            >
-              {loading ? '생성 중...' : '프로젝트 생성'}
-            </button>
-          </form>
+        >
+          {loading ? '생성 중...' : '프로젝트 생성'}
+        </button>
+      </form>
         </div>
       </div>
     </div>

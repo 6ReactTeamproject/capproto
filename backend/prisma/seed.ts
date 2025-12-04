@@ -345,13 +345,13 @@ async function main() {
     const nickname = developerNicknames[(i - 1) % developerNicknames.length];
     users.push(
       await prisma.user.create({
-        data: {
+      data: {
           email: `dev${i}@example.com`,
-          passwordHash,
+        passwordHash,
           nickname: nickname,
-          role: UserRole.DEVELOPER,
+        role: UserRole.DEVELOPER,
           techStacks: JSON.stringify(stacks),
-        },
+      },
       })
     );
   }
@@ -362,13 +362,13 @@ async function main() {
     const nickname = designerNicknames[(i - 1) % designerNicknames.length];
     users.push(
       await prisma.user.create({
-        data: {
+      data: {
           email: `designer${i}@example.com`,
-          passwordHash,
+        passwordHash,
           nickname: nickname,
-          role: UserRole.DESIGNER,
+        role: UserRole.DESIGNER,
           techStacks: JSON.stringify(stacks),
-        },
+      },
       })
     );
   }
@@ -379,13 +379,13 @@ async function main() {
     const nickname = plannerNicknames[(i - 1) % plannerNicknames.length];
     users.push(
       await prisma.user.create({
-        data: {
+      data: {
           email: `planner${i}@example.com`,
-          passwordHash,
+        passwordHash,
           nickname: nickname,
-          role: UserRole.PLANNER,
+        role: UserRole.PLANNER,
           techStacks: JSON.stringify(stacks),
-        },
+      },
       })
     );
   }
