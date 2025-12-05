@@ -224,16 +224,16 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
       
       {/* 채팅 모달 */}
       <div 
-        className="fixed bottom-0 right-0 w-full sm:w-96 h-[600px] sm:h-[700px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl z-[9999] flex flex-col animate-slide-up"
+        className="fixed bottom-0 right-0 w-full sm:w-96 h-[600px] sm:h-[700px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl z-[9999] flex flex-col animate-slide-up border border-gray-100"
         style={{ position: 'fixed' }}
       >
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+          <div className="flex items-center gap-3">
             {onBack && (
               <button
                 onClick={onBack}
-                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                className="p-2 hover:bg-white/50 rounded-full transition-all duration-200 transform hover:scale-110"
                 aria-label="뒤로가기"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,11 +241,11 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                 </svg>
               </button>
             )}
-            <h2 className="text-lg font-bold text-gray-900 truncate">{chatTitle}</h2>
+            <h2 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">{chatTitle}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            className="p-2 hover:bg-white/50 rounded-full transition-all duration-200 transform hover:scale-110"
             aria-label="닫기"
           >
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +255,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
         </div>
 
         {/* 메시지 영역 */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white">
           {loading ? (
             <div className="text-center text-gray-500 py-8">로딩 중...</div>
           ) : messages.length === 0 ? (
@@ -271,10 +271,10 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                   <div className={`text-xs text-gray-500 mb-1 ${isMyMessage ? 'text-right' : 'text-left'}`}>
                     {isMyMessage ? '나' : (message.sender?.nickname || '알 수 없음')}
                   </div>
-                  <div className={`rounded-xl p-3 shadow-sm max-w-[80%] ${
+                  <div className={`rounded-2xl p-3 shadow-md max-w-[80%] ${
                     isMyMessage 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-white text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                      : 'bg-white text-gray-900 border border-gray-100'
                   }`}>
                     <div className={`text-sm ${isMyMessage ? 'text-white' : 'text-gray-900'}`}>
                       {/* 번역된 내용이 있으면 번역본 표시, 없으면 원문 표시 */}
@@ -307,12 +307,12 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                 }
               }}
               placeholder="메시지를 입력하세요..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
             />
             <button
               onClick={sendMessage}
               disabled={!socket || !newMessage.trim() || (!projectId && !userId)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed text-sm"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed text-sm transform hover:-translate-y-0.5 disabled:transform-none"
             >
               전송
             </button>

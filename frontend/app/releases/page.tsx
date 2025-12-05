@@ -44,215 +44,141 @@ export default function ReleasesPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Link href="/projects" style={{ color: '#0070f3' }}>← 프로젝트 목록</Link>
-      </div>
-
-      <h1 style={{ marginBottom: '20px' }}>언어별 최신 릴리즈 정보</h1>
-
-      <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <label style={{ fontWeight: 'bold' }}>언어 선택:</label>
-        <select
-          value={selectedLanguage}
-          onChange={(e) => setSelectedLanguage(e.target.value)}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            fontSize: '16px',
-            minWidth: '200px',
-          }}
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link 
+          href="/projects" 
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold mb-6 transition-colors group"
         >
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>
-              {lang}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={loadReleases}
-          disabled={loading}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: loading ? '#ccc' : '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '14px',
-          }}
-        >
-          {loading ? '로딩 중...' : '새로고침'}
-        </button>
-        {user && (
-          <button
-            onClick={async () => {
-              try {
-                setLoading(true);
-                setError(null);
-                await releasesApi.sync(selectedLanguage);
-                await loadReleases();
-              } catch (err: any) {
-                setError(err.message || '동기화에 실패했습니다. GitHub API rate limit에 걸렸을 수 있습니다.');
-              } finally {
-                setLoading(false);
-              }
-            }}
-            disabled={loading}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: loading ? '#ccc' : '#0070f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-            }}
-          >
-            {loading ? '동기화 중...' : '수동 동기화'}
-          </button>
-        )}
-      </div>
+          <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          프로젝트 목록
+        </Link>
 
-      {error && (
-        <div
-          style={{
-            padding: '15px',
-            backgroundColor: '#fff3cd',
-            border: '1px solid #ffc107',
-            borderRadius: '4px',
-            color: '#856404',
-            marginBottom: '20px',
-          }}
-        >
-          <strong>알림:</strong> {error}
-          {error.includes('rate limit') && (
-            <div style={{ marginTop: '10px', fontSize: '14px' }}>
-              GitHub API 호출 제한에 걸렸습니다. 약 35분 후 다시 시도하거나, 로그인 후 "수동 동기화" 버튼을 사용해주세요.
-            </div>
-          )}
-        </div>
-      )}
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">언어별 최신 릴리즈 정보</h1>
 
-      {loading ? (
-        <div style={{ padding: '40px', textAlign: 'center' }}>로딩 중...</div>
-      ) : releases.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-          {error ? (
-            <div>
-              릴리즈 정보를 불러올 수 없습니다.
-              <br />
-              <button
-                onClick={loadReleases}
-                style={{
-                  marginTop: '10px',
-                  padding: '8px 16px',
-                  backgroundColor: '#0070f3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                다시 시도
-              </button>
-            </div>
-          ) : (
-            '릴리즈 정보가 없습니다.'
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {releases.map((release) => (
-            <div
-              key={release.id}
-              style={{
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                padding: '20px',
-                backgroundColor: '#fff',
-              }}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <label className="font-semibold text-gray-700 min-w-[100px]">언어 선택:</label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '15px' }}>
-                <div>
-                  <h2 style={{ margin: '0 0 5px 0', fontSize: '24px' }}>
-                    {release.language} {release.version}
-                  </h2>
-                  <div style={{ color: '#666', fontSize: '14px' }}>
-                    릴리즈 날짜: {new Date(release.releaseDate).toLocaleDateString('ko-KR')}
+              {LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={loadReleases}
+              disabled={loading}
+              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
+            >
+              {loading ? '로딩 중...' : '새로고침'}
+            </button>
+            {user && (
+              <button
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    setError(null);
+                    await releasesApi.sync(selectedLanguage);
+                    await loadReleases();
+                  } catch (err: any) {
+                    setError(err.message || '동기화에 실패했습니다. GitHub API rate limit에 걸렸을 수 있습니다.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
+              >
+                {loading ? '동기화 중...' : '수동 동기화'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-6">
+            <div className="text-yellow-800 font-semibold mb-2">알림: {error}</div>
+            {error.includes('rate limit') && (
+              <div className="text-sm text-yellow-700">
+                GitHub API 호출 제한에 걸렸습니다. 약 35분 후 다시 시도하거나, 로그인 후 "수동 동기화" 버튼을 사용해주세요.
+              </div>
+            )}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+            <div className="text-gray-500 text-lg">로딩 중...</div>
+          </div>
+        ) : releases.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center text-gray-600 border border-gray-100">
+            {error ? (
+              <div>
+                <div className="mb-4">릴리즈 정보를 불러올 수 없습니다.</div>
+                <button
+                  onClick={loadReleases}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  다시 시도
+                </button>
+              </div>
+            ) : (
+              '릴리즈 정보가 없습니다.'
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {releases.map((release) => (
+              <div
+                key={release.id}
+                className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-200"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      {release.language} {release.version}
+                    </h2>
+                    <div className="text-gray-600 text-sm">
+                      릴리즈 날짜: {new Date(release.releaseDate).toLocaleDateString('ko-KR')}
+                    </div>
+                  </div>
+                  <a
+                    href={release.officialDocs}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                  >
+                    공식 문서 보기 →
+                  </a>
+                </div>
+
+                {/* 공식 문서 핵심 내용 */}
+                <div className="bg-gray-50 rounded-xl p-6 mb-4 border border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">공식 문서 내용</h3>
+                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                    {release.officialContent}
                   </div>
                 </div>
-                <a
-                  href={release.officialDocs}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#0070f3',
-                    color: 'white',
-                    borderRadius: '4px',
-                    textDecoration: 'none',
-                    fontSize: '14px',
-                  }}
-                >
-                  공식 문서 보기 →
-                </a>
-              </div>
 
-              {/* 공식 문서 핵심 내용 */}
-              <div
-                style={{
-                  backgroundColor: '#f9f9f9',
-                  padding: '15px',
-                  borderRadius: '4px',
-                  marginBottom: '15px',
-                  border: '1px solid #e0e0e0',
-                }}
-              >
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#333' }}>
-                  공식 문서 내용
-                </h3>
-                <div
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    lineHeight: '1.6',
-                    color: '#555',
-                    fontSize: '14px',
-                  }}
-                >
-                  {release.officialContent}
+                {/* 간략 정리 */}
+                <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                  <h3 className="text-lg font-bold text-blue-900 mb-4">간략 정리</h3>
+                  <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                    {release.summary}
+                  </div>
                 </div>
               </div>
-
-              {/* 간략 정리 */}
-              <div
-                style={{
-                  padding: '15px',
-                  backgroundColor: '#e3f2fd',
-                  borderRadius: '4px',
-                  border: '1px solid #bbdefb',
-                }}
-              >
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#1976d2' }}>
-                  간략 정리
-                </h3>
-                <div
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    lineHeight: '1.6',
-                    color: '#424242',
-                    fontSize: '14px',
-                  }}
-                >
-                  {release.summary}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-

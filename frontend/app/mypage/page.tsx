@@ -130,7 +130,7 @@ export default function MyPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
         <div className="text-center">
           <div className="text-lg font-semibold text-gray-900 mb-2">로딩 중...</div>
           <div className="text-sm text-gray-600 mt-2">
@@ -146,13 +146,13 @@ export default function MyPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">로그인이 필요합니다</h1>
           <p className="text-gray-600 mb-6">마이페이지를 보려면 먼저 로그인해주세요.</p>
         <Link
           href="/login"
-            className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           로그인하기
         </Link>
@@ -163,14 +163,14 @@ export default function MyPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full text-center">
           <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium mb-4">
             오류: {error}
           </div>
         <button
           onClick={loadMyPageInfo}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           다시 시도
         </button>
@@ -183,25 +183,28 @@ export default function MyPage() {
   const techStacks = userInfo?.techStacks ? JSON.parse(userInfo.techStacks || '[]') : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link 
           href="/projects" 
-          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-6 transition-colors"
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold mb-6 transition-colors group"
         >
-          ← 프로젝트 목록
+          <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          프로젝트 목록
         </Link>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">마이페이지</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">마이페이지</h1>
 
       {/* 프로필 정보 */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">프로필 정보</h2>
             {!isEditingProfile && (
               <button
                 onClick={() => setIsEditingProfile(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 프로필 수정
               </button>
@@ -271,7 +274,7 @@ export default function MyPage() {
                     {editFormData.techStacks.map((stack) => (
                       <span
                         key={stack}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                        className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
                       >
                         {stack}
                       </span>
@@ -300,7 +303,7 @@ export default function MyPage() {
                 <button
                   onClick={handleSaveProfile}
                   disabled={editLoading}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
                 >
                   {editLoading ? '저장 중...' : '저장하기'}
                 </button>
@@ -318,7 +321,7 @@ export default function MyPage() {
                     });
                   }}
                   disabled={editLoading}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed"
                 >
                   취소
                 </button>
@@ -365,7 +368,7 @@ export default function MyPage() {
               {techStacks.map((stack: string, index: number) => (
                 <span
                   key={index}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                        className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
                 >
                   {stack}
                 </span>
@@ -528,30 +531,30 @@ export default function MyPage() {
       )}
 
       {/* 통계 정보 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-2">
             {stats?.createdProjectsCount || 0}
             </div>
-            <div className="text-sm text-gray-600">생성한 프로젝트</div>
+            <div className="text-sm text-gray-600 font-medium">생성한 프로젝트</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-3xl font-bold text-emerald-600 mb-2">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent mb-2">
               {stats?.appliedProjectsCount || 0}
         </div>
-            <div className="text-sm text-gray-600">참여 신청한 프로젝트</div>
+            <div className="text-sm text-gray-600 font-medium">참여 신청한 프로젝트</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-3xl font-bold text-yellow-600 mb-2">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+            <div className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-700 bg-clip-text text-transparent mb-2">
               {stats?.pendingApplicationsCount || 0}
         </div>
-            <div className="text-sm text-gray-600">대기 중인 신청</div>
+            <div className="text-sm text-gray-600 font-medium">대기 중인 신청</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
-            <div className="text-3xl font-bold text-cyan-600 mb-2">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+            <div className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-700 bg-clip-text text-transparent mb-2">
               {stats?.acceptedApplicationsCount || 0}
         </div>
-            <div className="text-sm text-gray-600">수락된 신청</div>
+            <div className="text-sm text-gray-600 font-medium">수락된 신청</div>
         </div>
       </div>
 
@@ -561,20 +564,20 @@ export default function MyPage() {
             <h2 className="text-xl font-bold text-gray-900">내가 생성한 프로젝트 ({myProjects?.length || 0})</h2>
           <Link
             href="/projects/new"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm hover:shadow-md"
+              className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
             새 프로젝트 생성
           </Link>
         </div>
         {!myProjects || myProjects.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-600 shadow-sm">
+            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center text-gray-600 shadow-lg">
             생성한 프로젝트가 없습니다.
           </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myProjects.map((project: any) => (
               <Link key={project.id} href={`/projects/${project.id}`}>
-                  <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-200 cursor-pointer h-full flex flex-col">
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 cursor-pointer h-full flex flex-col">
                     <h3 className="text-lg font-bold text-gray-900 mb-2">{project.title}</h3>
                     <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-2">
                     {project.shortDescription}
@@ -597,14 +600,14 @@ export default function MyPage() {
       <div>
           <h2 className="text-xl font-bold text-gray-900 mb-6">내가 참여 신청한 프로젝트 ({myApplications?.length || 0})</h2>
         {!myApplications || myApplications.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-600 shadow-sm">
+            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center text-gray-600 shadow-lg">
             참여 신청한 프로젝트가 없습니다.
           </div>
         ) : (
             <div className="space-y-4">
             {myApplications.map((application: any) => (
               <Link key={application.id} href={`/projects/${application.project.id}`}>
-                  <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-200 cursor-pointer">
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 cursor-pointer">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
                         <h3 className="text-lg font-bold text-gray-900 mb-1">{application.project.title}</h3>

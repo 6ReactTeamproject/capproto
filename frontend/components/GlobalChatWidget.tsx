@@ -421,12 +421,12 @@ export default function GlobalChatWidget() {
       {/* 플로팅 채팅 버튼 */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-[9999] group relative"
+        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center z-[9999] group relative transform hover:scale-110"
         style={{ position: "fixed" }}
         aria-label="채팅 열기"
       >
         <svg
-          className="w-6 h-6 transition-transform group-hover:scale-110"
+          className="w-7 h-7 transition-transform group-hover:scale-110"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -439,7 +439,7 @@ export default function GlobalChatWidget() {
           />
         </svg>
         {totalUnreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-lg border-2 border-white">
             {totalUnreadCount > 9 ? "9+" : totalUnreadCount}
           </span>
         )}
@@ -454,14 +454,16 @@ export default function GlobalChatWidget() {
             onClick={handleClose}
           />
           <div
-            className="fixed bottom-0 right-0 w-full sm:w-96 h-[500px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl z-[9999] flex flex-col animate-slide-up"
+            className="fixed bottom-0 right-0 w-full sm:w-96 h-[500px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl z-[9999] flex flex-col animate-slide-up border border-gray-100"
             style={{ position: "fixed" }}
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
-              <h2 className="text-lg font-bold text-gray-900">채팅방 선택</h2>
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+              <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                채팅방 선택
+              </h2>
               <button
                 onClick={handleClose}
-                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                className="p-2 hover:bg-white/50 rounded-full transition-all duration-200 transform hover:scale-110"
               >
                 <svg
                   className="w-5 h-5 text-gray-600"
@@ -483,20 +485,20 @@ export default function GlobalChatWidget() {
             <div className="flex border-b border-gray-200 bg-white">
               <button
                 onClick={() => setChatType("project")}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                   chatType === "project"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 프로젝트 채팅
               </button>
               <button
                 onClick={() => setChatType("direct")}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                   chatType === "direct"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-purple-600 border-b-2 border-purple-600 bg-purple-50/50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 개인 채팅
@@ -519,7 +521,7 @@ export default function GlobalChatWidget() {
                         handleClose();
                         router.push("/projects");
                       }}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                       프로젝트 둘러보기
                     </button>
@@ -532,7 +534,7 @@ export default function GlobalChatWidget() {
                         <button
                           key={project.id}
                           onClick={() => handleOpenChat(project.id)}
-                          className="w-full text-left p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all relative"
+                          className="w-full text-left p-4 bg-white border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-lg transition-all duration-200 relative transform hover:-translate-y-0.5"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1">
@@ -544,7 +546,7 @@ export default function GlobalChatWidget() {
                               </div>
                             </div>
                             {unreadCount > 0 && (
-                              <span className="flex-shrink-0 w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center">
+                              <span className="flex-shrink-0 w-6 h-6 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-md border-2 border-white">
                                 {unreadCount > 9 ? "9+" : unreadCount}
                               </span>
                             )}
@@ -572,7 +574,7 @@ export default function GlobalChatWidget() {
                       <button
                         key={chat.id}
                         onClick={() => handleOpenDirectChat(chat.otherUser.id)}
-                        className="w-full text-left p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all relative"
+                        className="w-full text-left p-4 bg-white border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-lg transition-all duration-200 relative transform hover:-translate-y-0.5"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
@@ -586,7 +588,7 @@ export default function GlobalChatWidget() {
                             )}
                           </div>
                           {unreadCount > 0 && (
-                            <span className="flex-shrink-0 w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center">
+                            <span className="flex-shrink-0 w-6 h-6 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-md border-2 border-white">
                               {unreadCount > 9 ? "9+" : unreadCount}
                             </span>
                           )}

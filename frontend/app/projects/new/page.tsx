@@ -94,10 +94,13 @@ export default function NewProjectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl shadow-sm p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">프로젝트 생성</h1>
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">프로젝트 생성</h1>
+            <p className="text-gray-600">새로운 프로젝트를 만들어보세요</p>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 제목 */}
             <div>
@@ -149,7 +152,7 @@ export default function NewProjectPage() {
               {formData.neededRoles.map((role) => (
                 <span
                   key={role}
-                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold"
                 >
                   {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
                 </span>
@@ -182,7 +185,7 @@ export default function NewProjectPage() {
               {formData.requiredStacks.map((stack) => (
                 <span
                   key={stack}
-                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
                 >
                   {stack}
                 </span>
@@ -228,7 +231,7 @@ export default function NewProjectPage() {
         <button
           type="submit"
           disabled={loading}
-              className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-colors shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+              className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
         >
           {loading ? '생성 중...' : '프로젝트 생성'}
         </button>

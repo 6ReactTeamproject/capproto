@@ -40,39 +40,32 @@ export default function UserProfilePage() {
       setProjects(data || []);
     } catch (err: any) {
       console.error('프로젝트 목록 로드 실패:', err);
-      // 프로젝트 로드 실패는 에러로 표시하지 않고 빈 배열로 처리
       setProjects([]);
     }
   };
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px', textAlign: 'center' }}>
-        <div>로딩 중...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">로딩 중...</div>
       </div>
     );
   }
 
   if (error || !user) {
     return (
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px', textAlign: 'center' }}>
-        <div style={{ color: 'red', marginBottom: '20px' }}>
-          {error || '유저를 찾을 수 없습니다.'}
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="max-w-md w-full text-center">
+          <div className="px-6 py-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 font-semibold mb-6">
+            {error || '유저를 찾을 수 없습니다.'}
+          </div>
+          <Link
+            href="/projects"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          >
+            프로젝트 목록으로 돌아가기
+          </Link>
         </div>
-        <Link
-          href="/projects"
-          style={{
-            display: 'inline-block',
-            marginTop: '20px',
-            padding: '12px 24px',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            borderRadius: '4px',
-            textDecoration: 'none',
-          }}
-        >
-          프로젝트 목록으로 돌아가기
-        </Link>
       </div>
     );
   }
@@ -81,142 +74,112 @@ export default function UserProfilePage() {
   const techStacks = user?.techStacks ? JSON.parse(user.techStacks || '[]') : [];
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ marginBottom: '30px' }}>
-        <Link href="/projects" style={{ color: '#0070f3', textDecoration: 'none' }}>
-          ← 프로젝트 목록
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link 
+          href="/projects" 
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold mb-6 transition-colors group"
+        >
+          <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          프로젝트 목록
         </Link>
-      </div>
 
-      <h1 style={{ marginBottom: '30px' }}>{user.nickname}님의 프로필</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">{user.nickname}님의 프로필</h1>
 
-      {/* 프로필 정보 */}
-      <div
-        style={{
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          padding: '24px',
-          marginBottom: '30px',
-          backgroundColor: '#fff',
-        }}
-      >
-        <h2 style={{ marginBottom: '20px', fontSize: '20px' }}>프로필 정보</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-          <div>
-            <strong style={{ color: '#666', display: 'block', marginBottom: '5px' }}>닉네임</strong>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{user.nickname || '-'}</div>
-          </div>
-          <div>
-            <strong style={{ color: '#666', display: 'block', marginBottom: '5px' }}>역할</strong>
+        {/* 프로필 정보 */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">프로필 정보</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <div>
-              {user.role === 'DEVELOPER' && '개발자'}
-              {user.role === 'DESIGNER' && '디자이너'}
-              {user.role === 'PLANNER' && '기획자'}
+              <div className="text-sm font-semibold text-gray-600 mb-2">닉네임</div>
+              <div className="text-lg font-bold text-gray-900">{user.nickname || '-'}</div>
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-600 mb-2">역할</div>
+              <div className="text-lg font-bold text-gray-900">
+                {user.role === 'DEVELOPER' && '개발자'}
+                {user.role === 'DESIGNER' && '디자이너'}
+                {user.role === 'PLANNER' && '기획자'}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-600 mb-2">가입일</div>
+              <div className="text-lg font-bold text-gray-900">
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '-'}
+              </div>
             </div>
           </div>
-          <div>
-            <strong style={{ color: '#666', display: 'block', marginBottom: '5px' }}>가입일</strong>
-            <div>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '-'}</div>
-          </div>
-        </div>
-        
-        {techStacks.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <strong style={{ color: '#666', display: 'block', marginBottom: '10px' }}>기술 스택</strong>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {techStacks.map((stack: string, index: number) => (
-                <span
-                  key={index}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#e3f2fd',
-                    color: '#1976d2',
-                    borderRadius: '16px',
-                    fontSize: '14px',
-                  }}
+          
+          {techStacks.length > 0 && (
+            <div className="mb-6">
+              <div className="text-sm font-semibold text-gray-600 mb-3">기술 스택</div>
+              <div className="flex flex-wrap gap-2">
+                {techStacks.map((stack: string, index: number) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
+                  >
+                    {stack}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {user.githubUsername && (
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <div className="text-sm font-semibold text-gray-600 mb-3">GitHub</div>
+              <div className="flex items-center gap-3">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <a
+                  href={`https://github.com/${user.githubUsername}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
                 >
-                  {stack}
-                </span>
+                  {user.githubUsername}
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 생성한 프로젝트 */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            {user.nickname}님이 생성한 프로젝트 ({projects.length})
+          </h2>
+          {projects.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-lg p-12 text-center text-gray-600 border border-gray-100">
+              생성한 프로젝트가 없습니다.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project: any) => (
+                <Link key={project.id} href={`/projects/${project.id}`}>
+                  <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 cursor-pointer h-full flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{project.title}</h3>
+                    <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-2">
+                      {project.shortDescription}
+                    </p>
+                    <div className="flex gap-4 text-xs text-gray-500 mb-2">
+                      <span>신청: {project.applicationCount || 0}건</span>
+                      <span>메시지: {project.messageCount || 0}개</span>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {new Date(project.createdAt).toLocaleDateString('ko-KR')}
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
-          </div>
-        )}
-
-        {user.githubUsername && (
-          <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-            <strong style={{ color: '#666', display: 'block', marginBottom: '10px' }}>GitHub</strong>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              <a
-                href={`https://github.com/${user.githubUsername}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#0070f3', textDecoration: 'none' }}
-              >
-                {user.githubUsername}
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 생성한 프로젝트 */}
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '20px' }}>
-          {user.nickname}님이 생성한 프로젝트 ({projects.length})
-        </h2>
-        {projects.length === 0 ? (
-          <div
-            style={{
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              padding: '40px',
-              textAlign: 'center',
-              color: '#666',
-            }}
-          >
-            생성한 프로젝트가 없습니다.
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-            {projects.map((project: any) => (
-              <Link key={project.id} href={`/projects/${project.id}`}>
-                <div
-                  style={{
-                    border: '1px solid #ccc',
-                    borderRadius: '8px',
-                    padding: '20px',
-                    cursor: 'pointer',
-                    transition: 'box-shadow 0.2s',
-                    backgroundColor: '#fff',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <h3 style={{ marginBottom: '10px', fontSize: '18px' }}>{project.title}</h3>
-                  <p style={{ color: '#666', marginBottom: '15px', fontSize: '14px' }}>
-                    {project.shortDescription}
-                  </p>
-                  <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#999' }}>
-                    <span>신청: {project.applicationCount || 0}건</span>
-                    <span>메시지: {project.messageCount || 0}개</span>
-                  </div>
-                  <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-                    {new Date(project.createdAt).toLocaleDateString('ko-KR')}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 }
-
