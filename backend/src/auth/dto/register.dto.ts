@@ -25,4 +25,18 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   country?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  portfolioLinks?: string[];
+
+  @IsArray()
+  @IsOptional()
+  experience?: Array<{
+    title: string;
+    role: string;
+    period: string;
+    description: string;
+  }>;
 }

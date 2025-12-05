@@ -18,6 +18,8 @@ model User {
   role           UserRole
   techStacks     String   @default("[]") @map("tech_stacks")
   country        String?  // 국가
+  portfolioLinks String   @default("[]") @map("portfolio_links") // 포트폴리오 링크 (디자이너/기획자용)
+  experience     String   @default("[]") @map("experience") // 프로젝트 경험 (디자이너/기획자용)
   githubId       String?  @unique @map("github_id")
   githubUsername String?  @map("github_username")
   githubToken    String?  @map("github_token") // GitHub OAuth 토큰 (암호화 저장 권장)

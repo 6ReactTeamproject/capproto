@@ -43,6 +43,8 @@ export class AuthService {
         role: registerDto.role,
         techStacks: JSON.stringify(registerDto.techStacks || []),
         country: registerDto.country,
+        portfolioLinks: JSON.stringify(registerDto.portfolioLinks || []),
+        experience: JSON.stringify(registerDto.experience || []),
       },
       select: {
         id: true,
@@ -114,6 +116,8 @@ export class AuthService {
         role: true,
         techStacks: true,
         country: true,
+        portfolioLinks: true,
+        experience: true,
         githubId: true,
         githubUsername: true,
       },
@@ -149,6 +153,12 @@ export class AuthService {
     if (updateUserDto.country !== undefined) {
       updateData.country = updateUserDto.country;
     }
+    if (updateUserDto.portfolioLinks !== undefined) {
+      updateData.portfolioLinks = JSON.stringify(updateUserDto.portfolioLinks);
+    }
+    if (updateUserDto.experience !== undefined) {
+      updateData.experience = JSON.stringify(updateUserDto.experience);
+    }
     if (passwordHash) {
       updateData.passwordHash = passwordHash;
     }
@@ -164,6 +174,8 @@ export class AuthService {
         role: true,
         techStacks: true,
         country: true,
+        portfolioLinks: true,
+        experience: true,
         githubId: true,
         githubUsername: true,
       },

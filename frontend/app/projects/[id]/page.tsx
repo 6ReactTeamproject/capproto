@@ -326,12 +326,38 @@ export default function ProjectDetailPage() {
                       recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
                     }
                   </div>
-                    <div className="text-sm text-gray-600 mb-4">
-                      <span className="font-semibold">기술 스택:</span>{' '}
-                    {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
-                      ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
-                      : '없음'}
-                  </div>
+                    {recommendedUser.role === 'DEVELOPER' && (
+                      <div className="text-sm text-gray-600 mb-4">
+                        <span className="font-semibold">기술 스택:</span>{' '}
+                        {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
+                          ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
+                          : '없음'}
+                      </div>
+                    )}
+                    {(recommendedUser.role === 'DESIGNER' || recommendedUser.role === 'PLANNER') && (
+                      <>
+                        {Array.isArray(recommendedUser.portfolioLinks) && recommendedUser.portfolioLinks.length > 0 && (
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-semibold">포트폴리오:</span>{' '}
+                            <span className="text-blue-600">{recommendedUser.portfolioLinks.length}개</span>
+                          </div>
+                        )}
+                        {Array.isArray(recommendedUser.experience) && recommendedUser.experience.length > 0 && (
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-semibold">프로젝트 경험:</span>{' '}
+                            <span className="text-blue-600">{recommendedUser.experience.length}개</span>
+                          </div>
+                        )}
+                        {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0 && (
+                          <div className="text-sm text-gray-600 mb-4">
+                            <span className="font-semibold">
+                              {recommendedUser.role === 'DESIGNER' ? '디자인 도구:' : '기획 도구:'}
+                            </span>{' '}
+                            {recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')}
+                          </div>
+                        )}
+                      </>
+                    )}
                     <div className={`mb-4 p-4 rounded-xl text-center ${
                       recommendedUser.score >= 70 ? 'bg-emerald-50' : 
                       recommendedUser.score >= 50 ? 'bg-yellow-50' : 'bg-red-50'

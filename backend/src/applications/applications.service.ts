@@ -92,6 +92,9 @@ export class ApplicationsService {
             nickname: true,
             role: true,
             techStacks: true,
+            portfolioLinks: true,
+            experience: true,
+            githubUsername: true,
           },
         },
       },
@@ -103,6 +106,8 @@ export class ApplicationsService {
       user: {
         ...app.user,
         techStacks: JSON.parse(app.user.techStacks || '[]'),
+        portfolioLinks: JSON.parse(app.user.portfolioLinks || '[]'),
+        experience: JSON.parse(app.user.experience || '[]'),
       },
     }));
   }

@@ -27,6 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         nickname: true,
         role: true,
         techStacks: true,
+        country: true,
+        portfolioLinks: true,
+        experience: true,
       },
     });
     return user;

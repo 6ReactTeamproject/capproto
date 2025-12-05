@@ -20,6 +20,8 @@ export class UsersService {
         role: true,
         techStacks: true,
         country: true,
+        portfolioLinks: true,
+        experience: true,
         createdAt: true,
         githubId: true,
         githubUsername: true,

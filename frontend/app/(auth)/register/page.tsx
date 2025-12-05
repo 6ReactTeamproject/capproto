@@ -67,6 +67,20 @@ export default function RegisterPage() {
     role: "DEVELOPER",
     techStacks: [] as string[],
     country: "",
+    portfolioLinks: [] as string[],
+    experience: [] as Array<{
+      title: string;
+      role: string;
+      period: string;
+      description: string;
+    }>,
+  });
+  const [newPortfolioLink, setNewPortfolioLink] = useState("");
+  const [newExperience, setNewExperience] = useState({
+    title: "",
+    role: "",
+    period: "",
+    description: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -181,53 +195,315 @@ export default function RegisterPage() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                기술 스택 (복수 선택 가능)
-              </label>
-              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
-                {AVAILABLE_TECH_STACKS.map((stack) => (
-                  <label
-                    key={stack}
-                    className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.techStacks.includes(stack)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData({
-                            ...formData,
-                            techStacks: [...formData.techStacks, stack],
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            techStacks: formData.techStacks.filter(
-                              (s) => s !== stack
-                            ),
-                          });
-                        }
-                      }}
-                      className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{stack}</span>
-                  </label>
-                ))}
-              </div>
-              {formData.techStacks.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {formData.techStacks.map((stack) => (
-                    <span
+            {/* 기술 스택 (개발자용) */}
+            {formData.role === "DEVELOPER" && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  기술 스택 (복수 선택 가능)
+                </label>
+                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
+                  {AVAILABLE_TECH_STACKS.map((stack) => (
+                    <label
                       key={stack}
-                      className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
+                      className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
                     >
-                      {stack}
-                    </span>
+                      <input
+                        type="checkbox"
+                        checked={formData.techStacks.includes(stack)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({
+                              ...formData,
+                              techStacks: [...formData.techStacks, stack],
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              techStacks: formData.techStacks.filter(
+                                (s) => s !== stack
+                              ),
+                            });
+                          }
+                        }}
+                        className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{stack}</span>
+                    </label>
                   ))}
                 </div>
-              )}
-            </div>
+                {formData.techStacks.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.techStacks.map((stack) => (
+                      <span
+                        key={stack}
+                        className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
+                      >
+                        {stack}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 포트폴리오 링크 (디자이너/기획자용) */}
+            {(formData.role === "DESIGNER" || formData.role === "PLANNER") && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  {formData.role === "DESIGNER"
+                    ? "포트폴리오 링크 (Behance, Dribbble, Figma 등)"
+                    : "포트폴리오/문서 링크 (Notion, 문서 링크 등)"}
+                </label>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="url"
+                    value={newPortfolioLink}
+                    onChange={(e) => setNewPortfolioLink(e.target.value)}
+                    placeholder="https://..."
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && newPortfolioLink.trim()) {
+                        e.preventDefault();
+                        setFormData({
+                          ...formData,
+                          portfolioLinks: [
+                            ...formData.portfolioLinks,
+                            newPortfolioLink.trim(),
+                          ],
+                        });
+                        setNewPortfolioLink("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newPortfolioLink.trim()) {
+                        setFormData({
+                          ...formData,
+                          portfolioLinks: [
+                            ...formData.portfolioLinks,
+                            newPortfolioLink.trim(),
+                          ],
+                        });
+                        setNewPortfolioLink("");
+                      }
+                    }}
+                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                  >
+                    추가
+                  </button>
+                </div>
+                {formData.portfolioLinks.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.portfolioLinks.map((link, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
+                      >
+                        <a
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
+                          {link.length > 40
+                            ? `${link.substring(0, 40)}...`
+                            : link}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              portfolioLinks: formData.portfolioLinks.filter(
+                                (_, i) => i !== index
+                              ),
+                            });
+                          }}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 기술 스택 (디자이너/기획자용 - 도구 경험) */}
+            {(formData.role === "DESIGNER" || formData.role === "PLANNER") && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  {formData.role === "DESIGNER"
+                    ? "디자인 도구 경험 (Figma, Adobe 등)"
+                    : "기획 도구 경험 (Notion, Figma, Miro 등)"}
+                </label>
+                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
+                  {AVAILABLE_TECH_STACKS.map((stack) => (
+                    <label
+                      key={stack}
+                      className="flex items-center cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.techStacks.includes(stack)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({
+                              ...formData,
+                              techStacks: [...formData.techStacks, stack],
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              techStacks: formData.techStacks.filter(
+                                (s) => s !== stack
+                              ),
+                            });
+                          }
+                        }}
+                        className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{stack}</span>
+                    </label>
+                  ))}
+                </div>
+                {formData.techStacks.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.techStacks.map((stack) => (
+                      <span
+                        key={stack}
+                        className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium"
+                      >
+                        {stack}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 프로젝트 경험 (디자이너/기획자용) */}
+            {(formData.role === "DESIGNER" || formData.role === "PLANNER") && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  프로젝트 경험 (선택사항)
+                </label>
+                <div className="space-y-3 mb-3 p-4 border border-gray-300 rounded-xl bg-gray-50">
+                  <input
+                    type="text"
+                    value={newExperience.title}
+                    onChange={(e) =>
+                      setNewExperience({
+                        ...newExperience,
+                        title: e.target.value,
+                      })
+                    }
+                    placeholder="프로젝트명"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    type="text"
+                    value={newExperience.role}
+                    onChange={(e) =>
+                      setNewExperience({
+                        ...newExperience,
+                        role: e.target.value,
+                      })
+                    }
+                    placeholder="역할 (예: 디자이너, 기획자)"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    type="text"
+                    value={newExperience.period}
+                    onChange={(e) =>
+                      setNewExperience({
+                        ...newExperience,
+                        period: e.target.value,
+                      })
+                    }
+                    placeholder="기간 (예: 2023-2024)"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <textarea
+                    value={newExperience.description}
+                    onChange={(e) =>
+                      setNewExperience({
+                        ...newExperience,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="설명"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newExperience.title.trim()) {
+                        setFormData({
+                          ...formData,
+                          experience: [
+                            ...formData.experience,
+                            { ...newExperience },
+                          ],
+                        });
+                        setNewExperience({
+                          title: "",
+                          role: "",
+                          period: "",
+                          description: "",
+                        });
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                  >
+                    경력 추가
+                  </button>
+                </div>
+                {formData.experience.length > 0 && (
+                  <div className="space-y-2">
+                    {formData.experience.map((exp, index) => (
+                      <div
+                        key={index}
+                        className="p-3 bg-white border border-gray-200 rounded-xl flex justify-between items-start"
+                      >
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900">
+                            {exp.title}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {exp.role} · {exp.period}
+                          </div>
+                          {exp.description && (
+                            <div className="text-sm text-gray-500 mt-1">
+                              {exp.description}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              experience: formData.experience.filter(
+                                (_, i) => i !== index
+                              ),
+                            });
+                          }}
+                          className="text-red-600 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {error && (
               <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
                 {error}
