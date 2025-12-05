@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { releasesApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 const LANGUAGES = [
   'TypeScript',
@@ -18,6 +19,7 @@ const LANGUAGES = [
 
 export default function ReleasesPage() {
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const [selectedLanguage, setSelectedLanguage] = useState('TypeScript');
   const [releases, setReleases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,11 +34,11 @@ export default function ReleasesPage() {
     setError(null);
     try {
       const data = await releasesApi.getByLanguage(selectedLanguage);
-      console.log(`${selectedLanguage} 릴리즈 정보:`, data);
+      console.log(`${selectedLanguage} ${t('releases.title')}:`, data);
       setReleases(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      console.error('릴리즈 정보 로드 실패:', err);
-      setError(err.message || '릴리즈 정보를 불러오는데 실패했습니다.');
+      console.error(`${t('releases.title')} 로드 실패:`, err);
+      setError(err.message || t('releases.loadError'));
       setReleases([]);
     } finally {
       setLoading(false);
@@ -53,14 +55,14 @@ export default function ReleasesPage() {
           <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          프로젝트 목록
+          {t('releases.backToProjects')}
         </Link>
 
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">언어별 최신 릴리즈 정보</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">{t('releases.languageReleases')}</h1>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <label className="font-semibold text-gray-700 min-w-[100px]">언어 선택:</label>
+            <label className="font-semibold text-gray-700 min-w-[100px]">{t('releases.selectLanguage')}</label>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
@@ -77,7 +79,7 @@ export default function ReleasesPage() {
               disabled={loading}
               className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
             >
-              {loading ? '로딩 중...' : '새로고침'}
+              {loading ? t('releases.loading') : t('releases.refresh')}
             </button>
             {user && (
               <button
@@ -88,7 +90,7 @@ export default function ReleasesPage() {
                     await releasesApi.sync(selectedLanguage);
                     await loadReleases();
                   } catch (err: any) {
-                    setError(err.message || '동기화에 실패했습니다. GitHub API rate limit에 걸렸을 수 있습니다.');
+                    setError(err.message || t('releases.syncError'));
                   } finally {
                     setLoading(false);
                   }
@@ -96,7 +98,7 @@ export default function ReleasesPage() {
                 disabled={loading}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
               >
-                {loading ? '동기화 중...' : '수동 동기화'}
+                {loading ? t('releases.syncing') : t('releases.sync')}
               </button>
             )}
           </div>
@@ -104,10 +106,10 @@ export default function ReleasesPage() {
 
         {error && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-6">
-            <div className="text-yellow-800 font-semibold mb-2">알림: {error}</div>
+            <div className="text-yellow-800 font-semibold mb-2">{t('releases.error')} {error}</div>
             {error.includes('rate limit') && (
               <div className="text-sm text-yellow-700">
-                GitHub API 호출 제한에 걸렸습니다. 약 35분 후 다시 시도하거나, 로그인 후 "수동 동기화" 버튼을 사용해주세요.
+                {t('releases.rateLimitMessage')}
               </div>
             )}
           </div>
@@ -115,22 +117,22 @@ export default function ReleasesPage() {
 
         {loading ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
-            <div className="text-gray-500 text-lg">로딩 중...</div>
+            <div className="text-gray-500 text-lg">{t('releases.loading')}</div>
           </div>
         ) : releases.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center text-gray-600 border border-gray-100">
             {error ? (
               <div>
-                <div className="mb-4">릴리즈 정보를 불러올 수 없습니다.</div>
+                <div className="mb-4">{t('releases.loadError')}</div>
                 <button
                   onClick={loadReleases}
                   className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
-                  다시 시도
+                  {t('releases.retry')}
                 </button>
               </div>
             ) : (
-              '릴리즈 정보가 없습니다.'
+              t('releases.noReleases')
             )}
           </div>
         ) : (
@@ -146,7 +148,9 @@ export default function ReleasesPage() {
                       {release.language} {release.version}
                     </h2>
                     <div className="text-gray-600 text-sm">
-                      릴리즈 날짜: {new Date(release.releaseDate).toLocaleDateString('ko-KR')}
+                      {t('releases.releaseDate')} {new Date(release.releaseDate).toLocaleDateString(
+                        language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US'
+                      )}
                     </div>
                   </div>
                   <a
@@ -155,13 +159,13 @@ export default function ReleasesPage() {
                     rel="noopener noreferrer"
                     className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
-                    공식 문서 보기 →
+                    {t('releases.officialDocs')}
                   </a>
                 </div>
 
                 {/* 공식 문서 핵심 내용 */}
                 <div className="bg-gray-50 rounded-xl p-6 mb-4 border border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">공식 문서 내용</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">{t('releases.officialContent')}</h3>
                   <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
                     {release.officialContent}
                   </div>
@@ -169,7 +173,7 @@ export default function ReleasesPage() {
 
                 {/* 간략 정리 */}
                 <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                  <h3 className="text-lg font-bold text-blue-900 mb-4">간략 정리</h3>
+                  <h3 className="text-lg font-bold text-blue-900 mb-4">{t('releases.summary')}</h3>
                   <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
                     {release.summary}
                   </div>

@@ -5,10 +5,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { usePathname } from 'next/navigation';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function Header() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const { t } = useI18n();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -43,7 +45,7 @@ export default function Header() {
                   : 'text-gray-700 hover:text-blue-600'
               }`}
             >
-              홈
+              {t('header.home')}
             </Link>
             <Link
               href="/projects"
@@ -53,7 +55,7 @@ export default function Header() {
                   : 'text-gray-700 hover:text-blue-600'
               }`}
             >
-              프로젝트
+              {t('header.projects')}
             </Link>
             {user && (
               <Link
@@ -64,7 +66,7 @@ export default function Header() {
                     : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
-                마이페이지
+                {t('header.mypage')}
               </Link>
             )}
             <Link
@@ -75,7 +77,7 @@ export default function Header() {
                   : 'text-gray-700 hover:text-blue-600'
               }`}
             >
-              릴리즈 정보
+              {t('header.releases')}
             </Link>
           </nav>
 
@@ -90,13 +92,13 @@ export default function Header() {
                   href="/projects/new"
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
-                  프로젝트 생성
+                  {t('header.createProject')}
                 </Link>
                 <button
                   onClick={logout}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-sm transition-all duration-200"
                 >
-                  로그아웃
+                  {t('header.logout')}
                 </button>
               </>
             ) : (
@@ -105,13 +107,13 @@ export default function Header() {
                   href="/login"
                   className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold text-sm transition-colors"
                 >
-                  로그인
+                  {t('header.login')}
                 </Link>
                 <Link
                   href="/register"
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
-                  가입하기
+                  {t('header.register')}
                 </Link>
               </>
             )}
@@ -148,7 +150,7 @@ export default function Header() {
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                 }`}
               >
-                홈
+                {t('header.home')}
               </Link>
               <Link
                 href="/projects"
@@ -159,7 +161,7 @@ export default function Header() {
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                 }`}
               >
-                프로젝트
+                {t('header.projects')}
               </Link>
               {user && (
                 <Link
@@ -171,7 +173,7 @@ export default function Header() {
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                   }`}
                 >
-                  마이페이지
+                  {t('header.mypage')}
                 </Link>
               )}
               <Link
@@ -183,7 +185,7 @@ export default function Header() {
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                 }`}
               >
-                릴리즈 정보
+                {t('header.releases')}
               </Link>
               
               {/* 모바일 사용자 메뉴 */}
@@ -198,7 +200,7 @@ export default function Header() {
                       onClick={closeMobileMenu}
                       className="block w-full px-4 py-2 mb-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm text-center transition-all duration-200 shadow-md hover:shadow-lg"
                     >
-                      프로젝트 생성
+                      {t('header.createProject')}
                     </Link>
                     <button
                       onClick={() => {
@@ -207,7 +209,7 @@ export default function Header() {
                       }}
                       className="block w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-sm transition-all duration-200"
                     >
-                      로그아웃
+                      {t('header.logout')}
                     </button>
                   </>
                 ) : (
@@ -217,14 +219,14 @@ export default function Header() {
                       onClick={closeMobileMenu}
                       className="block w-full px-4 py-2 mb-2 text-gray-700 hover:text-blue-600 font-semibold text-sm text-center transition-colors"
                     >
-                      로그인
+                      {t('header.login')}
                     </Link>
                     <Link
                       href="/register"
                       onClick={closeMobileMenu}
                       className="block w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm text-center transition-all duration-200 shadow-md hover:shadow-lg"
                     >
-                      가입하기
+                      {t('header.register')}
                     </Link>
                   </>
                 )}

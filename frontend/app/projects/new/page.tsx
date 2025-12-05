@@ -5,12 +5,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { projectsApi } from '@/lib/api';
 import { getToken } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
-// 사용 가능한 역할 목록
-const AVAILABLE_ROLES = [
-  { value: 'DEVELOPER', label: '개발자' },
-  { value: 'DESIGNER', label: '디자이너' },
-  { value: 'PLANNER', label: '기획자' },
+// 사용 가능한 역할 목록 (다국어 지원)
+const getAvailableRoles = (t: (key: string) => string) => [
+  { value: 'DEVELOPER', label: t('role.developer') },
+  { value: 'DESIGNER', label: t('role.designer') },
+  { value: 'PLANNER', label: t('role.planner') },
 ];
 
 // 사용 가능한 기술 스택 목록
@@ -31,6 +32,7 @@ const AVAILABLE_TECH_STACKS = [
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     title: '',
     shortDescription: '',
@@ -59,7 +61,7 @@ export default function NewProjectPage() {
       await projectsApi.create(formData);
       router.push('/projects');
     } catch (err: any) {
-      setError(err.message || '프로젝트 생성에 실패했습니다.');
+      setError(err.message || t('project.createError'));
     } finally {
       setLoading(false);
     }
@@ -98,41 +100,41 @@ export default function NewProjectPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">프로젝트 생성</h1>
-            <p className="text-gray-600">새로운 프로젝트를 만들어보세요</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('project.create')}</h1>
+            <p className="text-gray-600">{t('project.createDescription')}</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 제목 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">제목</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">{t('project.title')}</label>
           <input
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="프로젝트 제목을 입력하세요"
+                placeholder={t('project.titlePlaceholder')}
           />
         </div>
 
             {/* 한 줄 소개 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">한 줄 소개</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">{t('project.description')}</label>
           <textarea
             value={formData.shortDescription}
             onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
             required
             rows={3}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                placeholder="프로젝트를 한 줄로 소개해주세요"
+                placeholder={t('project.descriptionPlaceholder')}
           />
         </div>
 
             {/* 필요 역할 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">필요 역할 (복수 선택 가능)</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">{t('project.roles')} ({t('common.multipleSelect')})</label>
               <div className="flex flex-wrap gap-3 mb-3">
-            {AVAILABLE_ROLES.map((role) => (
+            {getAvailableRoles(t).map((role) => (
               <label
                 key={role.value}
                     className="flex items-center cursor-pointer px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
@@ -154,7 +156,7 @@ export default function NewProjectPage() {
                   key={role}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold"
                 >
-                  {AVAILABLE_ROLES.find((r) => r.value === role)?.label || role}
+                  {getAvailableRoles(t).find((r) => r.value === role)?.label || role}
                 </span>
               ))}
             </div>
@@ -163,7 +165,7 @@ export default function NewProjectPage() {
 
             {/* 필요 스택 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">필요 스택 (복수 선택 가능)</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">{t('project.stacks')} ({t('common.multipleSelect')})</label>
               <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
             {AVAILABLE_TECH_STACKS.map((stack) => (
               <label
@@ -196,10 +198,10 @@ export default function NewProjectPage() {
 
             {/* 프로젝트 기간 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">프로젝트 기간 (선택사항)</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">{t('project.duration')} ({t('common.optional')})</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-2">시작일</label>
+                  <label className="block text-xs text-gray-600 mb-2">{t('project.startDate')}</label>
                   <input
                     type="date"
                     value={formData.startDate}
@@ -208,7 +210,7 @@ export default function NewProjectPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-2">종료일</label>
+                  <label className="block text-xs text-gray-600 mb-2">{t('project.endDate')}</label>
                   <input
                     type="date"
                     value={formData.endDate}
@@ -233,7 +235,7 @@ export default function NewProjectPage() {
           disabled={loading}
               className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
         >
-          {loading ? '생성 중...' : '프로젝트 생성'}
+          {loading ? t('project.creating') : t('project.create')}
         </button>
       </form>
         </div>

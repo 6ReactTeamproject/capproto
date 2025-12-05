@@ -4,6 +4,7 @@ import './globals.css';
 import GlobalChatWidget from '@/components/GlobalChatWidget';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import I18nProviderWrapper from '@/components/I18nProviderWrapper';
 
 export const metadata: Metadata = {
   title: 'Sync-Up - 팀 매칭 플랫폼',
@@ -18,12 +19,14 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <GlobalChatWidget />
+        <I18nProviderWrapper>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <GlobalChatWidget />
+        </I18nProviderWrapper>
       </body>
     </html>
   );

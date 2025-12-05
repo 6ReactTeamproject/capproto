@@ -8,85 +8,113 @@
 
 ## 개발자 계정 (30명)
 
-| 번호 | 이메일 | 닉네임 | 역할 |
-|------|--------|--------|------|
-| 1 | dev1@example.com | james123 | DEVELOPER |
-| 2 | dev2@example.com | 민수 | DEVELOPER |
-| 3 | dev3@example.com | sarah99 | DEVELOPER |
-| 4 | dev4@example.com | alex_kim | DEVELOPER |
-| 5 | dev5@example.com | coffee | DEVELOPER |
-| 6 | dev6@example.com | react_lover | DEVELOPER |
-| 7 | dev7@example.com | kim_coder | DEVELOPER |
-| 8 | dev8@example.com | night_coder | DEVELOPER |
-| 9 | dev9@example.com | lee_dev | DEVELOPER |
-| 10 | dev10@example.com | jin_fullstack | DEVELOPER |
-| 11 | dev11@example.com | cloud_park | DEVELOPER |
-| 12 | dev12@example.com | choi_backend | DEVELOPER |
-| 13 | dev13@example.com | api_master | DEVELOPER |
-| 14 | dev14@example.com | micro_kim | DEVELOPER |
-| 15 | dev15@example.com | block_yoon | DEVELOPER |
-| 16 | dev16@example.com | ai_dev | DEVELOPER |
-| 17 | dev17@example.com | mobile_jung | DEVELOPER |
-| 18 | dev18@example.com | game_hong | DEVELOPER |
-| 19 | dev19@example.com | security_kang | DEVELOPER |
-| 20 | dev20@example.com | moon | DEVELOPER |
-| 21 | dev21@example.com | david2024 | DEVELOPER |
-| 22 | dev22@example.com | emily_dev | DEVELOPER |
-| 23 | dev23@example.com | mike_coder | DEVELOPER |
-| 24 | dev24@example.com | lisa_tech | DEVELOPER |
-| 25 | dev25@example.com | tom_dev | DEVELOPER |
-| 26 | dev26@example.com | jessica123 | DEVELOPER |
-| 27 | dev27@example.com | ryan_code | DEVELOPER |
-| 28 | dev28@example.com | amy_dev | DEVELOPER |
-| 29 | dev29@example.com | chris_tech | DEVELOPER |
-| 30 | dev30@example.com | kate_coder | DEVELOPER |
+| 번호 | 이메일            | 닉네임      | 역할      | 국가 |
+| ---- | ----------------- | ----------- | --------- | ---- |
+| 1    | dev1@example.com  | 민수        | DEVELOPER | KR   |
+| 2    | dev2@example.com  | james123    | DEVELOPER | US   |
+| 3    | dev3@example.com  | たろう      | DEVELOPER | JP   |
+| 4    | dev4@example.com  | 김코더      | DEVELOPER | KR   |
+| 5    | dev5@example.com  | sarah99     | DEVELOPER | US   |
+| 6    | dev6@example.com  | さくら      | DEVELOPER | JP   |
+| 7    | dev7@example.com  | 이개발      | DEVELOPER | KR   |
+| 8    | dev8@example.com  | alex_dev    | DEVELOPER | US   |
+| 9    | dev9@example.com  | けんじ      | DEVELOPER | JP   |
+| 10   | dev10@example.com | 박클라우드  | DEVELOPER | KR   |
+| 11   | dev11@example.com | coffee      | DEVELOPER | US   |
+| 12   | dev12@example.com | ゆき        | DEVELOPER | JP   |
+| 13   | dev13@example.com | 최백엔드    | DEVELOPER | KR   |
+| 14   | dev14@example.com | react_lover | DEVELOPER | US   |
+| 15   | dev15@example.com | ひろし      | DEVELOPER | JP   |
+| 16   | dev16@example.com | 정모바일    | DEVELOPER | KR   |
+| 17   | dev17@example.com | david2024   | DEVELOPER | US   |
+| 18   | dev18@example.com | みき        | DEVELOPER | JP   |
+| 19   | dev19@example.com | 홍게임      | DEVELOPER | KR   |
+| 20   | dev20@example.com | emily_dev   | DEVELOPER | US   |
+| 21   | dev21@example.com | だいすけ    | DEVELOPER | JP   |
+| 22   | dev22@example.com | 강보안      | DEVELOPER | KR   |
+| 23   | dev23@example.com | mike_coder  | DEVELOPER | US   |
+| 24   | dev24@example.com | あや        | DEVELOPER | JP   |
+| 25   | dev25@example.com | 문개발      | DEVELOPER | KR   |
+| 26   | dev26@example.com | lisa_tech   | DEVELOPER | US   |
+| 27   | dev27@example.com | まさき      | DEVELOPER | JP   |
+| 28   | dev28@example.com | 윤블록체인  | DEVELOPER | KR   |
+| 29   | dev29@example.com | tom_dev     | DEVELOPER | US   |
+| 30   | dev30@example.com | なつき      | DEVELOPER | JP   |
 
 ---
 
 ## 디자이너 계정 (15명)
 
-| 번호 | 이메일 | 닉네임 | 역할 |
-|------|--------|--------|------|
-| 1 | designer1@example.com | 지영 | DESIGNER |
-| 2 | designer2@example.com | 서연 | DESIGNER |
-| 3 | designer3@example.com | 수진 | DESIGNER |
-| 4 | designer4@example.com | 영희 | DESIGNER |
-| 5 | designer5@example.com | 미나 | DESIGNER |
-| 6 | designer6@example.com | 하늘 | DESIGNER |
-| 7 | designer7@example.com | 별 | DESIGNER |
-| 8 | designer8@example.com | river | DESIGNER |
-| 9 | designer9@example.com | ocean | DESIGNER |
-| 10 | designer10@example.com | star | DESIGNER |
-| 11 | designer11@example.com | luna | DESIGNER |
-| 12 | designer12@example.com | snow | DESIGNER |
-| 13 | designer13@example.com | rain | DESIGNER |
-| 14 | designer14@example.com | wind | DESIGNER |
-| 15 | designer15@example.com | sky | DESIGNER |
+| 번호 | 이메일                 | 닉네임       | 역할     | 국가 |
+| ---- | ---------------------- | ------------ | -------- | ---- |
+| 1    | designer1@example.com  | 지영         | DESIGNER | KR   |
+| 2    | designer2@example.com  | emily_design | DESIGNER | US   |
+| 3    | designer3@example.com  | みゆき       | DESIGNER | JP   |
+| 4    | designer4@example.com  | 서연         | DESIGNER | KR   |
+| 5    | designer5@example.com  | sophia_ui    | DESIGNER | US   |
+| 6    | designer6@example.com  | あかり       | DESIGNER | JP   |
+| 7    | designer7@example.com  | 수진         | DESIGNER | KR   |
+| 8    | designer8@example.com  | olivia_ux    | DESIGNER | US   |
+| 9    | designer9@example.com  | みお         | DESIGNER | JP   |
+| 10   | designer10@example.com | 영희         | DESIGNER | KR   |
+| 11   | designer11@example.com | ava_creative | DESIGNER | US   |
+| 12   | designer12@example.com | ゆい         | DESIGNER | JP   |
+| 13   | designer13@example.com | 미나         | DESIGNER | KR   |
+| 14   | designer14@example.com | isabella_art | DESIGNER | US   |
+| 15   | designer15@example.com | りん         | DESIGNER | JP   |
 
 ---
 
 ## 기획자 계정 (10명)
 
-| 번호 | 이메일 | 닉네임 | 역할 |
-|------|--------|--------|------|
-| 1 | planner1@example.com | 현우 | PLANNER |
-| 2 | planner2@example.com | 준호 | PLANNER |
-| 3 | planner3@example.com | sarah_planner | PLANNER |
-| 4 | planner4@example.com | alex_manager | PLANNER |
-| 5 | planner5@example.com | 민준 | PLANNER |
-| 6 | planner6@example.com | james_pm | PLANNER |
-| 7 | planner7@example.com | 태현 | PLANNER |
-| 8 | planner8@example.com | emily_strategy | PLANNER |
-| 9 | planner9@example.com | 준영 | PLANNER |
-| 10 | planner10@example.com | mike_planner | PLANNER |
+| 번호 | 이메일                | 닉네임         | 역할    | 국가 |
+| ---- | --------------------- | -------------- | ------- | ---- |
+| 1    | planner1@example.com  | 현우           | PLANNER | KR   |
+| 2    | planner2@example.com  | sarah_planner  | PLANNER | US   |
+| 3    | planner3@example.com  | たかし         | PLANNER | JP   |
+| 4    | planner4@example.com  | 준호           | PLANNER | KR   |
+| 5    | planner5@example.com  | alex_manager   | PLANNER | US   |
+| 6    | planner6@example.com  | ゆうき         | PLANNER | JP   |
+| 7    | planner7@example.com  | 민준           | PLANNER | KR   |
+| 8    | planner8@example.com  | james_pm       | PLANNER | US   |
+| 9    | planner9@example.com  | 태현           | PLANNER | KR   |
+| 10   | planner10@example.com | emily_strategy | PLANNER | US   |
+
+---
+
+## 국가별 요약
+
+### 한국 (KR) - 19명
+
+- 개발자: 10명
+- 디자이너: 5명
+- 기획자: 4명
+
+### 미국 (US) - 18명
+
+- 개발자: 10명
+- 디자이너: 5명
+- 기획자: 3명
+
+### 일본 (JP) - 18명
+
+- 개발자: 10명
+- 디자이너: 5명
+- 기획자: 3명
+
+**총 55명**
 
 ---
 
 ## 사용 방법
 
 1. 로그인 페이지에서 위의 이메일과 비밀번호(`password123`)를 입력하여 로그인합니다.
-2. 각 계정은 서로 다른 역할과 기술 스택을 가지고 있습니다.
+2. 각 계정은 서로 다른 역할, 기술 스택, 국가를 가지고 있습니다.
 3. 프로젝트 생성, 참여 신청, 채팅 등 모든 기능을 테스트할 수 있습니다.
+4. 각 유저의 국가에 따라 사이트 언어가 자동으로 설정됩니다:
+   - 한국 (KR) → 한국어
+   - 미국 (US) → 영어
+   - 일본 (JP) → 일본어
 
 ---
 
@@ -95,4 +123,4 @@
 - 모든 계정은 시드 스크립트(`backend/prisma/seed.ts`) 실행 시 자동으로 생성됩니다.
 - 시드 스크립트를 실행하면 기존 데이터가 모두 삭제되고 새로운 더미 데이터가 생성됩니다.
 - 프로젝트는 총 20개가 생성되며, 일부 프로젝트는 모집이 종료된 상태입니다.
-
+- 각 유저의 국가 정보는 다국어 지원 기능과 자동 번역 기능에 사용됩니다.

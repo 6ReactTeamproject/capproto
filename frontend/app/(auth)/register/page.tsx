@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authApi, setToken } from "@/lib/api";
+import { useI18n } from "@/lib/i18n/context";
 
 // 사용 가능한 기술 스택 목록
 const AVAILABLE_TECH_STACKS = [
@@ -51,15 +52,16 @@ const AVAILABLE_TECH_STACKS = [
   "TypeORM",
 ];
 
-// 국가 목록
-const COUNTRIES = [
-  { code: "KR", name: "대한민국" },
-  { code: "US", name: "미국" },
-  { code: "JP", name: "일본" },
+// 국가 목록 (다국어 지원)
+const getCountries = (t: (key: string) => string) => [
+  { code: "KR", name: t("common.country.kr") },
+  { code: "US", name: t("common.country.us") },
+  { code: "JP", name: t("common.country.jp") },
 ];
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -95,7 +97,7 @@ export default function RegisterPage() {
       setToken(response.accessToken);
       router.push("/projects");
     } catch (err: any) {
-      setError(err.message || "회원가입에 실패했습니다.");
+      setError(err.message || t("auth.registerError"));
     } finally {
       setLoading(false);
     }
@@ -109,13 +111,15 @@ export default function RegisterPage() {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
               <span className="text-white font-bold text-2xl">S</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">회원가입</h1>
-            <p className="text-gray-600 mt-2">새로운 계정을 만들어보세요</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("auth.register")}
+            </h1>
+            <p className="text-gray-600 mt-2">{t("auth.newAccount")}</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                이메일
+                {t("auth.email")}
               </label>
               <input
                 type="email"
@@ -125,12 +129,12 @@ export default function RegisterPage() {
                 }
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="이메일을 입력하세요"
+                placeholder={t("auth.email")}
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                비밀번호
+                {t("auth.password")}
               </label>
               <input
                 type="password"
@@ -141,12 +145,14 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="비밀번호를 입력하세요 (최소 6자)"
+                placeholder={`${t("auth.password")} (${t(
+                  "common.minLength"
+                )} 6)`}
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                닉네임
+                {t("auth.nickname")}
               </label>
               <input
                 type="text"
@@ -157,12 +163,12 @@ export default function RegisterPage() {
                 required
                 minLength={2}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="닉네임을 입력하세요"
+                placeholder={t("auth.nickname")}
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                역할
+                {t("auth.role")}
               </label>
               <select
                 value={formData.role}
@@ -171,14 +177,14 @@ export default function RegisterPage() {
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="DEVELOPER">개발자</option>
-                <option value="DESIGNER">디자이너</option>
-                <option value="PLANNER">기획자</option>
+                <option value="DEVELOPER">{t("role.developer")}</option>
+                <option value="DESIGNER">{t("role.designer")}</option>
+                <option value="PLANNER">{t("role.planner")}</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                국가
+                {t("auth.country")}
               </label>
               <select
                 value={formData.country}
@@ -187,8 +193,8 @@ export default function RegisterPage() {
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">국가를 선택하세요</option>
-                {COUNTRIES.map((country) => (
+                <option value="">{t("auth.selectCountry")}</option>
+                {getCountries(t).map((country) => (
                   <option key={country.code} value={country.code}>
                     {country.name}
                   </option>
@@ -251,8 +257,8 @@ export default function RegisterPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   {formData.role === "DESIGNER"
-                    ? "포트폴리오 링크 (Behance, Dribbble, Figma 등)"
-                    : "포트폴리오/문서 링크 (Notion, 문서 링크 등)"}
+                    ? t("auth.portfolioLinksDesigner")
+                    : t("auth.portfolioLinksPlanner")}
                 </label>
                 <div className="flex gap-2 mb-3">
                   <input
@@ -291,7 +297,7 @@ export default function RegisterPage() {
                     }}
                     className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
-                    추가
+                    {t("auth.addLink")}
                   </button>
                 </div>
                 {formData.portfolioLinks.length > 0 && (
@@ -337,8 +343,8 @@ export default function RegisterPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   {formData.role === "DESIGNER"
-                    ? "디자인 도구 경험 (Figma, Adobe 등)"
-                    : "기획 도구 경험 (Notion, Figma, Miro 등)"}
+                    ? t("mypage.designTools")
+                    : t("mypage.planningTools")}
                 </label>
                 <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
                   {AVAILABLE_TECH_STACKS.map((stack) => (
@@ -389,7 +395,7 @@ export default function RegisterPage() {
             {(formData.role === "DESIGNER" || formData.role === "PLANNER") && (
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  프로젝트 경험 (선택사항)
+                  {t("auth.experience")}
                 </label>
                 <div className="space-y-3 mb-3 p-4 border border-gray-300 rounded-xl bg-gray-50">
                   <input
@@ -401,7 +407,7 @@ export default function RegisterPage() {
                         title: e.target.value,
                       })
                     }
-                    placeholder="프로젝트명"
+                    placeholder={t("auth.projectName")}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <input
@@ -413,7 +419,7 @@ export default function RegisterPage() {
                         role: e.target.value,
                       })
                     }
-                    placeholder="역할 (예: 디자이너, 기획자)"
+                    placeholder={t("auth.projectRole")}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <input
@@ -425,7 +431,7 @@ export default function RegisterPage() {
                         period: e.target.value,
                       })
                     }
-                    placeholder="기간 (예: 2023-2024)"
+                    placeholder={t("auth.period")}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <textarea
@@ -436,7 +442,7 @@ export default function RegisterPage() {
                         description: e.target.value,
                       })
                     }
-                    placeholder="설명"
+                    placeholder={t("auth.description")}
                     rows={2}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
@@ -461,7 +467,7 @@ export default function RegisterPage() {
                     }}
                     className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
-                    경력 추가
+                    {t("auth.addExperience")}
                   </button>
                 </div>
                 {formData.experience.length > 0 && (
@@ -514,7 +520,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
             >
-              {loading ? "가입 중..." : "회원가입"}
+              {loading ? t("auth.registering") : t("auth.registerButton")}
             </button>
           </form>
           <div className="mt-6 text-center">
@@ -522,7 +528,7 @@ export default function RegisterPage() {
               href="/login"
               className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
-              로그인
+              {t("auth.goToLogin")}
             </Link>
           </div>
         </div>

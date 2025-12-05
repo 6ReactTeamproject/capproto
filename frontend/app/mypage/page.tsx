@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { mypageApi, authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -47,15 +48,16 @@ const AVAILABLE_TECH_STACKS = [
   "TypeORM",
 ];
 
-// 국가 목록
-const COUNTRIES = [
-  { code: "KR", name: "대한민국" },
-  { code: "US", name: "미국" },
-  { code: "JP", name: "일본" },
+// 국가 목록 (다국어 지원)
+const getCountries = (t: (key: string) => string) => [
+  { code: "KR", name: t('country.korea') },
+  { code: "US", name: t('country.usa') },
+  { code: "JP", name: t('country.japan') },
 ];
 
 export default function MyPage() {
   const { user, loading: authLoading, logout, checkAuth } = useAuth();
+  const { t, language } = useI18n();
   const [mypageInfo, setMypageInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +150,7 @@ export default function MyPage() {
       await loadMyPageInfo();
       await checkAuth(); // 인증 정보 새로고침
     } catch (err: any) {
-      setEditError(err.message || '프로필 수정에 실패했습니다.');
+      setEditError(err.message || t('mypage.editError'));
     } finally {
       setEditLoading(false);
     }
@@ -158,12 +160,12 @@ export default function MyPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
         <div className="text-center">
-          <div className="text-lg font-semibold text-gray-900 mb-2">로딩 중...</div>
+          <div className="text-lg font-semibold text-gray-900 mb-2">{t('common.loading')}</div>
           <div className="text-sm text-gray-600 mt-2">
-          GitHub 활동 정보를 불러오고 있습니다. 잠시만 기다려주세요.
+          {t('mypage.loadingGitHub')}
         </div>
           <div className="mt-4 text-xs text-gray-500">
-          (처음 로딩 시 최대 20개 저장소의 정보를 수집하므로 약간 시간이 걸릴 수 있습니다)
+          {t('mypage.loadingGitHubHint')}
           </div>
         </div>
       </div>
@@ -174,13 +176,13 @@ export default function MyPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">로그인이 필요합니다</h1>
-          <p className="text-gray-600 mb-6">마이페이지를 보려면 먼저 로그인해주세요.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('mypage.loginRequired')}</h1>
+          <p className="text-gray-600 mb-6">{t('mypage.loginRequiredDesc')}</p>
         <Link
           href="/login"
             className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
-          로그인하기
+          {t('mypage.loginButton')}
         </Link>
         </div>
       </div>
@@ -192,13 +194,13 @@ export default function MyPage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full text-center">
           <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium mb-4">
-            오류: {error}
+            {t('common.error')}: {error}
           </div>
         <button
           onClick={loadMyPageInfo}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
-          다시 시도
+          {t('common.retry')}
         </button>
         </div>
       </div>
@@ -220,21 +222,21 @@ export default function MyPage() {
           <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          프로젝트 목록
+          {t('project.list')}
         </Link>
 
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">마이페이지</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">{t('mypage.title')}</h1>
 
       {/* 프로필 정보 */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">프로필 정보</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('mypage.profile')}</h2>
             {!isEditingProfile && (
               <button
                 onClick={() => setIsEditingProfile(true)}
                 className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
-                프로필 수정
+                {t('mypage.editProfile')}
               </button>
             )}
           </div>
@@ -242,7 +244,7 @@ export default function MyPage() {
           {isEditingProfile ? (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">닉네임</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('mypage.nickname')}</label>
                 <input
                   type="text"
                   value={editFormData.nickname}
@@ -253,14 +255,14 @@ export default function MyPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">국가</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('mypage.country')}</label>
                 <select
                   value={editFormData.country}
                   onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">국가를 선택하세요</option>
-                  {COUNTRIES.map((country) => (
+                  <option value="">{t('auth.selectCountry')}</option>
+                  {getCountries(t).map((country) => (
                     <option key={country.code} value={country.code}>
                       {country.name}
                     </option>
@@ -270,7 +272,7 @@ export default function MyPage() {
               {/* 기술 스택 (개발자용) */}
               {user?.role === "DEVELOPER" && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">기술 스택 (복수 선택 가능)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">{t('mypage.techStacks')} ({t('common.multipleSelect')})</label>
                   <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-2">
                     {AVAILABLE_TECH_STACKS.map((stack) => (
                       <label
@@ -319,8 +321,8 @@ export default function MyPage() {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
                     {user.role === "DESIGNER" 
-                      ? "포트폴리오 링크 (Behance, Dribbble, Figma 등)" 
-                      : "포트폴리오/문서 링크 (Notion, 문서 링크 등)"}
+                      ? t('auth.portfolioLinksDesigner')
+                      : t('auth.portfolioLinksPlanner')}
                   </label>
                   <div className="flex gap-2 mb-3">
                     <input
@@ -463,7 +465,7 @@ export default function MyPage() {
                       onChange={(e) =>
                         setNewExperience({ ...newExperience, role: e.target.value })
                       }
-                      placeholder="역할 (예: 디자이너, 기획자)"
+                      placeholder={t("auth.projectRole")}
                       className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <input
@@ -472,7 +474,7 @@ export default function MyPage() {
                       onChange={(e) =>
                         setNewExperience({ ...newExperience, period: e.target.value })
                       }
-                      placeholder="기간 (예: 2023-2024)"
+                      placeholder={t("auth.period")}
                       className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <textarea
@@ -480,7 +482,7 @@ export default function MyPage() {
                       onChange={(e) =>
                         setNewExperience({ ...newExperience, description: e.target.value })
                       }
-                      placeholder="설명"
+                      placeholder={t("auth.description")}
                       rows={2}
                       className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     />
@@ -502,7 +504,7 @@ export default function MyPage() {
                       }}
                       className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
-                      경력 추가
+                      {t("auth.addExperience")}
                     </button>
                   </div>
                   {editFormData.experience.length > 0 && (
@@ -540,17 +542,17 @@ export default function MyPage() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">비밀번호 변경 (선택사항)</label>
+          <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t("mypage.passwordChange")}</label>
                 <input
                   type="password"
                   value={editFormData.password}
                   onChange={(e) => setEditFormData({ ...editFormData, password: e.target.value })}
                   minLength={6}
-                  placeholder="변경할 비밀번호를 입력하세요 (최소 6자)"
+                  placeholder={t("mypage.passwordPlaceholder")}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <div className="text-xs text-gray-500 mt-1">비밀번호를 변경하지 않으려면 비워두세요</div>
+                <div className="text-xs text-gray-500 mt-1">{t("mypage.passwordHint")}</div>
               </div>
               {editError && (
                 <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
@@ -563,7 +565,7 @@ export default function MyPage() {
                   disabled={editLoading}
                   className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
                 >
-                  {editLoading ? '저장 중...' : '저장하기'}
+                  {editLoading ? t("mypage.saving") : t("mypage.saveButton")}
                 </button>
                 <button
                   onClick={() => {
@@ -592,31 +594,31 @@ export default function MyPage() {
                   disabled={editLoading}
                   className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed"
                 >
-                  취소
+                  {t("common.cancel")}
                 </button>
               </div>
-            </div>
+          </div>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div>
-                  <div className="text-sm font-semibold text-gray-600 mb-2">닉네임</div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">{t("mypage.nickname")}</div>
                   <div className="text-gray-900 font-medium">{userInfo?.nickname || '-'}</div>
           </div>
           <div>
-                  <div className="text-sm font-semibold text-gray-600 mb-2">이메일</div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">{t("mypage.email")}</div>
                   <div className="text-gray-900 font-medium">{userInfo?.email || '-'}</div>
                 </div>
             <div>
-                  <div className="text-sm font-semibold text-gray-600 mb-2">역할</div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">{t("mypage.role")}</div>
                   <div className="text-gray-900 font-medium">
-              {userInfo?.role === 'DEVELOPER' && '개발자'}
-              {userInfo?.role === 'DESIGNER' && '디자이너'}
-              {userInfo?.role === 'PLANNER' && '기획자'}
+              {userInfo?.role === 'DEVELOPER' && t("role.developer")}
+              {userInfo?.role === 'DESIGNER' && t("role.designer")}
+              {userInfo?.role === 'PLANNER' && t("role.planner")}
             </div>
           </div>
           <div>
-                  <div className="text-sm font-semibold text-gray-600 mb-2">국가</div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">{t("mypage.country")}</div>
                   <div className="text-gray-900 font-medium">
                     {userInfo?.country ? COUNTRIES.find(c => c.code === userInfo.country)?.name || userInfo.country : '-'}
                   </div>
@@ -624,16 +626,18 @@ export default function MyPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <div>
-                  <div className="text-sm font-semibold text-gray-600 mb-2">가입일</div>
+                  <div className="text-sm font-semibold text-gray-600 mb-2">{t("mypage.joinedDate")}</div>
                   <div className="text-gray-900 font-medium">
-                    {userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString('ko-KR') : '-'}
+                    {userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString(
+                      language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US'
+                    ) : '-'}
                   </div>
           </div>
         </div>
         {techStacks.length > 0 && (
                 <div className="mb-6">
                   <div className="text-sm font-semibold text-gray-600 mb-3">
-                    {userInfo?.role === 'DEVELOPER' ? '기술 스택' : userInfo?.role === 'DESIGNER' ? '디자인 도구 경험' : '기획 도구 경험'}
+                    {userInfo?.role === 'DEVELOPER' ? t("mypage.techStacks") : userInfo?.role === 'DESIGNER' ? t("mypage.designTools") : t("mypage.planningTools")}
                   </div>
                   <div className="flex flex-wrap gap-2">
               {techStacks.map((stack: string, index: number) => (
@@ -650,7 +654,7 @@ export default function MyPage() {
         {portfolioLinks.length > 0 && (
           <div className="mb-6">
             <div className="text-sm font-semibold text-gray-600 mb-3">
-              {userInfo?.role === 'DESIGNER' ? '포트폴리오 링크' : '포트폴리오/문서 링크'}
+              {userInfo?.role === 'DESIGNER' ? t("mypage.portfolioLinks") : t("auth.portfolioLinksPlanner")}
             </div>
             <div className="flex flex-wrap gap-2">
               {portfolioLinks.map((link: string, index: number) => (
@@ -669,7 +673,7 @@ export default function MyPage() {
         )}
         {experience.length > 0 && (
           <div className="mb-6">
-            <div className="text-sm font-semibold text-gray-600 mb-3">프로젝트 경험</div>
+            <div className="text-sm font-semibold text-gray-600 mb-3">{t("mypage.experience")}</div>
             <div className="space-y-3">
               {experience.map((exp: any, index: number) => (
                 <div
@@ -691,7 +695,7 @@ export default function MyPage() {
             </>
           )}
           <div className="p-4 bg-gray-50 rounded-xl">
-            <div className="text-sm font-semibold text-gray-600 mb-3">GitHub 연동</div>
+            <div className="text-sm font-semibold text-gray-600 mb-3">{t("mypage.github")}</div>
           {userInfo?.githubUsername ? (
               <div className="flex items-center justify-between">
               <div>
@@ -701,16 +705,16 @@ export default function MyPage() {
                   </svg>
                   {userInfo.githubUsername}
                 </div>
-                  <div className="text-xs text-gray-600">GitHub 계정이 연동되어 있습니다</div>
+                  <div className="text-xs text-gray-600">{t("mypage.githubConnected")}</div>
               </div>
                 <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">
-                연동됨
+                {t("mypage.connected")}
               </span>
             </div>
           ) : (
             <div>
                 <div className="text-sm text-gray-600 mb-3">
-                GitHub 계정을 연동하면 GitHub로도 로그인할 수 있습니다.
+                {t("mypage.githubLinkDescription")}
               </div>
               <button
                 onClick={() => {
@@ -722,7 +726,7 @@ export default function MyPage() {
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                 </svg>
-                GitHub 연동하기
+                {t("mypage.linkGitHub")}
               </button>
             </div>
           )}
@@ -736,24 +740,24 @@ export default function MyPage() {
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
             </svg>
-            GitHub 활동 통계
+            {t("mypage.githubStats")}
           </h2>
           
           {githubStats.rateLimited && (
               <div className="px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-xl mb-6 text-sm text-yellow-800">
-              ⚠️ GitHub API 요청 한도에 도달했습니다. 통계 정보가 제한적으로 표시될 수 있습니다. 잠시 후 다시 시도해주세요.
+              {t("mypage.githubRateLimited")}
             </div>
           )}
           
           {githubStats.permissionIssue && (
               <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl mb-6 text-sm text-red-800">
-              ⚠️ GitHub 권한 문제가 발생했습니다. 조직 저장소 정보를 가져오려면 추가 권한이 필요합니다.
+              {t("mypage.githubPermissionIssue")}
                 <div className="mt-2">
                 <a 
                   href={`${API_BASE_URL}/auth/github`}
                     className="text-red-800 underline font-bold"
                 >
-                  GitHub로 다시 로그인하기 (재인증 필요)
+                  {t("mypage.githubReauth")}
                 </a>
               </div>
             </div>
@@ -764,31 +768,31 @@ export default function MyPage() {
                 <div className="text-2xl font-bold text-gray-900 mb-1">
                 {githubStats.totalCommits.toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">총 커밋 수</div>
+                <div className="text-sm text-gray-600">{t("mypage.totalCommits")}</div>
               </div>
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 mb-1">
                   {githubStats.publicRepositories}
             </div>
-                <div className="text-sm text-gray-600">Public 저장소</div>
+                <div className="text-sm text-gray-600">{t("mypage.publicRepos")}</div>
               </div>
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 mb-1">
                   {githubStats.commitPattern.lastWeek}
             </div>
-                <div className="text-sm text-gray-600">최근 1주일</div>
+                <div className="text-sm text-gray-600">{t("mypage.lastWeek")}</div>
               </div>
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 mb-1">
                   {githubStats.commitPattern.lastMonth}
             </div>
-                <div className="text-sm text-gray-600">최근 1개월</div>
+                <div className="text-sm text-gray-600">{t("mypage.lastMonth")}</div>
             </div>
           </div>
 
           {Object.keys(githubStats.languages).length > 0 && (
               <div className="mb-6">
-                <div className="text-sm font-semibold text-gray-600 mb-3">주요 사용 언어</div>
+                <div className="text-sm font-semibold text-gray-600 mb-3">{t("mypage.topLanguages")}</div>
                 <div className="flex flex-wrap gap-2">
                 {Object.entries(githubStats.languages)
                   .sort((a, b) => b[1] - a[1])
@@ -807,7 +811,7 @@ export default function MyPage() {
 
           {githubStats.recentActivity && githubStats.recentActivity.length > 0 && (
               <div className="mb-6">
-                <div className="text-sm font-semibold text-gray-600 mb-3">최근 활동 패턴 (최근 30일)</div>
+                <div className="text-sm font-semibold text-gray-600 mb-3">{t("mypage.recentActivity")}</div>
                 <div className="flex gap-0.5 items-end h-16">
                 {githubStats.recentActivity.map((activity, index) => {
                   const maxCommits = Math.max(...githubStats.recentActivity.map(a => a.commits), 1);
@@ -817,14 +821,14 @@ export default function MyPage() {
                       key={index}
                         className="flex-1 bg-emerald-500 rounded-t"
                         style={{ height: `${Math.max(height, 2)}px`, minHeight: '2px' }}
-                        title={`${activity.date}: ${activity.commits} commits`}
+                        title={`${activity.date}: ${activity.commits} ${t("mypage.commits")}`}
                     />
                   );
                 })}
               </div>
                 <div className="flex justify-between mt-2 text-xs text-gray-600">
-                <span>30일 전</span>
-                <span>오늘</span>
+                <span>{t("mypage.daysAgo30")}</span>
+                <span>{t("mypage.today")}</span>
               </div>
             </div>
           )}
@@ -848,42 +852,42 @@ export default function MyPage() {
             <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-2">
             {stats?.createdProjectsCount || 0}
             </div>
-            <div className="text-sm text-gray-600 font-medium">생성한 프로젝트</div>
+            <div className="text-sm text-gray-600 font-medium">{t("mypage.createdProjects")}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
             <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent mb-2">
               {stats?.appliedProjectsCount || 0}
         </div>
-            <div className="text-sm text-gray-600 font-medium">참여 신청한 프로젝트</div>
+            <div className="text-sm text-gray-600 font-medium">{t("mypage.appliedProjects")}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
             <div className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-700 bg-clip-text text-transparent mb-2">
               {stats?.pendingApplicationsCount || 0}
         </div>
-            <div className="text-sm text-gray-600 font-medium">대기 중인 신청</div>
+            <div className="text-sm text-gray-600 font-medium">{t("mypage.pendingApplications")}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
             <div className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-700 bg-clip-text text-transparent mb-2">
               {stats?.acceptedApplicationsCount || 0}
         </div>
-            <div className="text-sm text-gray-600 font-medium">수락된 신청</div>
+            <div className="text-sm text-gray-600 font-medium">{t("mypage.acceptedApplications")}</div>
         </div>
       </div>
 
       {/* 내가 생성한 프로젝트 */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">내가 생성한 프로젝트 ({myProjects?.length || 0})</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t("mypage.myProjects")} ({myProjects?.length || 0})</h2>
           <Link
             href="/projects/new"
               className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
-            새 프로젝트 생성
+            {t("project.create")}
           </Link>
         </div>
         {!myProjects || myProjects.length === 0 ? (
             <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center text-gray-600 shadow-lg">
-            생성한 프로젝트가 없습니다.
+            {t("mypage.noCreatedProjects")}
           </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -895,11 +899,13 @@ export default function MyPage() {
                     {project.shortDescription}
                   </p>
                     <div className="flex gap-4 text-xs text-gray-500 mb-2">
-                    <span>신청: {project.applicationCount || 0}건</span>
-                    <span>메시지: {project.messageCount || 0}개</span>
+                    <span>{t("project.applications")}: {project.applicationCount || 0}{t("common.count")}</span>
+                    <span>{t("chat.title")}: {project.messageCount || 0}{t("common.count")}</span>
                   </div>
                     <div className="text-xs text-gray-600">
-                    {new Date(project.createdAt).toLocaleDateString('ko-KR')}
+                    {new Date(project.createdAt).toLocaleDateString(
+                      language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US'
+                    )}
                   </div>
                 </div>
               </Link>
@@ -910,10 +916,10 @@ export default function MyPage() {
 
       {/* 내가 참여 신청한 프로젝트 */}
       <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-6">내가 참여 신청한 프로젝트 ({myApplications?.length || 0})</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">{t("mypage.myApplications")} ({myApplications?.length || 0})</h2>
         {!myApplications || myApplications.length === 0 ? (
             <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center text-gray-600 shadow-lg">
-            참여 신청한 프로젝트가 없습니다.
+            {t("mypage.noAppliedProjects")}
           </div>
         ) : (
             <div className="space-y-4">
@@ -934,9 +940,9 @@ export default function MyPage() {
                               : 'bg-yellow-100 text-yellow-700'
                         }`}
                       >
-                        {application.status === 'ACCEPTED' && '수락됨'}
-                        {application.status === 'REJECTED' && '거절됨'}
-                        {application.status === 'PENDING' && '대기 중'}
+                        {application.status === 'ACCEPTED' && t("project.accepted")}
+                        {application.status === 'REJECTED' && t("project.rejected")}
+                        {application.status === 'PENDING' && t("mypage.pending")}
                       </span>
                   </div>
                   {application.message && (
@@ -945,8 +951,10 @@ export default function MyPage() {
                     </div>
                   )}
                     <div className="mt-4 text-xs text-gray-600 space-y-1">
-                    <div>프로젝트 생성자: {application.project.creator.nickname}</div>
-                    <div>신청일: {new Date(application.createdAt).toLocaleDateString('ko-KR')}</div>
+                    <div>{t("project.creator")}: {application.project.creator.nickname}</div>
+                    <div>{t("project.apply")}: {new Date(application.createdAt).toLocaleDateString(
+                      language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US'
+                    )}</div>
                   </div>
                 </div>
               </Link>

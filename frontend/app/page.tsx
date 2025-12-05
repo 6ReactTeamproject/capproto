@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { projectsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
-// 역할을 한글로 변환하는 함수
-const getRoleLabel = (role: string): string => {
+// 역할을 다국어로 변환하는 함수
+const getRoleLabel = (role: string, t: (key: string) => string): string => {
   const roleMap: Record<string, string> = {
-    'DEVELOPER': '개발자',
-    'DESIGNER': '디자이너',
-    'PLANNER': '기획자',
+    'DEVELOPER': t('role.developer'),
+    'DESIGNER': t('role.designer'),
+    'PLANNER': t('role.planner'),
   };
   return roleMap[role] || role;
 };
@@ -20,6 +21,7 @@ const getRoleLabel = (role: string): string => {
 export default function HomePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { t, language } = useI18n();
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,12 @@ export default function HomePage() {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
+    const localeMap: Record<string, string> = {
+      'ko': 'ko-KR',
+      'en': 'en-US',
+      'ja': 'ja-JP',
+    };
+    return date.toLocaleDateString(localeMap[language] || 'ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -51,7 +58,7 @@ export default function HomePage() {
   if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-gray-500 text-lg">로딩 중...</div>
+        <div className="text-gray-500 text-lg">{t('common.loading')}</div>
       </div>
     );
   }
@@ -63,16 +70,26 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              사이드 프로젝트 팀원을
-              <br />
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                쉽게 찾아보세요
-              </span>
+              {t('home.subtitle').split('\n').map((line, i) => (
+                <span key={i}>
+                  {i > 0 && <br />}
+                  {i === 1 ? (
+                    <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      {line}
+                    </span>
+                  ) : (
+                    line
+                  )}
+                </span>
+              ))}
             </h1>
             <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-              개발자, 디자이너, 기획자와 함께 의미있는 프로젝트를 만들어보세요.
-              <br />
-              실시간 채팅과 자동 번역으로 전 세계 팀원과 협업하세요.
+              {t('home.description').split('\n').map((line, i) => (
+                <span key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </span>
+              ))}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {user ? (
@@ -81,13 +98,13 @@ export default function HomePage() {
                     href="/projects/new"
                     className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
                   >
-                    프로젝트 만들기
+                    {t('project.create')}
                   </Link>
                   <Link
                     href="/projects"
                     className="px-8 py-4 bg-white text-gray-700 rounded-2xl font-semibold text-lg shadow-md hover:shadow-lg border border-gray-200 transform hover:-translate-y-1 transition-all duration-200"
                   >
-                    프로젝트 둘러보기
+                    {t('home.viewProjects')}
                   </Link>
                 </>
               ) : (
@@ -96,13 +113,13 @@ export default function HomePage() {
                     href="/login"
                     className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
                   >
-                    시작하기
+                    {t('home.getStarted')}
                   </Link>
                   <Link
                     href="/projects"
                     className="px-8 py-4 bg-white text-gray-700 rounded-2xl font-semibold text-lg shadow-md hover:shadow-lg border border-gray-200 transform hover:-translate-y-1 transition-all duration-200"
                   >
-                    프로젝트 둘러보기
+                    {t('home.viewProjects')}
                   </Link>
                 </>
               )}
@@ -114,24 +131,24 @@ export default function HomePage() {
       {/* 최근 프로젝트 섹션 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">최근 프로젝트</h2>
+          <h2 className="text-3xl font-bold text-gray-900">{t('home.recentProjects')}</h2>
           <Link
             href="/projects"
             className="text-blue-600 hover:text-blue-700 font-semibold text-lg transition-colors"
           >
-            전체 보기 →
+            {t('home.viewProjects')} →
           </Link>
         </div>
 
         {recentProjects.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg mb-4">아직 등록된 프로젝트가 없습니다.</p>
+            <p className="text-gray-500 text-lg mb-4">{t('project.noProjects')}</p>
             {user && (
               <Link
                 href="/projects/new"
                 className="inline-block px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
               >
-                첫 프로젝트 만들기
+                {t('project.createFirst')}
               </Link>
             )}
           </div>
@@ -154,7 +171,7 @@ export default function HomePage() {
                   </div>
                   {!project.isRecruiting && (
                     <span className="ml-2 px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full whitespace-nowrap">
-                      모집 완료
+                      {t('project.closed')}
                     </span>
                   )}
                 </div>
@@ -165,7 +182,7 @@ export default function HomePage() {
                       key={role}
                       className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full"
                     >
-                      {getRoleLabel(role)}
+                      {getRoleLabel(role, t)}
                     </span>
                   ))}
                   {project.neededRoles?.length > 3 && (
@@ -209,7 +226,9 @@ export default function HomePage() {
                     </span>
                   </div>
                   <span className="text-xs text-gray-400">
-                    {new Date(project.createdAt).toLocaleDateString('ko-KR')}
+                    {new Date(project.createdAt).toLocaleDateString(
+                      language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US'
+                    )}
                   </span>
                 </div>
               </Link>
@@ -222,7 +241,7 @@ export default function HomePage() {
       <div className="bg-white border-t border-gray-200 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            왜 Sync-Up을 선택해야 할까요?
+            {t('home.features')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
@@ -241,9 +260,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">팀 매칭</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.feature1Title')}</h3>
               <p className="text-gray-600">
-                개발자, 디자이너, 기획자를 쉽게 찾고 프로젝트에 참여하세요.
+                {t('home.feature1Desc')}
               </p>
             </div>
             <div className="text-center">
@@ -262,9 +281,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">실시간 채팅</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.feature2Title')}</h3>
               <p className="text-gray-600">
-                프로젝트 채팅방과 개인 채팅으로 실시간 소통하세요.
+                {t('home.feature2Desc')}
               </p>
             </div>
             <div className="text-center">
@@ -283,9 +302,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">자동 번역</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.feature3Title')}</h3>
               <p className="text-gray-600">
-                전 세계 팀원과 언어 걱정 없이 소통하세요. 자동 번역이 지원됩니다.
+                {t('home.feature3Desc')}
               </p>
             </div>
           </div>
@@ -297,16 +316,16 @@ export default function HomePage() {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-4xl font-bold text-white mb-6">
-              지금 바로 시작해보세요
+              {t('home.getStarted')}
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              무료로 가입하고 사이드 프로젝트 팀원을 찾아보세요.
+              {t('home.description')}
             </p>
             <Link
               href="/register"
               className="inline-block px-8 py-4 bg-white text-blue-600 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200"
             >
-              무료로 가입하기
+              {t('header.register')}
             </Link>
           </div>
         </div>

@@ -8,13 +8,14 @@ import { projectsApi, applicationsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import ChatWidget from '@/components/ChatWidget';
 import UserDropdown from '@/components/UserDropdown';
+import { useI18n } from '@/lib/i18n/context';
 
-// 역할을 한글로 변환하는 함수
-const getRoleLabel = (role: string): string => {
+// 역할을 다국어로 변환하는 함수
+const getRoleLabel = (role: string, t: (key: string) => string): string => {
   const roleMap: Record<string, string> = {
-    'DEVELOPER': '개발자',
-    'DESIGNER': '디자이너',
-    'PLANNER': '기획자',
+    'DEVELOPER': t('role.developer'),
+    'DESIGNER': t('role.designer'),
+    'PLANNER': t('role.planner'),
   };
   return roleMap[role] || role;
 };
@@ -24,6 +25,7 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const projectId = params.id as string;
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const [project, setProject] = useState<any>(null);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [applicationMessage, setApplicationMessage] = useState('');
@@ -78,7 +80,7 @@ export default function ProjectDetailPage() {
       setApplicationMessage('');
       await loadProject();
     } catch (err: any) {
-      alert(err.message || '참여 신청에 실패했습니다.');
+      alert(err.message || t('project.applyError'));
     } finally {
       setApplying(false);
     }
@@ -88,10 +90,10 @@ export default function ProjectDetailPage() {
     setInvitingUsers(prev => new Set(prev).add(userId));
     try {
       await applicationsApi.invite(projectId, userId);
-      alert('초대가 완료되었습니다.');
+      alert(t('project.inviteSuccess'));
       loadRecommendations();
     } catch (err: any) {
-      alert(err.message || '초대에 실패했습니다.');
+      alert(err.message || t('project.inviteError'));
     } finally {
       setInvitingUsers(prev => {
         const next = new Set(prev);
@@ -102,16 +104,16 @@ export default function ProjectDetailPage() {
   };
 
   const handleCloseRecruitment = async () => {
-    if (!confirm('모집을 종료하시겠습니까? 종료 후에는 참여 신청을 받을 수 없습니다.')) {
+    if (!confirm(t('project.closeRecruitmentConfirm'))) {
       return;
     }
     setClosingRecruitment(true);
     try {
       await projectsApi.closeRecruitment(projectId);
       await loadProject();
-      alert('모집이 종료되었습니다.');
+      alert(t('project.closeRecruitmentSuccess'));
     } catch (err: any) {
-      alert(err.message || '모집 종료에 실패했습니다.');
+      alert(err.message || t('project.closeRecruitmentError'));
     } finally {
       setClosingRecruitment(false);
     }
@@ -120,7 +122,7 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-gray-500 text-lg">로딩 중...</div>
+        <div className="text-gray-500 text-lg">{t('common.loading')}</div>
       </div>
     );
   }
@@ -128,7 +130,7 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-gray-500 text-lg">프로젝트를 찾을 수 없습니다.</div>
+        <div className="text-gray-500 text-lg">{t('project.notFound')}</div>
       </div>
     );
   }
@@ -138,7 +140,12 @@ export default function ProjectDetailPage() {
     try {
       const d = typeof date === 'string' ? new Date(date) : date;
       if (isNaN(d.getTime())) return null;
-      return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+      const localeMap: Record<string, string> = {
+        'ko': 'ko-KR',
+        'en': 'en-US',
+        'ja': 'ja-JP',
+      };
+      return d.toLocaleDateString(localeMap[language] || 'ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
     } catch {
       return null;
     }
@@ -146,7 +153,7 @@ export default function ProjectDetailPage() {
 
   const start = formatDate(project.startDate);
   const end = formatDate(project.endDate);
-  const dateRange = start && end ? `${start} ~ ${end}` : start ? `${start} ~` : end ? `~ ${end}` : '미정';
+  const dateRange = start && end ? `${start} ~ ${end}` : start ? `${start} ~` : end ? `~ ${end}` : t('project.undecided');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -159,7 +166,7 @@ export default function ProjectDetailPage() {
           <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          목록으로
+          {t('project.backToList')}
         </Link>
 
         {/* 프로젝트 헤더 */}
@@ -170,7 +177,7 @@ export default function ProjectDetailPage() {
                 <h1 className="text-4xl font-bold text-gray-900">{project.title}</h1>
                 {project.isRecruiting === false && (
                   <span className="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-semibold whitespace-nowrap">
-                    모집 완료
+                    {t('project.closed')}
                   </span>
                 )}
               </div>
@@ -182,7 +189,7 @@ export default function ProjectDetailPage() {
                 disabled={closingRecruitment}
                 className="px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
               >
-                {closingRecruitment ? '처리 중...' : '모집 종료'}
+                {closingRecruitment ? t('common.processing') : t('project.closeRecruitment')}
               </button>
             )}
           </div>
@@ -191,19 +198,19 @@ export default function ProjectDetailPage() {
         {/* 프로젝트 정보 */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">프로젝트 정보</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('project.detail')}</h2>
           {isCreator && (
             <Link
               href={`/projects/${projectId}/manage`}
                 className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
-              프로젝트 관리
+              {t('project.manage')}
             </Link>
           )}
         </div>
           <div className="space-y-5">
           <div className="flex items-center gap-3">
-              <span className="font-semibold text-gray-700 min-w-[100px]">생성자:</span>
+              <span className="font-semibold text-gray-700 min-w-[100px]">{t('project.creator')}:</span>
             {project.creator?.id ? (
                 <UserDropdown
                   userId={project.creator.id}
@@ -218,19 +225,19 @@ export default function ProjectDetailPage() {
             )}
           </div>
             <div className="flex items-start gap-3">
-              <span className="font-semibold text-gray-700 min-w-[100px]">필요 역할:</span>
+              <span className="font-semibold text-gray-700 min-w-[100px]">{t('project.roles')}:</span>
               <div className="flex flex-wrap gap-2">
                 {Array.isArray(project.neededRoles) 
                   ? project.neededRoles.map((role: string) => (
                       <span key={role} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full">
-                        {getRoleLabel(role)}
+                        {getRoleLabel(role, t)}
                       </span>
                     ))
                   : <span className="text-gray-600">N/A</span>}
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="font-semibold text-gray-700 min-w-[100px]">필요 스택:</span>
+              <span className="font-semibold text-gray-700 min-w-[100px]">{t('project.stacks')}:</span>
               <div className="flex flex-wrap gap-2">
                 {Array.isArray(project.requiredStacks) 
                   ? project.requiredStacks.map((stack: string) => (
@@ -242,7 +249,7 @@ export default function ProjectDetailPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="font-semibold text-gray-700 min-w-[100px]">프로젝트 기간:</span>
+              <span className="font-semibold text-gray-700 min-w-[100px]">{t('project.duration')}:</span>
               <span className="text-gray-600">{dateRange}</span>
             </div>
         </div>
@@ -251,21 +258,21 @@ export default function ProjectDetailPage() {
         {/* 참여 신청 */}
       {!isCreator && (
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">참여 신청</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('project.applications')}</h2>
             {project.isRecruiting === false ? (
               <div className="px-6 py-4 bg-orange-50 border border-orange-200 rounded-xl text-orange-700 font-semibold">
-                모집이 종료된 프로젝트입니다.
+                {t('project.recruitmentClosed')}
               </div>
             ) : hasApplied ? (
               <div className="px-6 py-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-semibold">
-                참여 신청이 완료되었습니다!
+                {t('project.applicationComplete')}
               </div>
           ) : (
               <div className="space-y-4">
               <textarea
                 value={applicationMessage}
                 onChange={(e) => setApplicationMessage(e.target.value)}
-                placeholder="자기 PR을 입력하세요 (선택사항)"
+                placeholder={t('project.applicationMessagePlaceholder')}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
               />
@@ -274,7 +281,7 @@ export default function ProjectDetailPage() {
                 disabled={applying || !user}
                   className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
               >
-                {!user ? '로그인 필요' : applying ? '신청 중...' : '참여 신청하기'}
+                {!user ? t('project.loginRequired') : applying ? t('project.applying') : t('project.applyButton')}
               </button>
               </div>
           )}
@@ -291,7 +298,7 @@ export default function ProjectDetailPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              채팅방 열기
+              {t('project.openChat')}
             </button>
       </div>
         )}
@@ -300,9 +307,9 @@ export default function ProjectDetailPage() {
         {/* 추천 팀원 */}
       {isCreator && (
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">추천 팀원</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('project.recommendations')}</h2>
           {recommendations.length === 0 ? (
-              <div className="text-gray-500 text-center py-12">추천할 팀원이 없습니다.</div>
+              <div className="text-gray-500 text-center py-12">{t('project.noRecommendations')}</div>
           ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recommendations.map((recommendedUser) => (
@@ -320,38 +327,34 @@ export default function ProjectDetailPage() {
                       />
                     </div>
                     <div className="text-gray-600 text-sm mb-3">
-                    역할: {
-                      recommendedUser.role === 'DEVELOPER' ? '개발자' :
-                      recommendedUser.role === 'DESIGNER' ? '디자이너' :
-                      recommendedUser.role === 'PLANNER' ? '기획자' : recommendedUser.role
-                    }
+                    {t('project.role')}: {getRoleLabel(recommendedUser.role, t)}
                   </div>
                     {recommendedUser.role === 'DEVELOPER' && (
                       <div className="text-sm text-gray-600 mb-4">
-                        <span className="font-semibold">기술 스택:</span>{' '}
+                        <span className="font-semibold">{t('project.stacks')}:</span>{' '}
                         {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
                           ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
-                          : '없음'}
+                          : t('common.none')}
                       </div>
                     )}
                     {(recommendedUser.role === 'DESIGNER' || recommendedUser.role === 'PLANNER') && (
                       <>
                         {Array.isArray(recommendedUser.portfolioLinks) && recommendedUser.portfolioLinks.length > 0 && (
                           <div className="text-sm text-gray-600 mb-2">
-                            <span className="font-semibold">포트폴리오:</span>{' '}
-                            <span className="text-blue-600">{recommendedUser.portfolioLinks.length}개</span>
+                            <span className="font-semibold">{t('mypage.portfolioLinks')}:</span>{' '}
+                            <span className="text-blue-600">{recommendedUser.portfolioLinks.length}{t('common.count')}</span>
                           </div>
                         )}
                         {Array.isArray(recommendedUser.experience) && recommendedUser.experience.length > 0 && (
                           <div className="text-sm text-gray-600 mb-2">
-                            <span className="font-semibold">프로젝트 경험:</span>{' '}
-                            <span className="text-blue-600">{recommendedUser.experience.length}개</span>
+                            <span className="font-semibold">{t('mypage.experience')}:</span>{' '}
+                            <span className="text-blue-600">{recommendedUser.experience.length}{t('common.count')}</span>
                           </div>
                         )}
                         {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0 && (
                           <div className="text-sm text-gray-600 mb-4">
                             <span className="font-semibold">
-                              {recommendedUser.role === 'DESIGNER' ? '디자인 도구:' : '기획 도구:'}
+                              {recommendedUser.role === 'DESIGNER' ? t('mypage.designTools') : t('mypage.planningTools')}:
                             </span>{' '}
                             {recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')}
                           </div>
@@ -363,10 +366,10 @@ export default function ProjectDetailPage() {
                       recommendedUser.score >= 50 ? 'bg-yellow-50' : 'bg-red-50'
                     }`}>
                       <div className="text-3xl font-bold text-blue-600">
-                      {recommendedUser.score}점
+                      {recommendedUser.score}{t('common.score')}
                     </div>
                       <div className="text-xs text-gray-600 mt-1">
-                      매칭률
+                      {t('project.matchScore')}
                     </div>
                   </div>
                   <button
@@ -374,7 +377,7 @@ export default function ProjectDetailPage() {
                     disabled={invitingUsers.has(recommendedUser.userId)}
                       className="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
                   >
-                    {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
+                    {invitingUsers.has(recommendedUser.userId) ? t('project.inviting') : t('project.invite')}
                   </button>
                 </div>
               ))}

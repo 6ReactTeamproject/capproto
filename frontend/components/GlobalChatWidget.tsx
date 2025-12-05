@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { mypageApi, projectsApi, chatApi, getToken } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n/context";
 import ChatWidget from "./ChatWidget";
 
 const API_BASE_URL =
@@ -15,6 +16,7 @@ type ChatType = "project" | "direct";
 
 export default function GlobalChatWidget() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [chatType, setChatType] = useState<ChatType>("project");
@@ -68,7 +70,7 @@ export default function GlobalChatWidget() {
         const chats = await chatApi.getDirectRooms();
         setDirectChats(chats);
       } catch (err) {
-        console.error("개인 채팅 목록 로드 실패:", err);
+        console.error(`${t("chat.personalChat")} 목록 로드 실패:`, err);
       }
     };
 
@@ -333,7 +335,7 @@ export default function GlobalChatWidget() {
       0
     );
     if (totalUnread > 0) {
-      document.title = `(${totalUnread}) 새 메시지 - Sync-Up`;
+      document.title = `(${totalUnread}) ${t("chat.title")} - Sync-Up`;
     } else {
       document.title = "Sync-Up - 팀 매칭 플랫폼";
     }
@@ -380,7 +382,7 @@ export default function GlobalChatWidget() {
       const chats = await chatApi.getDirectRooms();
       setDirectChats(chats);
     } catch (err) {
-      console.error("개인 채팅 목록 로드 실패:", err);
+      console.error(`${t("chat.personalChat")} 목록 로드 실패:`, err);
     }
   };
 
@@ -423,7 +425,7 @@ export default function GlobalChatWidget() {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center z-[9999] group relative transform hover:scale-110"
         style={{ position: "fixed" }}
-        aria-label="채팅 열기"
+        aria-label={t("chat.title")}
       >
         <svg
           className="w-7 h-7 transition-transform group-hover:scale-110"
@@ -459,7 +461,7 @@ export default function GlobalChatWidget() {
           >
             <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
               <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                채팅방 선택
+                {t("chat.title")}
               </h2>
               <button
                 onClick={handleClose}
@@ -491,7 +493,7 @@ export default function GlobalChatWidget() {
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
-                프로젝트 채팅
+                {t("chat.projectChat")}
               </button>
               <button
                 onClick={() => setChatType("direct")}
@@ -501,7 +503,7 @@ export default function GlobalChatWidget() {
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
-                개인 채팅
+                {t("chat.personalChat")}
               </button>
             </div>
 
@@ -509,12 +511,12 @@ export default function GlobalChatWidget() {
               {chatType === "project" ? (
                 loading ? (
                   <div className="text-center text-gray-500 py-8">
-                    로딩 중...
+                    {t("chat.loading")}
                   </div>
                 ) : myProjects.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="text-gray-500 mb-4">
-                      참여 중인 프로젝트가 없습니다.
+                      {t("chat.noParticipatingProjects")}
                     </div>
                     <button
                       onClick={() => {
@@ -523,7 +525,7 @@ export default function GlobalChatWidget() {
                       }}
                       className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
-                      프로젝트 둘러보기
+                      {t("chat.browseProjects")}
                     </button>
                   </div>
                 ) : (
@@ -557,11 +559,13 @@ export default function GlobalChatWidget() {
                   </div>
                 )
               ) : loading ? (
-                <div className="text-center text-gray-500 py-8">로딩 중...</div>
+                <div className="text-center text-gray-500 py-8">
+                  {t("chat.loading")}
+                </div>
               ) : directChats.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="text-gray-500 mb-4">
-                    개인 채팅방이 없습니다.
+                    {t("chat.noMessages")}
                   </div>
                 </div>
               ) : (

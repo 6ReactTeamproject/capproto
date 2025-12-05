@@ -2,8 +2,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function Footer() {
+  const { t } = useI18n();
+  
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -19,7 +22,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-gray-600 text-sm mb-4 max-w-md">
-              사이드 프로젝트 팀원을 쉽게 찾고, 실시간 채팅과 자동 번역으로 전 세계 팀원과 협업하세요.
+              {t('footer.description')}
             </p>
             <div className="flex gap-4">
               <a
@@ -38,42 +41,42 @@ export default function Footer() {
 
           {/* 링크 섹션 */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">서비스</h3>
+            <h3 className="font-bold text-gray-900 mb-4">{t('footer.services')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/projects" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
-                  프로젝트 둘러보기
+                  {t('footer.browseProjects')}
                 </Link>
               </li>
               <li>
                 <Link href="/projects/new" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
-                  프로젝트 생성
+                  {t('footer.createProject')}
                 </Link>
               </li>
               <li>
                 <Link href="/releases" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
-                  릴리즈 정보
+                  {t('footer.releaseInfo')}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">계정</h3>
+            <h3 className="font-bold text-gray-900 mb-4">{t('footer.account')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/login" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
-                  로그인
+                  {t('footer.login')}
                 </Link>
               </li>
               <li>
                 <Link href="/register" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
-                  회원가입
+                  {t('footer.register')}
                 </Link>
               </li>
               <li>
                 <Link href="/mypage" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
-                  마이페이지
+                  {t('footer.mypage')}
                 </Link>
               </li>
             </ul>
@@ -83,7 +86,7 @@ export default function Footer() {
         {/* 저작권 */}
         <div className="mt-8 pt-8 border-t border-gray-200">
           <p className="text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} Sync-Up. All rights reserved.
+            {t('footer.copyright', { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>

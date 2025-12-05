@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { chatApi, getToken, projectsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
@@ -19,11 +20,12 @@ interface ChatWidgetProps {
 
 export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack, onOpen }: ChatWidgetProps) {
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [chatTitle, setChatTitle] = useState<string>('채팅');
+  const [chatTitle, setChatTitle] = useState<string>(t('chat.title'));
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const initializedChatRef = useRef<string | null>(null);
@@ -32,15 +34,15 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
     try {
       if (projectId) {
         const project = await projectsApi.getOne(projectId);
-        setChatTitle(project.title || '프로젝트 채팅');
+        setChatTitle(project.title || t('chat.projectChat'));
       } else if (userId) {
         // 개인 채팅의 경우 상대방 이름 표시 (나중에 API로 가져올 수 있음)
-        setChatTitle('개인 채팅');
+        setChatTitle(t('chat.personalChat'));
       }
     } catch (err) {
-      console.error('채팅 정보 로드 실패:', err);
+      console.error(`${t('chat.title')} 정보 로드 실패:`, err);
     }
-  }, [projectId, userId]);
+  }, [projectId, userId, t]);
 
   const loadChatRoom = useCallback(async () => {
     if (!user) return;
@@ -120,7 +122,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
       socketRef.current = newSocket;
       setSocket(newSocket);
     } catch (err: any) {
-      console.error('채팅방 로드 실패:', err);
+      console.error(`${t('chat.title')} 로드 실패:`, err);
       setLoading(false);
     }
   }, [projectId, userId, user]);
@@ -191,7 +193,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
       content: messageContent,
     }, (error: any) => {
       if (error) {
-        console.error('메시지 전송 실패:', error);
+        console.error(`${t('chat.sendMessage')} 실패:`, error);
         // 에러 발생 시 임시 메시지 제거
         setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
       }
@@ -234,7 +236,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
               <button
                 onClick={onBack}
                 className="p-2 hover:bg-white/50 rounded-full transition-all duration-200 transform hover:scale-110"
-                aria-label="뒤로가기"
+                aria-label={t('common.back')}
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -246,7 +248,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/50 rounded-full transition-all duration-200 transform hover:scale-110"
-            aria-label="닫기"
+            aria-label={t('common.close')}
           >
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -257,9 +259,9 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
         {/* 메시지 영역 */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white">
           {loading ? (
-            <div className="text-center text-gray-500 py-8">로딩 중...</div>
+            <div className="text-center text-gray-500 py-8">{t('chat.loading')}</div>
           ) : messages.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">메시지가 없습니다.</div>
+            <div className="text-center text-gray-500 py-8">{t('chat.noMessages')}</div>
           ) : (
             messages.map((message) => {
               const isMyMessage = message.sender?.id === user?.id;
@@ -269,7 +271,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                   className={`flex flex-col ${isMyMessage ? 'items-end' : 'items-start'}`}
                 >
                   <div className={`text-xs text-gray-500 mb-1 ${isMyMessage ? 'text-right' : 'text-left'}`}>
-                    {isMyMessage ? '나' : (message.sender?.nickname || '알 수 없음')}
+                    {isMyMessage ? t('common.me') : (message.sender?.nickname || t('common.anonymous'))}
                   </div>
                   <div className={`rounded-2xl p-3 shadow-md max-w-[80%] ${
                     isMyMessage 
@@ -282,10 +284,13 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                     </div>
                   </div>
                   <div className={`text-xs text-gray-400 mt-1 ${isMyMessage ? 'text-right' : 'text-left'}`}>
-                    {new Date(message.createdAt).toLocaleTimeString('ko-KR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
+                    {new Date(message.createdAt).toLocaleTimeString(
+                      language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US',
+                      { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      }
+                    )}
                   </div>
                 </div>
               );
@@ -306,7 +311,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                   sendMessage();
                 }
               }}
-              placeholder="메시지를 입력하세요..."
+              placeholder={t('chat.placeholder')}
               className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
             />
             <button
@@ -314,7 +319,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
               disabled={!socket || !newMessage.trim() || (!projectId && !userId)}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed text-sm transform hover:-translate-y-0.5 disabled:transform-none"
             >
-              전송
+              {t('chat.sendMessage')}
             </button>
           </div>
         </div>

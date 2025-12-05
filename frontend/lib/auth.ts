@@ -10,6 +10,7 @@ export interface User {
   nickname: string;
   role: string;
   techStacks: string;
+  country?: string | null;
 }
 
 export function useAuth() {
