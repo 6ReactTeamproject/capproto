@@ -21,13 +21,16 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @CurrentUser() user?: any,
   ) {
     return this.projectsService.findAll(
       page ? parseInt(page) : 1,
       limit ? parseInt(limit) : 10,
+      user?.id,
     );
   }
 
