@@ -280,7 +280,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
               } else {
                 try {
                   const parsed = JSON.parse(message.content || message.translatedContent || '{}');
-                  if (parsed.type === 'application-notification' || parsed.type === 'application-accepted') {
+                  if (parsed.type === 'application-notification' || parsed.type === 'application-accepted' || parsed.type === 'project-invitation') {
                     notificationData = parsed;
                   }
                 } catch (e) {
@@ -298,6 +298,8 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                     <div className={`rounded-2xl p-4 shadow-md max-w-[90%] w-full ${
                       notificationData.type === 'application-accepted'
                         ? 'bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200'
+                        : notificationData.type === 'project-invitation'
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200'
                         : 'bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200'
                     }`}>
                       <div className="flex items-center justify-center gap-2 mb-2">
@@ -313,6 +315,8 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                         <div className="text-sm text-gray-700">
                           {notificationData.type === 'application-accepted' 
                             ? t('chat.applicationAccepted', { projectTitle: notificationData.projectTitle || '' })
+                            : notificationData.type === 'project-invitation'
+                            ? t('chat.projectInvitation', { creatorName: notificationData.creatorName || t('common.anonymous'), projectTitle: notificationData.projectTitle || '' })
                             : t('chat.applicationReceived', { applicantName: notificationData.applicantName || t('common.anonymous') })
                           }
                         </div>
@@ -334,6 +338,48 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                                 >
                                   {t('chat.openProjectChat')}
                                 </button>
+                            ) : notificationData.type === 'project-invitation' ? (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={async (e) => {
+                                    e.preventDefault();
+                                    if (!notificationData.applicationId) return;
+                                    try {
+                                      const { applicationsApi } = await import('@/lib/api');
+                                      await applicationsApi.accept(notificationData.applicationId);
+                                      // 수락 성공 시 프로젝트 채팅창으로 이동
+                                      window.dispatchEvent(new CustomEvent('open-project-chat', { 
+                                        detail: { projectId: notificationData.projectId } 
+                                      }));
+                                      window.dispatchEvent(new CustomEvent('open-global-chat'));
+                                    } catch (err: any) {
+                                      alert(err.message || t('project.acceptError'));
+                                    }
+                                  }}
+                                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                >
+                                  {t('chat.acceptInvitation')}
+                                </button>
+                                <button
+                                  onClick={async (e) => {
+                                    e.preventDefault();
+                                    if (!notificationData.applicationId) return;
+                                    if (!confirm(t('project.rejectConfirm'))) return;
+                                    try {
+                                      const { applicationsApi } = await import('@/lib/api');
+                                      await applicationsApi.reject(notificationData.applicationId);
+                                      alert(t('project.rejectSuccess'));
+                                      // 거절 후 메시지 목록 새로고침
+                                      window.location.reload();
+                                    } catch (err: any) {
+                                      alert(err.message || t('project.rejectError'));
+                                    }
+                                  }}
+                                  className="px-5 py-2.5 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                >
+                                  {t('chat.rejectInvitation')}
+                                </button>
+                              </div>
                             ) : (
                               <a
                                 href={`/projects/${notificationData.projectId}/manage`}

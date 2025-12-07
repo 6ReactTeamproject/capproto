@@ -248,6 +248,7 @@ export class ApplicationsService {
             id: true,
             nickname: true,
             role: true,
+            country: true,
           },
         },
         project: {
@@ -258,6 +259,73 @@ export class ApplicationsService {
         },
       },
     });
+
+    // 초대받는 사용자에게 시스템 메시지로 초대 알림 전송
+    try {
+      // 초대받는 사용자의 시스템 채팅방 생성 또는 조회
+      const systemChatRoom = await this.chatService.getOrCreateSystemChatRoom(invitedUserId);
+
+      // 초대받는 사용자의 국가에 맞는 언어로 메시지 생성
+      const invitedUserCountry = invitedUser.country || 'KR';
+      const langMap: Record<string, string> = {
+        KR: 'ko',
+        US: 'en',
+        JP: 'ja',
+      };
+      const lang = langMap[invitedUserCountry] || 'ko';
+      
+      const messages: Record<string, string> = {
+        ko: '프로젝트 초대가 도착했습니다',
+        en: 'You have been invited to a project',
+        ja: 'プロジェクトへの招待が届きました',
+      };
+      
+      const creator = await this.prisma.user.findUnique({
+        where: { id: creatorId },
+        select: { nickname: true },
+      });
+      
+      const notificationMessage = JSON.stringify({
+        type: 'project-invitation',
+        projectId: projectId,
+        projectTitle: project.title,
+        applicationId: application.id, // 초대 수락/거절을 위한 applicationId
+        creatorName: creator?.nickname || '프로젝트 생성자',
+        message: messages[lang],
+      });
+
+      // 시스템 메시지로 저장 (senderId는 시스템 ID 사용)
+      const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+      const chatMessage = await this.chatService.createMessage(
+        systemChatRoom.id,
+        SYSTEM_USER_ID,
+        notificationMessage,
+      );
+
+      // 초대받는 사용자에게 번역된 메시지 전송
+      const translatedMessage = await this.chatService.translateMessageForUser(
+        chatMessage,
+        invitedUserId,
+      );
+
+      // WebSocket을 통해 실시간 알림 전송
+      const messageData: any = {
+        ...translatedMessage,
+        userId: SYSTEM_USER_ID, // 시스템 메시지임을 표시
+        roomId: systemChatRoom.id,
+        metadata: {
+          type: 'project-invitation',
+          projectId: projectId,
+          projectTitle: project.title,
+        },
+      };
+
+      await this.chatService.sendDirectNotification(invitedUserId, messageData);
+      console.log(`✅ 초대 알림 전송 완료: ${creatorId} -> ${invitedUserId}`);
+    } catch (error) {
+      // 알림 전송 실패해도 초대는 성공으로 처리
+      console.error('초대 알림 전송 실패:', error);
+    }
 
     return application;
   }
@@ -293,10 +361,17 @@ export class ApplicationsService {
       throw new NotFoundException('참여 신청을 찾을 수 없습니다.');
     }
 
-    // 프로젝트 생성자만 수정 가능
-    if (application.project.creatorId !== creatorId) {
+    // 프로젝트 생성자 또는 초대받은 사용자(신청자)만 수정 가능
+    // 생성자는 수락/거절 가능, 초대받은 사용자는 자신의 초대를 수락/거절 가능
+    const isCreator = application.project.creatorId === creatorId;
+    const isInvitedUser = application.user.id === creatorId;
+    
+    if (!isCreator && !isInvitedUser) {
       throw new NotFoundException('참여 신청을 찾을 수 없습니다.');
     }
+    
+    // 초대받은 사용자는 수락만 가능 (거절은 가능하지만, 생성자가 거절하는 것과 동일)
+    // 생성자는 수락/거절 모두 가능
 
     const updatedApplication = await this.prisma.projectApplication.update({
       where: { id: applicationId },
@@ -312,8 +387,9 @@ export class ApplicationsService {
       },
     });
 
-    // 수락된 경우 신청자에게 개인 채팅 알림 전송
-    if (status === 'ACCEPTED') {
+    // 수락된 경우 신청자에게 개인 채팅 알림 전송 (생성자가 수락한 경우에만)
+    // 초대받은 사용자가 자신의 초대를 수락한 경우는 알림 불필요
+    if (status === 'ACCEPTED' && isCreator) {
       try {
         const applicantId = application.user.id;
         const project = application.project;
