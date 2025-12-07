@@ -3,13 +3,20 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
+import { ChatService } from '../chat/chat.service';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => ChatService))
+    private chatService: ChatService,
+  ) {}
 
   async create(projectId: string, userId: string, createApplicationDto: CreateApplicationDto) {
     // 프로젝트 존재 확인
@@ -53,16 +60,88 @@ export class ApplicationsService {
             id: true,
             nickname: true,
             role: true,
+            country: true,
           },
         },
         project: {
           select: {
             id: true,
             title: true,
+            creatorId: true,
           },
         },
       },
     });
+
+    // 프로젝트 생성자에게 시스템 메시지로 알림 전송
+    try {
+      const creatorId = application.project.creatorId;
+      const applicant = application.user;
+      
+      // 생성자의 시스템 채팅방 생성 또는 조회
+      const systemChatRoom = await this.chatService.getOrCreateSystemChatRoom(creatorId);
+
+      // 알림 메시지 생성 (프로젝트 ID를 메타데이터로 포함)
+      // 생성자의 국가에 맞는 언어로 메시지 생성
+      const creator = await this.prisma.user.findUnique({
+        where: { id: creatorId },
+        select: { country: true },
+      });
+      const creatorCountry = creator?.country || 'KR';
+      const langMap: Record<string, string> = {
+        KR: 'ko',
+        US: 'en',
+        JP: 'ja',
+      };
+      const lang = langMap[creatorCountry] || 'ko';
+      
+      const messages: Record<string, string> = {
+        ko: '참여 신청이 들어왔습니다',
+        en: 'New application received',
+        ja: '参加申請が届きました',
+      };
+      
+      const notificationMessage = JSON.stringify({
+        type: 'application-notification',
+        projectId: projectId,
+        projectTitle: application.project.title,
+        applicantName: applicant.nickname,
+        message: messages[lang],
+      });
+
+      // 시스템 메시지로 저장 (senderId는 시스템 ID 사용)
+      const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+      const message = await this.chatService.createMessage(
+        systemChatRoom.id,
+        SYSTEM_USER_ID,
+        notificationMessage,
+      );
+
+      // 생성자에게 번역된 메시지 전송
+      const translatedMessage = await this.chatService.translateMessageForUser(
+        message,
+        creatorId,
+      );
+
+      // WebSocket을 통해 실시간 알림 전송
+      const messageData: any = {
+        ...translatedMessage,
+        userId: SYSTEM_USER_ID, // 시스템 메시지임을 표시
+        roomId: systemChatRoom.id,
+        metadata: {
+          type: 'application-notification',
+          projectId: projectId,
+          projectTitle: application.project.title,
+          applicantName: applicant.nickname,
+        },
+      };
+
+      await this.chatService.sendDirectNotification(creatorId, messageData);
+      console.log(`✅ 시스템 알림 전송 완료: ${applicant.nickname} -> ${creatorId}`);
+    } catch (error) {
+      // 알림 전송 실패해도 신청은 성공으로 처리
+      console.error('알림 전송 실패:', error);
+    }
 
     return application;
   }
@@ -192,7 +271,21 @@ export class ApplicationsService {
     const application = await this.prisma.projectApplication.findUnique({
       where: { id: applicationId },
       include: {
-        project: true,
+        project: {
+          select: {
+            id: true,
+            title: true,
+            creatorId: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            nickname: true,
+            role: true,
+            country: true,
+          },
+        },
       },
     });
 
@@ -205,7 +298,7 @@ export class ApplicationsService {
       throw new NotFoundException('참여 신청을 찾을 수 없습니다.');
     }
 
-    return this.prisma.projectApplication.update({
+    const updatedApplication = await this.prisma.projectApplication.update({
       where: { id: applicationId },
       data: { status },
       include: {
@@ -218,5 +311,84 @@ export class ApplicationsService {
         },
       },
     });
+
+    // 수락된 경우 신청자에게 개인 채팅 알림 전송
+    if (status === 'ACCEPTED') {
+      try {
+        const applicantId = application.user.id;
+        const project = application.project;
+        const creator = await this.prisma.user.findUnique({
+          where: { id: creatorId },
+          select: {
+            id: true,
+            nickname: true,
+            country: true,
+          },
+        });
+
+        if (!creator) return updatedApplication;
+
+        // 신청자의 시스템 채팅방 생성 또는 조회
+        const systemChatRoom = await this.chatService.getOrCreateSystemChatRoom(applicantId);
+
+        // 알림 메시지 생성 (프로젝트 ID를 메타데이터로 포함)
+        // 신청자의 국가에 맞는 언어로 메시지 생성
+        const applicant = application.user;
+        const applicantCountry = applicant.country || 'KR';
+        const langMap: Record<string, string> = {
+          KR: 'ko',
+          US: 'en',
+          JP: 'ja',
+        };
+        const lang = langMap[applicantCountry] || 'ko';
+        
+        const messages: Record<string, string> = {
+          ko: '참여 신청이 수락되었습니다',
+          en: 'Your application has been accepted',
+          ja: '参加申請が承認されました',
+        };
+        
+        const notificationMessage = JSON.stringify({
+          type: 'application-accepted',
+          projectId: project.id,
+          projectTitle: project.title,
+          message: messages[lang],
+        });
+
+        // 시스템 메시지로 저장 (senderId는 시스템 ID 사용)
+        const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+        const message = await this.chatService.createMessage(
+          systemChatRoom.id,
+          SYSTEM_USER_ID,
+          notificationMessage,
+        );
+
+        // 신청자에게 번역된 메시지 전송
+        const translatedMessage = await this.chatService.translateMessageForUser(
+          message,
+          applicantId,
+        );
+
+        // WebSocket을 통해 실시간 알림 전송
+        const messageData: any = {
+          ...translatedMessage,
+          userId: SYSTEM_USER_ID, // 시스템 메시지임을 표시
+          roomId: systemChatRoom.id,
+          metadata: {
+            type: 'application-accepted',
+            projectId: project.id,
+            projectTitle: project.title,
+          },
+        };
+
+        await this.chatService.sendDirectNotification(applicantId, messageData);
+        console.log(`✅ 시스템 알림 전송 완료: ${creator.nickname} -> ${application.user.nickname}`);
+      } catch (error) {
+        // 알림 전송 실패해도 수락은 성공으로 처리
+        console.error('수락 알림 전송 실패:', error);
+      }
+    }
+
+    return updatedApplication;
   }
 }

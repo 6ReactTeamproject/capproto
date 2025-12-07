@@ -31,7 +31,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private chatService: ChatService,
     private prisma: PrismaService,
     private configService: ConfigService,
-  ) {}
+  ) {
+    // ChatService에 gateway 참조 설정 (순환 참조 방지)
+    this.chatService.setChatGateway(this);
+  }
 
   private extractUserIdFromToken(token: string): string | null {
     try {
@@ -271,6 +274,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     } catch (error: any) {
       client.emit('error', { message: error.message || '메시지 전송 권한이 없습니다.' });
+    }
+  }
+
+  // 개인 채팅 알림 전송 (외부 서비스에서 호출)
+  async sendDirectNotification(recipientId: string, messageData: any) {
+    const recipientSockets = this.userSocketMap.get(recipientId);
+    if (recipientSockets) {
+      recipientSockets.forEach((socketId) => {
+        this.server.to(socketId).emit('new-message', messageData);
+      });
+    }
+    // 채팅방에 입장한 클라이언트에게도 브로드캐스트
+    if (messageData.roomId) {
+      this.server.to(`room-${messageData.roomId}`).emit('new-message', messageData);
     }
   }
 }

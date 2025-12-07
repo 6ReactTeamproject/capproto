@@ -124,6 +124,28 @@ export default function GlobalChatWidget() {
       }
     };
 
+    const handleProjectChat = (event: CustomEvent) => {
+      const { projectId } = event.detail;
+      if (projectId) {
+        setChatType("project");
+        setSelectedProjectId(projectId);
+        selectedProjectIdRef.current = projectId;
+        setIsOpen(true);
+        // 프로젝트 채팅방 알림 초기화
+        openChatRoomsRef.current.add(projectId);
+        setUnreadCounts((prev) => {
+          const next = { ...prev };
+          delete next[projectId];
+          return next;
+        });
+        processedMessageIdsRef.current.clear();
+      }
+    };
+
+    const handleOpenGlobalChat = () => {
+      setIsOpen(true);
+    };
+
     window.addEventListener(
       "chat-opened" as any,
       handleChatOpen as EventListener
@@ -135,6 +157,14 @@ export default function GlobalChatWidget() {
     window.addEventListener(
       "direct-chat-opened" as any,
       handleDirectChatOpen as EventListener
+    );
+    window.addEventListener(
+      "open-project-chat" as any,
+      handleProjectChat as EventListener
+    );
+    window.addEventListener(
+      "open-global-chat" as any,
+      handleOpenGlobalChat as EventListener
     );
 
     return () => {
@@ -153,6 +183,14 @@ export default function GlobalChatWidget() {
       window.removeEventListener(
         "direct-chat-opened" as any,
         handleDirectChatOpen as EventListener
+      );
+      window.removeEventListener(
+        "open-project-chat" as any,
+        handleProjectChat as EventListener
+      );
+      window.removeEventListener(
+        "open-global-chat" as any,
+        handleOpenGlobalChat as EventListener
       );
     };
   }, [user, authLoading]);
@@ -572,21 +610,58 @@ export default function GlobalChatWidget() {
                 <div className="space-y-2">
                   {directChats.map((chat: any) => {
                     if (!chat.otherUser?.id) return null;
+                    const SYSTEM_USER_ID =
+                      "00000000-0000-0000-0000-000000000000";
+                    const isSystemChat =
+                      chat.otherUser.id === SYSTEM_USER_ID || chat.isSystemChat;
                     const chatKey = `direct-${chat.otherUser.id}`;
                     const unreadCount = unreadCounts[chatKey] || 0;
                     return (
                       <button
                         key={chat.id}
                         onClick={() => handleOpenDirectChat(chat.otherUser.id)}
-                        className="w-full text-left p-4 bg-white border border-gray-100 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-lg transition-all duration-200 relative transform hover:-translate-y-0.5"
+                        className={`w-full text-left p-4 border rounded-xl hover:shadow-lg transition-all duration-200 relative transform hover:-translate-y-0.5 ${
+                          isSystemChat
+                            ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100"
+                            : "bg-white border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
-                            <div className="font-semibold text-gray-900 mb-1">
-                              {chat.otherUser.nickname}
+                            <div
+                              className={`font-semibold mb-1 flex items-center gap-2 ${
+                                isSystemChat
+                                  ? "text-amber-700"
+                                  : "text-gray-900"
+                              }`}
+                            >
+                              {isSystemChat && (
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              )}
+                              {isSystemChat
+                                ? t("chat.systemChat")
+                                : chat.otherUser.nickname}
                             </div>
                             {chat.lastMessage && (
-                              <div className="text-sm text-gray-600 line-clamp-1">
+                              <div
+                                className={`text-sm line-clamp-1 ${
+                                  isSystemChat
+                                    ? "text-amber-600"
+                                    : "text-gray-600"
+                                }`}
+                              >
                                 {chat.lastMessage.content}
                               </div>
                             )}

@@ -6,12 +6,35 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { projectsApi, applicationsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
+import UserDropdown from '@/components/UserDropdown';
+
+// 역할을 다국어로 변환하는 함수
+const getRoleLabel = (role: string, t: (key: string) => string): string => {
+  const roleMap: Record<string, string> = {
+    'DEVELOPER': t('role.developer'),
+    'DESIGNER': t('role.designer'),
+    'PLANNER': t('role.planner'),
+  };
+  return roleMap[role] || role;
+};
+
+// 신청 상태를 다국어로 변환하는 함수
+const getStatusLabel = (status: string, t: (key: string) => string): string => {
+  const statusMap: Record<string, string> = {
+    'PENDING': t('project.statusPending'),
+    'ACCEPTED': t('project.statusAccepted'),
+    'REJECTED': t('project.statusRejected'),
+  };
+  return statusMap[status] || status;
+};
 
 export default function ProjectManagePage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const [project, setProject] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
@@ -64,8 +87,9 @@ export default function ProjectManagePage() {
     try {
       await applicationsApi.accept(applicationId);
       loadApplications();
+      alert(t('project.acceptSuccess'));
     } catch (err: any) {
-      alert(err.message || '수락에 실패했습니다.');
+      alert(err.message || t('project.acceptError'));
     }
   };
 
@@ -73,22 +97,23 @@ export default function ProjectManagePage() {
     try {
       await applicationsApi.reject(applicationId);
       loadApplications();
+      alert(t('project.rejectSuccess'));
     } catch (err: any) {
-      alert(err.message || '거절에 실패했습니다.');
+      alert(err.message || t('project.rejectError'));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm('정말로 이 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    if (!confirm(t('project.deleteConfirm'))) {
       return;
     }
 
     try {
       await projectsApi.delete(projectId);
-      alert('프로젝트가 삭제되었습니다.');
+      alert(t('project.deleteSuccess'));
       router.push('/projects');
     } catch (err: any) {
-      alert(err.message || '프로젝트 삭제에 실패했습니다.');
+      alert(err.message || t('project.deleteError'));
     }
   };
 
@@ -96,12 +121,12 @@ export default function ProjectManagePage() {
     setInvitingUsers(prev => new Set(prev).add(userId));
     try {
       await applicationsApi.invite(projectId, userId);
-      alert('초대가 완료되었습니다.');
+      alert(t('project.inviteSuccess'));
       // 참여 신청 목록과 추천 목록 새로고침
       loadApplications();
       loadRecommendations();
     } catch (err: any) {
-      alert(err.message || '초대에 실패했습니다.');
+      alert(err.message || t('project.inviteError'));
     } finally {
       setInvitingUsers(prev => {
         const next = new Set(prev);
@@ -111,167 +136,205 @@ export default function ProjectManagePage() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const localeMap: Record<string, string> = {
+      ko: "ko-KR",
+      en: "en-US",
+      ja: "ja-JP",
+    };
+    return date.toLocaleDateString(localeMap[language] || "ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   if (loading) {
-    return <div style={{ padding: '20px' }}>로딩 중...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">{t('common.loading')}</div>
+      </div>
+    );
   }
 
   if (!project) {
-    return <div style={{ padding: '20px' }}>프로젝트를 찾을 수 없습니다.</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">{t('project.notFound')}</div>
+      </div>
+    );
   }
 
   if (project.creator?.id !== user?.id) {
-    return <div style={{ padding: '20px' }}>권한이 없습니다.</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-gray-500 text-lg">{t('project.accessDenied')}</div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Link href={`/projects/${projectId}`} style={{ color: '#0070f3' }}>← 프로젝트로 돌아가기</Link>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0 }}>프로젝트 관리: {project.title}</h1>
-        <button
-          onClick={handleDelete}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px',
-          }}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 뒤로가기 */}
+        <Link 
+          href={`/projects/${projectId}`} 
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold mb-6 transition-colors group"
         >
-          프로젝트 삭제
-        </button>
-      </div>
+          <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {t('project.backToProject')}
+        </Link>
 
-      <div style={{ marginTop: '30px', marginBottom: '30px' }}>
-        <h2 style={{ marginBottom: '15px' }}>참여 신청 목록</h2>
-        {applications.length === 0 ? (
-          <div>참여 신청이 없습니다.</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {applications.map((application) => (
-              <div
-                key={application.id}
-                style={{
-                  border: '1px solid #ccc',
-                  borderRadius: '8px',
-                  padding: '20px',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
-                  <div>
-                    <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{application.user?.nickname}</div>
-                    <div style={{ color: '#666', marginBottom: '5px' }}>역할: {application.user?.role}</div>
-                    {application.message && (
-                      <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '4px' }}>
-                        {application.message}
+        {/* 헤더 */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('project.manage')}: {project.title}</h1>
+            </div>
+            <button
+              onClick={handleDelete}
+              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              {t('project.deleteProject')}
+            </button>
+          </div>
+        </div>
+
+        {/* 참여 신청 목록 */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('project.applications')}</h2>
+          {applications.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">{t('project.noApplications')}</div>
+          ) : (
+            <div className="space-y-4">
+              {applications.map((application) => (
+                <div
+                  key={application.id}
+                  className="border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-200 bg-white"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        {application.user?.id ? (
+                          <UserDropdown
+                            userId={application.user.id}
+                            nickname={application.user.nickname}
+                            onDirectChat={(userId) => {
+                              window.dispatchEvent(new CustomEvent('open-direct-chat', { detail: { userId } }));
+                            }}
+                          />
+                        ) : (
+                          <div className="font-bold text-lg text-gray-900">{application.user?.nickname}</div>
+                        )}
                       </div>
-                    )}
-                    <div style={{ fontSize: '0.9em', color: '#999', marginTop: '10px' }}>
-                      신청일: {new Date(application.createdAt).toLocaleString()}
+                      <div className="text-gray-600 text-sm mb-2">
+                        {t('project.role')}: {getRoleLabel(application.user?.role || '', t)}
+                      </div>
+                      {application.message && (
+                        <div className="mt-3 p-4 bg-gray-50 rounded-xl text-gray-700 text-sm">
+                          {application.message}
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500 mt-3">
+                        {t('project.applicationDate')}: {formatDate(application.createdAt)}
+                      </div>
+                      {application.status && (
+                        <div className="mt-2">
+                          <span className="text-sm text-gray-600">{t('project.status')}: </span>
+                          <strong className={`text-sm font-semibold ${
+                            application.status === 'ACCEPTED' ? 'text-emerald-600' :
+                            application.status === 'REJECTED' ? 'text-red-600' :
+                            'text-yellow-600'
+                          }`}>
+                            {getStatusLabel(application.status, t)}
+                          </strong>
+                        </div>
+                      )}
                     </div>
-                    {application.status && (
-                      <div style={{ marginTop: '5px' }}>
-                        상태: <strong>{application.status === 'ACCEPTED' ? '수락됨' : application.status === 'REJECTED' ? '거절됨' : '대기 중'}</strong>
+                    {application.status === 'PENDING' && (
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleAccept(application.id)}
+                          className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        >
+                          {t('project.accept')}
+                        </button>
+                        <button
+                          onClick={() => handleReject(application.id)}
+                          className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        >
+                          {t('project.reject')}
+                        </button>
                       </div>
                     )}
                   </div>
-                  {application.status === 'PENDING' && (
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        onClick={() => handleAccept(application.id)}
-                        style={{
-                          padding: '8px 16px',
-                          backgroundColor: '#28a745',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        수락
-                      </button>
-                      <button
-                        onClick={() => handleReject(application.id)}
-                        style={{
-                          padding: '8px 16px',
-                          backgroundColor: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        거절
-                      </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 추천 팀원 */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('project.recommendations')}</h2>
+          {recommendations.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">{t('project.noRecommendations')}</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recommendations.map((recommendedUser) => (
+                <div
+                  key={recommendedUser.userId}
+                  className="border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1 bg-white"
+                >
+                  <div className="font-bold text-lg text-gray-900 mb-3">
+                    <UserDropdown
+                      userId={recommendedUser.userId}
+                      nickname={recommendedUser.nickname}
+                      onDirectChat={(userId) => {
+                        window.dispatchEvent(new CustomEvent('open-direct-chat', { detail: { userId } }));
+                      }}
+                    />
+                  </div>
+                  <div className="text-gray-600 text-sm mb-3">
+                    {t('project.role')}: {getRoleLabel(recommendedUser.role, t)}
+                  </div>
+                  {recommendedUser.role === 'DEVELOPER' && (
+                    <div className="text-sm text-gray-600 mb-4">
+                      <span className="font-semibold">{t('project.stacks')}:</span>{' '}
+                      {Array.isArray(recommendedUser.techStacks) && recommendedUser.techStacks.length > 0
+                        ? recommendedUser.techStacks.slice(0, 3).join(', ') + (recommendedUser.techStacks.length > 3 ? '...' : '')
+                        : t('common.none')}
                     </div>
                   )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginTop: '30px' }}>
-        <h2 style={{ marginBottom: '15px' }}>추천 팀원</h2>
-        {recommendations.length === 0 ? (
-          <div>추천할 팀원이 없습니다.</div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
-            {recommendations.map((recommendedUser) => (
-              <div
-                key={recommendedUser.userId}
-                style={{
-                  border: '1px solid #ccc',
-                  borderRadius: '8px',
-                  padding: '15px',
-                }}
-              >
-                <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{recommendedUser.nickname}</div>
-                <div style={{ color: '#666', marginBottom: '5px' }}>역할: {recommendedUser.role}</div>
-                <div style={{ marginBottom: '5px' }}>
-                  <strong>스택:</strong> {Array.isArray(recommendedUser.techStacks) ? recommendedUser.techStacks.join(', ') : 'N/A'}
-                </div>
-                <div style={{ 
-                  marginTop: '10px', 
-                  padding: '8px', 
-                  backgroundColor: recommendedUser.score >= 70 ? '#d4edda' : recommendedUser.score >= 50 ? '#fff3cd' : '#f8d7da',
-                  borderRadius: '4px',
-                  textAlign: 'center',
-                }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0070f3' }}>
-                    {recommendedUser.score}점
+                  <div className={`mb-4 p-4 rounded-xl text-center ${
+                    recommendedUser.score >= 70 ? 'bg-emerald-50' : 
+                    recommendedUser.score >= 50 ? 'bg-yellow-50' : 'bg-red-50'
+                  }`}>
+                    <div className="text-3xl font-bold text-blue-600">
+                      {recommendedUser.score}{t('common.score')}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {t('project.matchScore')}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                    매칭률
-                  </div>
+                  <button
+                    onClick={() => handleInvite(recommendedUser.userId)}
+                    disabled={invitingUsers.has(recommendedUser.userId)}
+                    className="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none"
+                  >
+                    {invitingUsers.has(recommendedUser.userId) ? t('project.inviting') : t('project.invite')}
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleInvite(recommendedUser.userId)}
-                  disabled={invitingUsers.has(recommendedUser.userId)}
-                  style={{
-                    marginTop: '10px',
-                    width: '100%',
-                    padding: '8px 16px',
-                    backgroundColor: invitingUsers.has(recommendedUser.userId) ? '#ccc' : '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: invitingUsers.has(recommendedUser.userId) ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                  }}
-                >
-                  {invitingUsers.has(recommendedUser.userId) ? '초대 중...' : '초대하기'}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

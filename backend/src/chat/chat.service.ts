@@ -8,7 +8,14 @@ import { PrismaService } from "../common/prisma/prisma.service";
 
 @Injectable()
 export class ChatService {
+  private chatGateway: any = null;
+
   constructor(private prisma: PrismaService) {}
+
+  // ChatGateway 참조 설정 (순환 참조 방지)
+  setChatGateway(gateway: any) {
+    this.chatGateway = gateway;
+  }
 
   // 국가 코드를 언어 코드로 변환
   private countryToLanguage(country: string | null | undefined): string {
@@ -236,9 +243,23 @@ export class ChatService {
     });
 
     // 각 채팅방의 마지막 메시지를 현재 사용자의 언어로 번역
+    const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
     const translatedChats = await Promise.all(
       chatRooms.map(async (room) => {
         const otherUser = room.userId1 === userId ? room.user2 : room.user1;
+        const isSystemChat =
+          otherUser?.id === SYSTEM_USER_ID ||
+          room.userId1 === SYSTEM_USER_ID ||
+          room.userId2 === SYSTEM_USER_ID;
+
+        // 시스템 채팅방인 경우 시스템 사용자 정보 생성
+        const finalOtherUser = isSystemChat
+          ? {
+              id: SYSTEM_USER_ID,
+              nickname: "시스템",
+            }
+          : otherUser;
+
         let lastMessage = room.messages[0] || null;
 
         // 마지막 메시지가 있으면 현재 사용자의 언어로 번역
@@ -255,9 +276,10 @@ export class ChatService {
 
         return {
           id: room.id,
-          otherUser,
+          otherUser: finalOtherUser,
           lastMessage,
           updatedAt: room.updatedAt,
+          isSystemChat, // 시스템 채팅방 여부 표시
         };
       })
     );
@@ -267,12 +289,34 @@ export class ChatService {
 
   // 메시지 저장
   async createMessage(roomId: string, senderId: string, content: string) {
-    // 보낸 사람의 국가에서 언어 자동 결정
-    const sender = await this.prisma.user.findUnique({
-      where: { id: senderId },
-      select: { country: true },
-    });
-    const sourceLang = this.countryToLanguage(sender?.country);
+    // 시스템 사용자 ID 처리
+    const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
+    let sourceLang = "ko"; // 기본값
+
+    // 보낸 사람의 국가에서 언어 자동 결정 (시스템 사용자가 아닌 경우)
+    if (senderId !== SYSTEM_USER_ID) {
+      const sender = await this.prisma.user.findUnique({
+        where: { id: senderId },
+        select: { country: true },
+      });
+      sourceLang = this.countryToLanguage(sender?.country);
+    } else {
+      // 시스템 메시지의 경우 메시지 내용에서 언어 감지 시도
+      // JSON 파싱하여 메시지 내용 확인
+      try {
+        const parsed = JSON.parse(content);
+        if (parsed.message) {
+          // 메시지 내용이 한국어, 영어, 일본어 중 어느 것인지 간단히 판단
+          const msg = parsed.message;
+          if (/[가-힣]/.test(msg)) sourceLang = "ko";
+          else if (/[ひらがなカタカナ一-龯]/.test(msg)) sourceLang = "ja";
+          else sourceLang = "en";
+        }
+      } catch {
+        // JSON 파싱 실패 시 기본값 사용
+        sourceLang = "ko";
+      }
+    }
 
     // 메시지는 원문으로만 저장 (각 수신자에게는 개별적으로 번역하여 전송)
     // targetLang과 translatedContent는 스키마 기본값 사용
@@ -1123,5 +1167,75 @@ export class ChatService {
       targetLang
     );
     return { translatedContent };
+  }
+
+  // 개인 채팅 알림 전송 (외부 서비스에서 호출)
+  async sendDirectNotification(recipientId: string, messageData: any) {
+    if (!this.chatGateway) {
+      console.error("ChatGateway가 설정되지 않았습니다.");
+      return;
+    }
+    await this.chatGateway.sendDirectNotification(recipientId, messageData);
+  }
+
+  // 시스템 메시지용 개인 채팅방 조회 또는 생성 (각 사용자에게 개인적으로 시스템 메시지 전송)
+  async getOrCreateSystemChatRoom(userId: string) {
+    // 시스템 메시지 전용 채팅방: userId1 = userId, userId2 = null (시스템)
+    // userId2를 null로 하면 스키마 제약에 걸리므로, 특별한 시스템 사용자 ID 사용
+    const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000"; // 시스템 사용자 ID
+
+    // 기존 시스템 채팅방 찾기
+    let chatRoom = await this.prisma.chatRoom.findFirst({
+      where: {
+        OR: [
+          { userId1: userId, userId2: SYSTEM_USER_ID },
+          { userId1: SYSTEM_USER_ID, userId2: userId },
+        ],
+        projectId: null,
+      },
+      include: {
+        messages: {
+          include: {
+            sender: {
+              select: {
+                id: true,
+                nickname: true,
+                country: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    // 채팅방이 없으면 생성
+    if (!chatRoom) {
+      // 두 사용자 ID를 정렬하여 중복 방지
+      const [sortedId1, sortedId2] = [userId, SYSTEM_USER_ID].sort();
+
+      chatRoom = await this.prisma.chatRoom.create({
+        data: {
+          userId1: sortedId1,
+          userId2: sortedId2,
+        },
+        include: {
+          messages: {
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  nickname: true,
+                  country: true,
+                },
+              },
+            },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+      });
+    }
+
+    return chatRoom;
   }
 }

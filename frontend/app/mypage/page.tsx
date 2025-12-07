@@ -620,7 +620,7 @@ export default function MyPage() {
           <div>
                   <div className="text-sm font-semibold text-gray-600 mb-2">{t("mypage.country")}</div>
                   <div className="text-gray-900 font-medium">
-                    {userInfo?.country ? COUNTRIES.find(c => c.code === userInfo.country)?.name || userInfo.country : '-'}
+                    {userInfo?.country ? getCountries(t).find(c => c.code === userInfo.country)?.name || userInfo.country : '-'}
                   </div>
                 </div>
               </div>

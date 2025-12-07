@@ -17,6 +17,23 @@ async function main() {
 
   console.log("✅ 기존 데이터 삭제 완료");
 
+  // 시스템 사용자 생성 (알림 메시지용)
+  const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
+  await prisma.user.upsert({
+    where: { id: SYSTEM_USER_ID },
+    update: {},
+    create: {
+      id: SYSTEM_USER_ID,
+      email: "system@procap.com",
+      passwordHash: await bcrypt.hash("system", 10),
+      nickname: "시스템",
+      role: UserRole.DEVELOPER,
+      techStacks: "[]",
+      country: "KR",
+    },
+  });
+  console.log("✅ 시스템 사용자 생성 완료");
+
   // 비밀번호 해시
   const passwordHash = await bcrypt.hash("password123", 10);
 

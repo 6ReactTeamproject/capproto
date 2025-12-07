@@ -29,6 +29,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const initializedChatRef = useRef<string | null>(null);
+  const currentRoomIdRef = useRef<string | null>(null);
 
   const loadChatInfo = useCallback(async () => {
     try {
@@ -77,6 +78,7 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
       }
 
       setMessages(room.messages || []);
+      currentRoomIdRef.current = room.id; // 현재 채팅방 ID 저장
       setLoading(false);
 
       // WebSocket 연결
@@ -103,6 +105,11 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
 
       newSocket.on('new-message', (message: any) => {
         console.log('새 메시지 수신:', message);
+        // 현재 채팅방의 메시지만 표시 (roomId 확인)
+        if (message.roomId && currentRoomIdRef.current && message.roomId !== currentRoomIdRef.current) {
+          console.log('다른 채팅방 메시지 무시:', message.roomId, '현재:', currentRoomIdRef.current);
+          return;
+        }
         setMessages((prev) => {
           // 임시 메시지가 있으면 제거하고 실제 메시지로 교체
           const filtered = prev.filter((msg) => !msg.id?.startsWith('temp-'));
@@ -265,13 +272,111 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
           ) : (
             messages.map((message) => {
               const isMyMessage = message.sender?.id === user?.id;
+              
+              // 알림 메시지인지 확인 (metadata 또는 content에서 파싱)
+              let notificationData = null;
+              if (message.metadata?.type === 'application-notification' || message.metadata?.type === 'application-accepted') {
+                notificationData = message.metadata;
+              } else {
+                try {
+                  const parsed = JSON.parse(message.content || message.translatedContent || '{}');
+                  if (parsed.type === 'application-notification' || parsed.type === 'application-accepted') {
+                    notificationData = parsed;
+                  }
+                } catch (e) {
+                  // JSON 파싱 실패 시 일반 메시지로 처리
+                }
+              }
+
+              // 시스템 메시지인 경우 중앙 정렬로 표시
+              if (notificationData) {
+                return (
+                  <div 
+                    key={message.id} 
+                    className="flex flex-col items-center my-4"
+                  >
+                    <div className={`rounded-2xl p-4 shadow-md max-w-[90%] w-full ${
+                      notificationData.type === 'application-accepted'
+                        ? 'bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200'
+                        : 'bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200'
+                    }`}>
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs text-gray-500 font-semibold">{t('chat.systemMessage')}</span>
+                      </div>
+                      <div className="text-center space-y-3">
+                        <div className="font-semibold text-gray-900">
+                          {notificationData.projectTitle || t('chat.applicationNotification')}
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          {notificationData.type === 'application-accepted' 
+                            ? t('chat.applicationAccepted', { projectTitle: notificationData.projectTitle || '' })
+                            : t('chat.applicationReceived', { applicantName: notificationData.applicantName || t('common.anonymous') })
+                          }
+                        </div>
+                        {notificationData.projectId && (
+                          <div className="flex justify-center gap-2 mt-4">
+                              {notificationData.type === 'application-accepted' ? (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    // GlobalChatWidget을 열고 프로젝트 채팅으로 전환
+                                    // 이벤트를 먼저 발생시켜 GlobalChatWidget이 열리도록 함
+                                    window.dispatchEvent(new CustomEvent('open-project-chat', { 
+                                      detail: { projectId: notificationData.projectId } 
+                                    }));
+                                    // GlobalChatWidget이 열리도록 추가 이벤트 발생
+                                    window.dispatchEvent(new CustomEvent('open-global-chat'));
+                                  }}
+                                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                >
+                                  {t('chat.openProjectChat')}
+                                </button>
+                            ) : (
+                              <a
+                                href={`/projects/${notificationData.projectId}/manage`}
+                                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  window.location.href = `/projects/${notificationData.projectId}/manage`;
+                                }}
+                              >
+                                {t('chat.viewProject')}
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 text-center mt-3">
+                        {new Date(message.createdAt).toLocaleTimeString(
+                          language === 'ko' ? 'ko-KR' : language === 'ja' ? 'ja-JP' : 'en-US',
+                          { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          }
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // 일반 메시지
+              const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+              const isSystemSender = message.sender?.id === SYSTEM_USER_ID;
+              const senderName = isSystemSender 
+                ? t('chat.systemChat') 
+                : (isMyMessage ? t('common.me') : (message.sender?.nickname || t('common.anonymous')));
+              
               return (
                 <div 
                   key={message.id} 
                   className={`flex flex-col ${isMyMessage ? 'items-end' : 'items-start'}`}
                 >
                   <div className={`text-xs text-gray-500 mb-1 ${isMyMessage ? 'text-right' : 'text-left'}`}>
-                    {isMyMessage ? t('common.me') : (message.sender?.nickname || t('common.anonymous'))}
+                    {senderName}
                   </div>
                   <div className={`rounded-2xl p-3 shadow-md max-w-[80%] ${
                     isMyMessage 
@@ -279,7 +384,6 @@ export default function ChatWidget({ projectId, userId, isOpen, onClose, onBack,
                       : 'bg-white text-gray-900 border border-gray-100'
                   }`}>
                     <div className={`text-sm ${isMyMessage ? 'text-white' : 'text-gray-900'}`}>
-                      {/* 번역된 내용이 있으면 번역본 표시, 없으면 원문 표시 */}
                       {message.translatedContent || message.content}
                     </div>
                   </div>
