@@ -25,7 +25,7 @@ export class ChatController {
   ) {
     // roomId가 실제로는 projectId일 수 있으므로 프로젝트 참여자 확인
     const chatRoom = await this.chatService.getOrCreateChatRoom(roomId, user.id);
-    return chatRoom.messages;
+    return chatRoom.messages || [];
   }
 
   @Get('rooms/direct/:userId')

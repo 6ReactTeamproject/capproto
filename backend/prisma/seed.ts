@@ -30,7 +30,7 @@ async function main() {
       role: UserRole.DEVELOPER,
       techStacks: "[]",
       country: "KR",
-    },
+    } as any,
   });
   console.log("✅ 시스템 사용자 생성 완료");
 

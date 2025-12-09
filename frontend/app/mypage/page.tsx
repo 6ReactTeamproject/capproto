@@ -50,9 +50,9 @@ const AVAILABLE_TECH_STACKS = [
 
 // 국가 목록 (다국어 지원)
 const getCountries = (t: (key: string) => string) => [
-  { code: "KR", name: t('country.korea') },
-  { code: "US", name: t('country.usa') },
-  { code: "JP", name: t('country.japan') },
+  { code: "KR", name: t("common.country.kr") },
+  { code: "US", name: t("common.country.us") },
+  { code: "JP", name: t("common.country.jp") },
 ];
 
 export default function MyPage() {

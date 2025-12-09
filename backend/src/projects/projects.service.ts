@@ -660,8 +660,8 @@ export class ProjectsService {
 
     return {
       ...project,
-      neededRoles: JSON.parse(project.neededRoles),
-      requiredStacks: JSON.parse(project.requiredStacks),
+      neededRoles: JSON.parse(project.neededRoles || "[]"),
+      requiredStacks: JSON.parse(project.requiredStacks || "[]"),
     };
   }
 
@@ -691,8 +691,8 @@ export class ProjectsService {
         this.translateProjectForUser(
           {
             ...project,
-            neededRoles: JSON.parse(project.neededRoles),
-            requiredStacks: JSON.parse(project.requiredStacks),
+            neededRoles: JSON.parse(project.neededRoles || "[]"),
+            requiredStacks: JSON.parse(project.requiredStacks || "[]"),
             isRecruiting: (project as any).isRecruiting ?? true,
           },
           userId
@@ -745,8 +745,8 @@ export class ProjectsService {
 
     const projectData = {
       ...project,
-      neededRoles: JSON.parse(project.neededRoles),
-      requiredStacks: JSON.parse(project.requiredStacks),
+      neededRoles: JSON.parse(project.neededRoles || "[]"),
+      requiredStacks: JSON.parse(project.requiredStacks || "[]"),
       isRecruiting: (project as any).isRecruiting ?? true, // 기본값 true
       creator: {
         ...project.creator,

@@ -118,13 +118,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           throw new Error('채팅방을 찾을 수 없습니다.');
         }
         // 현재 사용자의 언어로 메시지 번역
-        const translatedMessages = await Promise.all(
-          chatRoom.messages.map((msg) => this.chatService.translateMessageForUser(msg, data.currentUserId))
-        );
-        chatRoom = {
-          ...chatRoom,
-          messages: translatedMessages,
-        };
+        if (chatRoom.messages && chatRoom.messages.length > 0) {
+          const translatedMessages = await Promise.all(
+            chatRoom.messages.map((msg) => this.chatService.translateMessageForUser(msg, data.currentUserId))
+          );
+          chatRoom = {
+            ...chatRoom,
+            messages: translatedMessages,
+          };
+        } else {
+          chatRoom = {
+            ...chatRoom,
+            messages: chatRoom.messages || [],
+          };
+        }
       } else {
         throw new Error('projectId, userId, 또는 roomId가 필요합니다.');
       }

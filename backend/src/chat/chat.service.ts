@@ -79,7 +79,7 @@ export class ChatService {
                 id: true,
                 nickname: true,
                 country: true,
-              },
+              } as any,
             },
           },
           orderBy: { createdAt: "asc" },
@@ -98,7 +98,7 @@ export class ChatService {
                   id: true,
                   nickname: true,
                   country: true,
-                },
+                } as any,
               },
             },
             orderBy: { createdAt: "asc" },
@@ -108,7 +108,7 @@ export class ChatService {
     }
 
     // userId가 제공된 경우, 각 메시지를 현재 사용자의 언어로 번역
-    if (userId) {
+    if (userId && chatRoom.messages) {
       const translatedMessages = await Promise.all(
         chatRoom.messages.map((msg) =>
           this.translateMessageForUser(msg, userId)
@@ -139,7 +139,7 @@ export class ChatService {
         userId1: sortedId1,
         userId2: sortedId2,
         projectId: null,
-      },
+      } as any,
       include: {
         messages: {
           include: {
@@ -148,7 +148,7 @@ export class ChatService {
                 id: true,
                 nickname: true,
                 country: true,
-              },
+              } as any,
             },
           },
           orderBy: { createdAt: "asc" },
@@ -165,7 +165,7 @@ export class ChatService {
             nickname: true,
           },
         },
-      },
+      } as any,
     });
 
     // 채팅방이 없으면 생성
@@ -174,7 +174,7 @@ export class ChatService {
         data: {
           userId1: sortedId1,
           userId2: sortedId2,
-        },
+        } as any,
         include: {
           messages: {
             include: {
@@ -183,7 +183,7 @@ export class ChatService {
                   id: true,
                   nickname: true,
                   country: true,
-                },
+                } as any,
               },
             },
             orderBy: { createdAt: "asc" },
@@ -200,17 +200,26 @@ export class ChatService {
               nickname: true,
             },
           },
-        },
+        } as any,
       });
     }
 
     // 각 메시지를 현재 사용자(userId1)의 언어로 번역
-    const translatedMessages = await Promise.all(
-      chatRoom.messages.map((msg) => this.translateMessageForUser(msg, userId1))
-    );
+    if (chatRoom.messages && chatRoom.messages.length > 0) {
+      const translatedMessages = await Promise.all(
+        chatRoom.messages.map((msg) =>
+          this.translateMessageForUser(msg, userId1)
+        )
+      );
+      return {
+        ...chatRoom,
+        messages: translatedMessages,
+      };
+    }
+
     return {
       ...chatRoom,
-      messages: translatedMessages,
+      messages: chatRoom.messages || [],
     };
   }
 
@@ -220,7 +229,7 @@ export class ChatService {
       where: {
         projectId: null,
         OR: [{ userId1: userId }, { userId2: userId }],
-      },
+      } as any,
       include: {
         user1: {
           select: {
@@ -238,19 +247,20 @@ export class ChatService {
           orderBy: { createdAt: "desc" },
           take: 1,
         },
-      },
+      } as any,
       orderBy: { updatedAt: "desc" },
     });
 
     // 각 채팅방의 마지막 메시지를 현재 사용자의 언어로 번역
     const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
     const translatedChats = await Promise.all(
-      chatRooms.map(async (room) => {
-        const otherUser = room.userId1 === userId ? room.user2 : room.user1;
+      chatRooms.map(async (room: any) => {
+        const otherUser =
+          (room.userId1 as string) === userId ? room.user2 : room.user1;
         const isSystemChat =
           otherUser?.id === SYSTEM_USER_ID ||
-          room.userId1 === SYSTEM_USER_ID ||
-          room.userId2 === SYSTEM_USER_ID;
+          (room.userId1 as string) === SYSTEM_USER_ID ||
+          (room.userId2 as string) === SYSTEM_USER_ID;
 
         // 시스템 채팅방인 경우 시스템 사용자 정보 생성
         const finalOtherUser = isSystemChat
@@ -297,9 +307,9 @@ export class ChatService {
     if (senderId !== SYSTEM_USER_ID) {
       const sender = await this.prisma.user.findUnique({
         where: { id: senderId },
-        select: { country: true },
+        select: { country: true } as any,
       });
-      sourceLang = this.countryToLanguage(sender?.country);
+      sourceLang = this.countryToLanguage((sender as any)?.country);
     } else {
       // 시스템 메시지의 경우 메시지 내용에서 언어 감지 시도
       // JSON 파싱하여 메시지 내용 확인
@@ -334,7 +344,7 @@ export class ChatService {
             id: true,
             nickname: true,
             country: true,
-          },
+          } as any,
         },
       },
     });
@@ -347,9 +357,9 @@ export class ChatService {
     // 수신자의 국가 확인
     const recipient = await this.prisma.user.findUnique({
       where: { id: targetUserId },
-      select: { country: true },
+      select: { country: true } as any,
     });
-    const targetLang = this.countryToLanguage(recipient?.country);
+    const targetLang = this.countryToLanguage((recipient as any)?.country);
 
     // 메시지 내용을 분석해서 실제 언어 감지 (보낸 사람의 국적과 무관)
     const detectSourceLang = (text: string): string => {
@@ -1194,7 +1204,7 @@ export class ChatService {
           { userId1: SYSTEM_USER_ID, userId2: userId },
         ],
         projectId: null,
-      },
+      } as any,
       include: {
         messages: {
           include: {
@@ -1203,7 +1213,7 @@ export class ChatService {
                 id: true,
                 nickname: true,
                 country: true,
-              },
+              } as any,
             },
           },
           orderBy: { createdAt: "asc" },
@@ -1220,7 +1230,7 @@ export class ChatService {
         data: {
           userId1: sortedId1,
           userId2: sortedId2,
-        },
+        } as any,
         include: {
           messages: {
             include: {
@@ -1229,7 +1239,7 @@ export class ChatService {
                   id: true,
                   nickname: true,
                   country: true,
-                },
+                } as any,
               },
             },
             orderBy: { createdAt: "asc" },
