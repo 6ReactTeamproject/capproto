@@ -128,6 +128,11 @@ export class ProjectsService {
           title: "Flutter Cross-platform App",
           description: "iOS/Android native app development using Flutter",
         },
+        캡스톤: {
+          title: "Capstone Project",
+          description:
+            "Web page development for study abroad program using React and NestJS",
+        },
       },
       "en-ko": {
         "React-based Web Application": {
@@ -211,6 +216,10 @@ export class ProjectsService {
         "Flutter Cross-platform App": {
           title: "Flutter 크로스플랫폼 앱",
           description: "Flutter를 활용한 iOS/Android 네이티브 앱 개발",
+        },
+        "Capstone Project": {
+          title: "캡스톤",
+          description: "react와 nest를 사용한 현지학기제 웹페이지 개발",
         },
       },
       "ko-ja": {
@@ -301,6 +310,10 @@ export class ProjectsService {
           title: "Flutterクロスプラットフォームアプリ",
           description: "Flutterを活用したiOS/Androidネイティブアプリ開発",
         },
+        캡스톤: {
+          title: "キャップストーン",
+          description: "ReactとNestJSを使用した現地学期制ウェブページ開発",
+        },
       },
       "ja-ko": {
         ReactベースのWebアプリケーション: {
@@ -384,6 +397,10 @@ export class ProjectsService {
         Flutterクロスプラットフォームアプリ: {
           title: "Flutter 크로스플랫폼 앱",
           description: "Flutter를 활용한 iOS/Android 네이티브 앱 개발",
+        },
+        キャップストーン: {
+          title: "캡스톤",
+          description: "react와 nest를 사용한 현지학기제 웹페이지 개발",
         },
       },
       "en-ja": {
@@ -473,6 +490,10 @@ export class ProjectsService {
         "Flutter Cross-platform App": {
           title: "Flutterクロスプラットフォームアプリ",
           description: "Flutterを活用したiOS/Androidネイティブアプリ開発",
+        },
+        "Capstone Project": {
+          title: "キャップストーン",
+          description: "ReactとNestJSを使用した現地学期制ウェブページ開発",
         },
       },
       "ja-en": {
@@ -564,6 +585,11 @@ export class ProjectsService {
         Flutterクロスプラットフォームアプリ: {
           title: "Flutter Cross-platform App",
           description: "iOS/Android native app development using Flutter",
+        },
+        キャップストーン: {
+          title: "Capstone Project",
+          description:
+            "Web page development for study abroad program using React and NestJS",
         },
       },
     };
