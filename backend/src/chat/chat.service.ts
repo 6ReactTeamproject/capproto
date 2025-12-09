@@ -440,6 +440,14 @@ export class ChatService {
           "Yes, I'll check it out! I think we also need to discuss user authentication and permission management.",
         "NestJS에 관심이 많아서 참여하고 싶습니다. 백엔드 개발 경험이 있습니다.":
           "I'm very interested in NestJS and would like to participate. I have backend development experience.",
+        "안녕하세요, 앞으로 잘 부탁드립니다.":
+          "Hello, I look forward to working with you.",
+        "네 저도 잘 부탁드립니다.":
+          "Yes, I look forward to working with you too.",
+        "데이터 베이스 설계는 언제부터 시작하나요?":
+          "When will we start designing the database?",
+        "디자이너분이 모이면 시작하려고 합니다.":
+          "We plan to start once the designers join.",
         "안녕하세요!": "Hello!",
         안녕하세요: "Hello",
         네: "Yes",
@@ -557,6 +565,14 @@ export class ChatService {
           "프론트엔드 개발자로 참여할 수 있습니다. Vue.js와 Spring 사용 경험이 있습니다.",
         "I've written the initial plan document. I've structured it around kanban board, task management, and comment features. Please take a look.":
           "초기 기획 문서를 작성했습니다. 칸반 보드, 작업 관리, 댓글 기능을 중심으로 구성했습니다. 확인해주세요.",
+        "Hello, I look forward to working with you.":
+          "안녕하세요, 앞으로 잘 부탁드립니다.",
+        "Yes, I look forward to working with you too.":
+          "네 저도 잘 부탁드립니다.",
+        "When will we start designing the database?":
+          "데이터 베이스 설계는 언제부터 시작하나요?",
+        "We plan to start once the designers join.":
+          "디자이너분이 모이면 시작하려고 합니다.",
         Hello: "안녕하세요",
         Yes: "네",
         Good: "좋아요",
@@ -658,6 +674,13 @@ export class ChatService {
           "はい、良いですね！ワイヤーフレームが出ればデザイン作業も容易になると思います。デザインコンセプトも一緒に議論しましょう。",
         "좋습니다! 애니메이션 작업도 함께 진행하면 더 완성도 높은 결과물이 나올 것 같아요.":
           "良いですね！アニメーション作業も一緒に進めれば、より完成度の高い結果物が出ると思います。",
+        "안녕하세요, 앞으로 잘 부탁드립니다.":
+          "こんにちは、これからよろしくお願いします。",
+        "네 저도 잘 부탁드립니다.": "はい、私もよろしくお願いします。",
+        "데이터 베이스 설계는 언제부터 시작하나요?":
+          "データベース設計はいつから始めますか？",
+        "디자이너분이 모이면 시작하려고 합니다.":
+          "デザイナーの方が集まったら始めようと思っています。",
         "React + Node.js + MongoDB 스택으로 풀스택 프로젝트 진행합니다. 실시간 기능도 포함할 예정이에요.":
           "React + Node.js + MongoDBスタックでフルスタックプロジェクトを進めます。リアルタイム機能も含める予定です。",
         "일단 Context API로 시작하고, 필요하면 Redux나 Zustand로 전환할 수 있어요. MongoDB 스키마 설계도 같이 해야 할 것 같아요.":
@@ -785,6 +808,13 @@ export class ChatService {
           "사용자 스토리와 요구사항 정의도 작성했습니다. 확인해주실 수 있을까요?",
         "はい、確認してみます！ユーザー認証と権限管理の部分も追加で議論する必要があると思います。":
           "네, 확인해볼게요! 사용자 인증과 권한 관리 부분도 추가로 논의해야 할 것 같아요.",
+        "こんにちは、これからよろしくお願いします。":
+          "안녕하세요, 앞으로 잘 부탁드립니다.",
+        "はい、私もよろしくお願いします。": "네 저도 잘 부탁드립니다.",
+        "データベース設計はいつから始めますか？":
+          "데이터 베이스 설계는 언제부터 시작하나요?",
+        "デザイナーの方が集まったら始めようと思っています。":
+          "디자이너분이 모이면 시작하려고 합니다.",
         こんにちは: "안녕하세요",
         はい: "네",
         良い: "좋아요",
@@ -885,6 +915,14 @@ export class ChatService {
           "素晴らしい！まず認証システムとメインダッシュボードを実装する予定です。TypeScriptで型安全性も確保します。",
         "Yes, welcome! If the design comes out first, development will be easier. It would be good to organize the design system together as well.":
           "はい、ようこそ！デザインが先に出れば、開発が容易になります。デザインシステムも一緒に整理できれば良いと思います。",
+        "Hello, I look forward to working with you.":
+          "こんにちは、これからよろしくお願いします。",
+        "Yes, I look forward to working with you too.":
+          "はい、私もよろしくお願いします。",
+        "When will we start designing the database?":
+          "データベース設計はいつから始めますか？",
+        "We plan to start once the designers join.":
+          "デザイナーの方が集まったら始めようと思っています。",
         "I have experience with Prisma and would like to participate! What domain should we start with?":
           "Prismaの経験があるので参加したいです！どのドメインから始めれば良いですか？",
         "Understood. I'll also think about the JWT authentication structure and middleware configuration together.":
@@ -1000,6 +1038,14 @@ export class ChatService {
           "I can also help with backend development. I have experience with Node.js and MongoDB.",
         "ユーザーストーリーと要件定義も作成しました。確認していただけますか？":
           "I've also created user stories and requirements definition. Could you please take a look?",
+        "こんにちは、これからよろしくお願いします。":
+          "Hello, I look forward to working with you.",
+        "はい、私もよろしくお願いします。":
+          "Yes, I look forward to working with you too.",
+        "データベース設計はいつから始めますか？":
+          "When will we start designing the database?",
+        "デザイナーの方が集まったら始めようと思っています。":
+          "We plan to start once the designers join.",
         こんにちは: "Hello",
         はい: "Yes",
         良い: "Good",
