@@ -365,8 +365,8 @@ export class ChatService {
     const detectSourceLang = (text: string): string => {
       // 한국어 체크
       if (/[가-힣]/.test(text)) return "ko";
-      // 일본어 체크
-      if (/[ひらがなカタカナ漢字]/.test(text)) return "ja";
+      // 일본어 체크 (히라가나, 카타카나, 한자)
+      if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text)) return "ja";
       // 기본값은 영어
       return "en";
     };
@@ -1096,8 +1096,8 @@ export class ChatService {
     const detectSourceLang = (text: string): string => {
       // 한국어 체크
       if (/[가-힣]/.test(text)) return "ko";
-      // 일본어 체크
-      if (/[ひらがなカタカナ漢字]/.test(text)) return "ja";
+      // 일본어 체크 (히라가나, 카타카나, 한자)
+      if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text)) return "ja";
       // 기본값은 영어
       return "en";
     };
