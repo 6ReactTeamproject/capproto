@@ -228,15 +228,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             });
           }
         }
-
-        // 채팅방에 입장한 모든 클라이언트에게도 브로드캐스트 (fallback)
-        // 보낸 사람의 언어로 번역된 메시지 전송
-        const senderTranslatedMessage = await this.chatService.translateMessageForUser(message, data.senderId);
-        const broadcastMessage = {
-          ...senderTranslatedMessage,
-          projectId: data.projectId,
-        };
-        this.server.to(`room-${chatRoom.id}`).emit('new-message', broadcastMessage);
       } 
       // 개인 채팅방의 경우: 상대방에게 번역된 메시지 전송
       else if (data.userId && chatRoom.userId1 && chatRoom.userId2) {
@@ -269,15 +260,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.server.to(socketId).emit('new-message', senderMessageData);
           });
         }
-
-        // 채팅방에 입장한 모든 클라이언트에게도 브로드캐스트 (fallback)
-        // 보낸 사람의 언어로 번역된 메시지 전송
-        const broadcastMessage = {
-          ...senderTranslatedMessage,
-          userId: recipientId,
-        };
-        console.log('개인 채팅방 브로드캐스트:', broadcastMessage);
-        this.server.to(`room-${chatRoom.id}`).emit('new-message', broadcastMessage);
       }
     } catch (error: any) {
       client.emit('error', { message: error.message || '메시지 전송 권한이 없습니다.' });
